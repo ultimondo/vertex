@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — Character Sheet (core-Vertex mockup)</title>
+<!--
+  VERTEX · core-Vertex aesthetic mockup (v1)
+  Setting-neutral identity: deep ink, bone text, the three Core Stat colors + Fate purple as glowing accents.
+  Static look-and-feel mockup with a small live "Cast" demo to tease the dice engine.
+  Self-contained single file. Fonts load from Google Fonts (falls back to system serif/sans offline).
+  Sample character: Mara Quill, a Blacksmith. All taglines/Features are canonical (System Guide v004 + Weird West Designation Guide).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ----- core-Vertex palette (setting-neutral) ----- */
+    --ink:        #0b0d12;   /* the well */
+    --ink-2:      #11141b;   /* raised panels */
+    --ink-3:      #161a23;   /* cards */
+    --bone:       #ece6da;   /* primary text */
+    --bone-dim:   #9b958a;   /* secondary text */
+    --bone-faint: #5f5c57;   /* tertiary / disabled */
+    --line:       rgba(236,230,218,.10);
+    --line-strong:rgba(236,230,218,.18);
+
+    /* the three Core Stats — brightened to glow on ink */
+    --red:   #d75c4f;
+    --green: #67ab5c;
+    --blue:  #57a6e0;
+    --fate:  #b06ef0;        /* narrative / meta accent */
+    --gold:  #d8b24a;        /* HP */
+    --steel: #8b93a1;        /* Armor */
+    --temp:  #b9b4ab;        /* Temp HP */
+
+    --radius: 10px;
+    --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -24px rgba(0,0,0,.9);
+    --serif: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+    --sans:  "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--ink); color:var(--bone);
+    font-family:var(--sans); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    /* faint erosion grain */
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/></svg>");
+  }
+  a{ color:inherit; text-decoration:none; }
+  h1,h2,h3{ font-family:var(--serif); font-weight:500; margin:0; letter-spacing:.2px; }
+
+  /* ---------------- app chrome ---------------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; gap:18px;
+    padding:12px 26px; background:rgba(9,11,16,.86); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .wordmark{ font-family:var(--serif); font-size:25px; letter-spacing:5px; }
+  .wordmark b{ font-weight:600; }
+  .wordmark .x{ color:var(--fate); }
+  .topbar .spacer{ flex:1; }
+  .chip{
+    font-size:12.5px; color:var(--bone-dim); border:1px solid var(--line-strong);
+    padding:6px 12px; border-radius:999px; display:flex; gap:8px; align-items:center;
+  }
+  .chip .dot{ width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); }
+  .btn{
+    font-family:var(--sans); font-size:13px; color:var(--bone);
+    background:var(--ink-3); border:1px solid var(--line-strong);
+    padding:7px 14px; border-radius:8px; cursor:pointer; transition:.15s;
+  }
+  .btn:hover{ border-color:var(--fate); color:#fff; }
+
+  .tabs{
+    display:flex; gap:2px; padding:0 18px; background:var(--ink);
+    border-bottom:1px solid var(--line); position:sticky; top:55px; z-index:19;
+    overflow-x:auto;
+  }
+  .tabs a{
+    padding:13px 16px; font-size:13px; letter-spacing:.6px; color:var(--bone-dim);
+    border-bottom:2px solid transparent; white-space:nowrap; text-transform:uppercase;
+  }
+  .tabs a:hover{ color:var(--bone); }
+  .tabs a.active{ color:var(--bone); border-bottom-color:var(--fate); }
+
+  .wrap{ max-width:1120px; margin:0 auto; padding:30px 26px 90px; }
+
+  /* ---------------- identity header ---------------- */
+  .hero{ display:flex; gap:26px; align-items:flex-end; padding:8px 4px 26px; border-bottom:1px solid var(--line); }
+  .portrait{
+    width:104px; height:104px; flex:none; border-radius:12px; border:1px solid var(--line-strong);
+    background:
+      radial-gradient(120% 120% at 30% 20%, rgba(215,92,79,.25), transparent 60%),
+      radial-gradient(120% 120% at 80% 90%, rgba(87,166,224,.22), transparent 60%),
+      var(--ink-3);
+    display:flex; align-items:center; justify-content:center; font-family:var(--serif);
+    font-size:44px; color:var(--bone); position:relative; overflow:hidden;
+  }
+  .portrait::after{ content:""; position:absolute; inset:0; box-shadow:0 0 60px -10px rgba(176,110,240,.35) inset; }
+  .hero .id{ flex:1; }
+  .epithet{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--bone-dim); }
+  .hero h1{ font-size:52px; line-height:1.02; margin:2px 0 6px; }
+  .desig{ font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:var(--bone-dim); }
+  .desig b{ color:var(--bone); font-weight:600; }
+  .quote{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--bone-faint); max-width:300px; text-align:right; }
+
+  /* ---------------- grid + panels ---------------- */
+  .cols{ display:grid; grid-template-columns:1.05fr .95fr; gap:22px; margin-top:26px; }
+  @media (max-width:880px){ .cols{ grid-template-columns:1fr; } .hero{ flex-wrap:wrap; } .quote{ text-align:left; } }
+  .panel{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:22px; }
+  .panel > .head{ display:flex; align-items:baseline; justify-content:space-between; margin:-2px 0 16px; }
+  .panel h2{ font-size:23px; }
+  .panel .sub{ font-size:11.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--bone-faint); }
+
+  /* ---------------- core stats ---------------- */
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .stat{ border:1px solid var(--line-strong); border-radius:10px; padding:14px 12px 12px; text-align:center; position:relative; background:var(--ink-3); }
+  .stat .name{ font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--bone-dim); }
+  .stat .val{ font-family:var(--serif); font-size:46px; line-height:1; margin:4px 0 2px; }
+  .stat .dom{ font-size:11px; color:var(--bone-faint); min-height:28px; }
+  .stat.red   { border-top:2px solid var(--red); }   .stat.red .val{ color:var(--red); text-shadow:0 0 22px rgba(215,92,79,.45); }
+  .stat.green { border-top:2px solid var(--green); } .stat.green .val{ color:var(--green); text-shadow:0 0 22px rgba(103,171,92,.4); }
+  .stat.blue  { border-top:2px solid var(--blue); }  .stat.blue .val{ color:var(--blue); text-shadow:0 0 22px rgba(87,166,224,.45); }
+  .derived{ margin-top:7px; padding-top:9px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--bone-dim); }
+  .derived b{ color:var(--bone); font-weight:600; }
+
+  /* ---------------- meters ---------------- */
+  .meters{ display:grid; gap:11px; margin-top:4px; }
+  .meter .lab{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+  .meter .lab .k{ letter-spacing:.6px; text-transform:uppercase; color:var(--bone-dim); font-size:11px; }
+  .meter .lab .v{ font-variant-numeric:tabular-nums; color:var(--bone); }
+  .track{ height:9px; border-radius:6px; background:rgba(255,255,255,.05); overflow:hidden; border:1px solid var(--line); }
+  .fill{ height:100%; border-radius:6px; }
+  .fill.hp   { background:linear-gradient(90deg,#b88a1e,var(--gold)); box-shadow:0 0 14px rgba(216,178,74,.5); }
+  .fill.temp { background:var(--temp); }
+  .fill.armor{ background:linear-gradient(90deg,#5b626e,var(--steel)); }
+  .fill.fate { background:linear-gradient(90deg,#7b3fd0,var(--fate)); box-shadow:0 0 14px rgba(176,110,240,.55); }
+  .pips{ display:flex; gap:5px; }
+  .pip{ width:14px; height:14px; border-radius:4px; border:1px solid var(--line-strong); }
+  .pip.on.armor{ background:var(--steel); border-color:var(--steel); }
+
+  /* ---------------- archetypes ---------------- */
+  .arc{ border:1px solid var(--line); border-radius:10px; padding:14px 15px; margin-bottom:12px; background:var(--ink-3); position:relative; }
+  .arc .row1{ display:flex; align-items:baseline; gap:10px; justify-content:space-between; }
+  .arc .aname{ font-family:var(--serif); font-size:21px; }
+  .arc .tagline{ font-family:var(--serif); font-style:italic; color:var(--bone-dim); font-size:15px; margin:1px 0 9px; }
+  .tag{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--line-strong); white-space:nowrap; }
+  .tag.red{ color:var(--red); border-color:rgba(215,92,79,.5); }
+  .tag.green{ color:var(--green); border-color:rgba(103,171,92,.5); }
+  .tag.blue{ color:var(--blue); border-color:rgba(87,166,224,.5); }
+  .drift{ display:flex; align-items:center; gap:9px; font-size:11px; color:var(--bone-faint); letter-spacing:.5px; }
+  .notches{ display:flex; gap:4px; }
+  .notch{ width:11px; height:11px; border-radius:50%; border:1px solid var(--line-strong); }
+  .notch.on{ background:var(--bone-dim); border-color:var(--bone-dim); }
+  .status{ font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; padding:2px 8px; border-radius:5px; }
+  .status.active{ color:var(--green); }
+  /* canon status visual language */
+  .arc.faltering{ border-left:3px solid var(--gold); background:linear-gradient(90deg,rgba(216,178,74,.06),var(--ink-3) 40%); }
+  .arc.faltering .status{ color:var(--gold); }
+  .arc.silent{ opacity:.5; border-left:3px solid #777; }
+  .arc.silent .status{ color:var(--bone-dim); }
+  .arc.retired{ opacity:.34; }
+  .arc.retired .aname{ text-decoration:line-through; }
+
+  /* ---------------- bonds: tethers + holds ---------------- */
+  .bond{ border:1px solid var(--line); border-radius:9px; padding:12px 14px; margin-bottom:10px; background:var(--ink-3); }
+  .bond .to{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--bone-faint); margin-bottom:3px; }
+  .bond .line{ font-family:var(--serif); font-size:18px; }
+  .knot .old{ text-decoration:line-through; color:var(--bone-faint); font-style:italic; display:block; font-size:15px; }
+  .knot .new{ color:var(--bone); display:block; margin-top:2px; }
+  .knot .seam{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--fate); margin-top:6px; }
+  .tether-open .line{ color:var(--red); font-style:italic; }
+  .tether-open .to::after{ content:" · open / severed"; color:var(--red); }
+
+  .hold{ border-left:3px solid var(--gold); }
+  .hold.yielded{ border-left-color:var(--red); opacity:.7; }
+  .hold .meta{ display:flex; gap:14px; margin-top:6px; font-size:11.5px; color:var(--bone-dim); }
+  .hold .meta b{ color:var(--bone); }
+  .hold.yielded .line{ text-decoration:line-through; color:var(--bone-faint); }
+  .owed{ color:var(--red); }
+
+  /* ---------------- features ---------------- */
+  .feat{ padding:11px 0 11px 12px; border-left:3px solid var(--line); margin-bottom:10px; }
+  .feat.major{ border-left-color:var(--red); }
+  .feat.minor{ border-left-color:var(--green); }
+  .feat.passive{ border-left-color:var(--blue); }
+  .feat .fn{ font-family:var(--serif); font-size:18px; }
+  .feat .ft{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--bone-faint); margin-left:8px; }
+  .feat .fd{ font-size:13px; color:var(--bone-dim); margin-top:3px; }
+
+  .gear-row{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; }
+  .gear-row .meta{ color:var(--bone-faint); font-size:11.5px; }
+
+  /* ---------------- cast widget ---------------- */
+  .cast{ background:linear-gradient(180deg,rgba(176,110,240,.07),transparent), var(--ink-2); border:1px solid var(--line-strong); }
+  .cast .controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .castbtn{ font-family:var(--sans); font-size:13px; padding:9px 14px; border-radius:8px; cursor:pointer; border:1px solid var(--line-strong); background:var(--ink-3); color:var(--bone); }
+  .castbtn.red:hover{ border-color:var(--red); color:#fff; }
+  .castbtn.green:hover{ border-color:var(--green); color:#fff; }
+  .castbtn.blue:hover{ border-color:var(--blue); color:#fff; }
+  .diff{ margin-left:auto; font-size:12.5px; color:var(--bone-dim); }
+  .diff select{ background:var(--ink-3); color:var(--bone); border:1px solid var(--line-strong); border-radius:6px; padding:5px 8px; font-family:var(--sans); }
+  .dice{ display:flex; gap:9px; flex-wrap:wrap; min-height:46px; align-items:center; }
+  .die{ width:42px; height:42px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+        font-family:var(--serif); font-size:23px; background:var(--ink-3); border:1px solid var(--line-strong); }
+  .die.hit{ border-color:var(--green); color:var(--green); box-shadow:0 0 16px -3px rgba(103,171,92,.6); }
+  .die.six{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 16px -3px rgba(216,178,74,.7); }
+  .die.one{ border-color:var(--red); color:var(--red); box-shadow:0 0 16px -3px rgba(215,92,79,.6); }
+  .verdict{ margin-top:14px; font-family:var(--serif); font-size:21px; min-height:30px; }
+  .verdict .win{ color:var(--gold); }
+  .verdict .down{ color:var(--red); }
+  .verdict .ok{ color:var(--green); }
+  .verdict .no{ color:var(--bone-dim); }
+  .verdict small{ display:block; font-family:var(--sans); font-size:12px; color:var(--bone-faint); margin-top:3px; letter-spacing:.3px; }
+
+  .footnote{ text-align:center; color:var(--bone-faint); font-size:12px; margin-top:40px; font-style:italic; font-family:var(--serif); }
+  .badge-mock{ position:fixed; bottom:14px; right:16px; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+               color:var(--bone-faint); background:rgba(9,11,16,.85); border:1px solid var(--line); padding:6px 12px; border-radius:999px; z-index:30; }
+</style>
+</head>
+<body>
+
+  <!-- app chrome -->
+  <div class="topbar">
+    <div class="wordmark">VERTE<span class="x">X</span></div>
+    <div class="spacer"></div>
+    <div class="chip"><span class="dot"></span> Mara Quill</div>
+    <button class="btn">Switch character ▾</button>
+    <button class="btn">+ New</button>
+  </div>
+  <nav class="tabs">
+    <a class="active" href="#core">Core</a>
+    <a href="#archetypes">Archetypes</a>
+    <a href="#bonds">Bonds</a>
+    <a href="#designation">Designation</a>
+    <a href="#gear">Gear</a>
+    <a href="#cast">Cast</a>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- identity -->
+    <header class="hero" id="core">
+      <div class="portrait">MQ</div>
+      <div class="id">
+        <div class="epithet">the version of you that you have never met</div>
+        <h1>Mara Quill</h1>
+        <div class="desig">Designation · <b>Blacksmith</b> — “Iron bends, but you do not.”</div>
+      </div>
+      <div class="quote">“I’ve mended every blade in this town. None of them mine.”</div>
+    </header>
+
+    <div class="cols">
+      <!-- LEFT: the self -->
+      <div>
+        <!-- core stats -->
+        <section class="panel">
+          <div class="head"><h2>Core Stats</h2><span class="sub">start 1 · +5 from archetypes</span></div>
+          <div class="stats">
+            <div class="stat red">
+              <div class="name">Red</div><div class="val">4</div>
+              <div class="dom">Force · Resilience</div>
+              <div class="derived">Max HP <b>4</b></div>
+            </div>
+            <div class="stat green">
+              <div class="name">Green</div><div class="val">2</div>
+              <div class="dom">Precision · Reflex</div>
+              <div class="derived">Move <b>4u</b> · Target Diff <b>1</b></div>
+            </div>
+            <div class="stat blue">
+              <div class="name">Blue</div><div class="val">2</div>
+              <div class="dom">Intellect · Abstraction</div>
+              <div class="derived">Feature Uses <b>2</b></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- resources -->
+        <section class="panel">
+          <div class="head"><h2>Resources</h2><span class="sub">auto-derived</span></div>
+          <div class="meters">
+            <div class="meter">
+              <div class="lab"><span class="k">Hit Points</span><span class="v">3 / 4</span></div>
+              <div class="track"><div class="fill hp" style="width:75%"></div></div>
+            </div>
+            <div class="meter">
+              <div class="lab"><span class="k">Temp HP</span><span class="v">0</span></div>
+              <div class="track"><div class="fill temp" style="width:0%"></div></div>
+            </div>
+            <div class="meter">
+              <div class="lab"><span class="k">Armor</span><span class="v">2 / 5</span></div>
+              <div class="pips">
+                <span class="pip on armor"></span><span class="pip on armor"></span>
+                <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+              </div>
+            </div>
+            <div class="meter">
+              <div class="lab"><span class="k">Fate</span><span class="v">6 / 10</span></div>
+              <div class="track"><div class="fill fate" style="width:60%"></div></div>
+            </div>
+            <div class="meter">
+              <div class="lab"><span class="k">Feature Uses (this scene)</span><span class="v">2 / 2</span></div>
+              <div class="track"><div class="fill" style="width:100%;background:var(--blue)"></div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT: designation & features (kept near top so Core view feels complete) -->
+      <div>
+        <section class="panel" id="designation">
+          <div class="head"><h2>Designation &amp; Features</h2><span class="sub">Blacksmith</span></div>
+          <div class="feat major">
+            <span class="fn">Make Do</span><span class="ft">Major Action</span>
+            <div class="fd">Cast Red: restore a broken or damaged item without resources. Succeeds regardless of the Cast — and on a Windfall, forgo the table to <i>permanently</i> enhance the item.</div>
+          </div>
+          <div class="feat minor">
+            <span class="fn">Quickforge</span><span class="ft">Minor Action</span>
+            <div class="fd">Two weapons wielded by you or an ally gain +1 to their next to-hit Casts until the end of the encounter.</div>
+          </div>
+          <div class="feat passive">
+            <span class="fn">Anvil’s Resolve</span><span class="ft">Passive</span>
+            <div class="fd">Armor from wearables is twice as effective on you. You always have +1 Armor, restored automatically each scene. Craftsmen and working folk trust your word.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- archetypes : full width -->
+    <section class="panel" id="archetypes">
+      <div class="head"><h2>Archetypes</h2><span class="sub">forces in tension · drift &amp; the crossing</span></div>
+
+      <div class="arc">
+        <div class="row1">
+          <div><span class="aname">Iron Anchor</span> <span class="status active">Active</span></div>
+          <span class="tag red">Red · +3</span>
+        </div>
+        <div class="tagline">“The floor is exactly where you put it, and it isn’t going anywhere.”</div>
+        <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 2 / 5</div>
+      </div>
+
+      <div class="arc">
+        <div class="row1">
+          <div><span class="aname">Riposte</span> <span class="status active">Active</span></div>
+          <span class="tag green">Green · +1</span>
+        </div>
+        <div class="tagline">“Wait for the opening. Strike the flaw.”</div>
+        <div class="drift">Drift <span class="notches"><i class="notch"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 0 / 5</div>
+      </div>
+
+      <div class="arc faltering">
+        <div class="row1">
+          <div><span class="aname">Splintered Faith</span> <span class="status">Faltering</span></div>
+          <span class="tag blue">Blue · +1</span>
+        </div>
+        <div class="tagline">“Break the glass. Bleed a little.”</div>
+        <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i></span> 5 / 5 — answer it at the next Crossing</div>
+      </div>
+
+      <div class="arc silent">
+        <div class="row1">
+          <div><span class="aname">Total Devotion</span> <span class="status">Silent</span></div>
+          <span class="tag blue">Blue · suspended</span>
+        </div>
+        <div class="tagline">“Cling to the unbroken light.”</div>
+        <div class="drift">Numbed — grants neither Advantage nor Disadvantage. Wake it only through a Vignette.</div>
+      </div>
+    </section>
+
+    <!-- bonds : tethers + holds -->
+    <div class="cols" id="bonds">
+      <section class="panel">
+        <div class="head"><h2>Tethers</h2><span class="sub">what they are to you, now</span></div>
+        <div class="bond">
+          <div class="to">to Cassian</div>
+          <div class="line">“The one who knows what I did and stayed anyway.”</div>
+        </div>
+        <div class="bond knot">
+          <div class="to">to Della · re-tied</div>
+          <div class="line">
+            <span class="old">“The steadiest hand at the table.”</span>
+            <span class="new">“The hand that shakes now — and reaches anyway.”</span>
+          </div>
+          <div class="seam">⌇ knot · the moment it changed</div>
+        </div>
+        <div class="bond tether-open">
+          <div class="to">to Wren</div>
+          <div class="line">“The thing I am most afraid of losing.”</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Conviction Holds</h2><span class="sub">the line you will not cross</span></div>
+        <div class="bond hold">
+          <div class="line">“I will not draw a weapon against someone who cannot fight back.”</div>
+          <div class="meta"><span>Status <b>Active</b></span><span>Honored under pressure <b>×2</b></span></div>
+        </div>
+        <div class="bond hold yielded">
+          <div class="line">“I will protect the people of this place for as long as I have the means.”</div>
+          <div class="meta"><span>Status <b>Yielded</b></span><span class="owed">⚑ Vignette owed — slot locked</span></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- gear -->
+    <section class="panel" id="gear">
+      <div class="head"><h2>Equipment &amp; Weapons</h2><span class="sub">equipped</span></div>
+      <div class="gear-row"><span>⚒ <b>Blacksmith’s Hammer &amp; Tongs</b> <span class="meta">— weapon</span></span><span class="meta">Red · Range 1</span></div>
+      <div class="gear-row"><span>Leather Apron &amp; Gauntlets <span class="meta">— torso</span></span><span class="meta">Armor 1</span></div>
+      <div class="gear-row"><span>Portable Anvil &amp; Toolkit <span class="meta">— accessory</span></span><span class="meta">enables repair anywhere</span></div>
+      <div class="gear-row" style="border-bottom:none"><span class="meta" style="font-style:italic">+1 Armor always (Anvil’s Resolve), doubled wearable armor</span><span class="meta">Total Armor 2</span></div>
+    </section>
+
+    <!-- cast widget -->
+    <section class="panel cast" id="cast">
+      <div class="head"><h2>Cast</h2><span class="sub">5–6 = success · 2+ sixes = Windfall · 2+ ones = Downside</span></div>
+      <div class="controls">
+        <button class="castbtn red"   onclick="cast(4,'Red')">Cast Red · 4d6</button>
+        <button class="castbtn green" onclick="cast(2,'Green')">Cast Green · 2d6</button>
+        <button class="castbtn blue"  onclick="cast(2,'Blue')">Cast Blue · 2d6</button>
+        <span class="diff">Difficulty
+          <select id="difficulty">
+            <option>1</option><option selected>2</option><option>3</option><option>4</option>
+          </select>
+        </span>
+      </div>
+      <div class="dice" id="dice"><span class="no" style="color:var(--bone-faint);font-family:var(--sans);font-size:13px">Choose a stat to Cast…</span></div>
+      <div class="verdict" id="verdict"></div>
+    </section>
+
+    <p class="footnote">There is a version of you that you have never met. The Story is how they arrive.</p>
+  </div>
+
+  <div class="badge-mock">mockup · look &amp; feel only</div>
+
+<script>
+  // tiny live Cast demo — previews the real dice engine's logic
+  function cast(pool, label){
+    const diff = parseInt(document.getElementById('difficulty').value, 10);
+    const rolls = Array.from({length: pool}, () => 1 + Math.floor(Math.random()*6));
+    const diceEl = document.getElementById('dice');
+    diceEl.innerHTML = '';
+    let successes=0, sixes=0, ones=0;
+    rolls.forEach(r=>{
+      const d=document.createElement('div'); d.className='die'; d.textContent=r;
+      if(r===6){ d.classList.add('six'); successes++; sixes++; }
+      else if(r===5){ d.classList.add('hit'); successes++; }
+      else if(r===1){ d.classList.add('one'); ones++; }
+      diceEl.appendChild(d);
+    });
+    // resolve per v004
+    let windfall = sixes>=2, downside = ones>=2;
+    if(windfall && downside){ // sets cancel 1:1
+      const cancel=Math.min(sixes,ones); const w=sixes-cancel>0, dn=ones-cancel>0;
+      windfall=w; downside=dn;
+    }
+    const v=document.getElementById('verdict');
+    if(windfall){
+      v.innerHTML = `<span class="win">Windfall.</span> Perfect self-actualization — automatic success, roll the Windfall Table.
+        <small>${label} · ${successes} successes · ${sixes} sixes</small>`;
+    } else if(downside){
+      v.innerHTML = `<span class="down">Downside.</span> The weight breaks you — automatic failure, roll the Downside Table.
+        <small>${label} · ${ones} ones</small>`;
+    } else if(successes>=diff){
+      v.innerHTML = `<span class="ok">Success.</span> Your intent becomes reality.
+        <small>${label} · ${successes}/${diff} successes</small>`;
+    } else {
+      v.innerHTML = `<span class="no">Not enough.</span> The truth refuses you.
+        <small>${label} · ${successes}/${diff} successes</small>`;
+    }
+  }
+
+  // tab active-state on scroll
+  const links=[...document.querySelectorAll('.tabs a')];
+  const ids=links.map(a=>a.getAttribute('href').slice(1));
+  window.addEventListener('scroll', ()=>{
+    let cur=ids[0];
+    for(const id of ids){ const el=document.getElementById(id); if(el && el.getBoundingClientRect().top<140) cur=id; }
+    links.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+cur));
+  }, {passive:true});
+</script>
+</body>
+</html>

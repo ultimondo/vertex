@@ -1,0 +1,19 @@
+# --- OS / editor cruft ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*~
+.vscode/
+.idea/
+
+# --- Local-only reference assets (kept on disk, never pushed) ---
+moodboard/
+
+# --- Claude Code local settings ---
+.claude/settings.local.json
+
+# --- Scratch / temp extracts ---
+.v004.txt
+*.tmp
+*.log

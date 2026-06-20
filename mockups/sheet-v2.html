@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — Character Sheet (core-Vertex mockup v2)</title>
+<!--
+  VERTEX · core-Vertex mockup v2
+  Darker / starker / more monochrome. Chromatic aberration on the wordmark.
+  Compartmentalized TABBED panels (real tab switching). Interactive Resources + per-Feature use tracking.
+  Verbatim Blacksmith text from the Weird West Designation Guide. Self-contained single file.
+  Font is switchable (top-right "Aa") so you can compare evocative display faces.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* stark monochrome base */
+    --ink:        #060608;
+    --ink-2:      #0b0c0f;
+    --ink-3:      #101114;
+    --white:      #ffffff;
+    --bone:       #efebe3;
+    --dim:        #8a8884;
+    --faint:      #54534f;
+    --line:       rgba(239,235,227,.085);
+    --line-2:     rgba(239,235,227,.16);
+
+    /* the three Core Stats — restrained, the only real chroma */
+    --red:   #c75348;
+    --green: #5e9b54;
+    --blue:  #5197cf;
+    --fate:  #9b6fe0;
+    --gold:  #cfa83f;   /* HP */
+    --steel: #9aa0aa;   /* Armor */
+    --temp:  #b7b2a9;   /* Temp HP */
+
+    /* feature-type indicators — deliberately NOT the stat colors (monochrome tones) */
+    --feat-major:   #e7e2d7;
+    --feat-minor:   #8a8990;
+    --feat-passive: #4f4e54;
+
+    --serif: "Cormorant Garamond", Georgia, serif;   /* switchable display face (default: Cormorant) */
+    --sans:  "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 9px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--ink); color:var(--bone);
+    font-family:var(--sans); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/></svg>");
+  }
+  h1,h2,h3{ font-family:var(--serif); font-weight:500; margin:0; }
+  button{ font-family:var(--sans); cursor:pointer; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:18px;
+    padding:14px 26px; background:rgba(6,6,8,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);
+  }
+  /* chromatic-aberration wordmark */
+  .brand{ position:relative; font-family:"Cinzel", serif; font-size:24px; letter-spacing:7px; color:var(--white); }
+  .brand::before, .brand::after{
+    content:"VERTEX"; position:absolute; left:0; top:0; z-index:-1; letter-spacing:7px;
+    mix-blend-mode:screen; pointer-events:none;
+  }
+  .brand::before{ color:#ff1f4f; animation:caL 5.5s ease-in-out infinite; }
+  .brand::after{  color:#1fd4ff; animation:caR 5.5s ease-in-out infinite; }
+  @keyframes caL{ 0%,100%{transform:translate(-1.6px,0)} 50%{transform:translate(-2.4px,.4px)} }
+  @keyframes caR{ 0%,100%{transform:translate(1.6px,0)}  50%{transform:translate(2.4px,-.4px)} }
+  .topbar .spacer{ flex:1; }
+  .charname-chip{ font-size:13px; color:var(--bone); border:1px solid var(--line-2); padding:6px 14px; border-radius:999px; }
+  .btn{ font-size:13px; color:var(--bone); background:var(--ink-3); border:1px solid var(--line-2); padding:7px 13px; border-radius:8px; }
+  .btn:hover{ border-color:var(--white); color:var(--white); }
+  .fontpick{ display:flex; gap:4px; align-items:center; }
+  .fontpick .lbl{ font-size:12px; color:var(--faint); margin-right:2px; }
+  .fontpick button{ font-size:12px; color:var(--dim); background:transparent; border:1px solid var(--line); padding:5px 9px; border-radius:7px; }
+  .fontpick button.on{ color:var(--white); border-color:var(--white); }
+
+  /* ---------- persistent character header ---------- */
+  .hero{ max-width:1080px; margin:0 auto; padding:26px 26px 0; display:flex; align-items:center; gap:20px; }
+  .portrait{
+    width:74px; height:74px; flex:none; border-radius:10px; border:1px solid var(--line-2);
+    background:var(--ink-3); display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:30px; color:var(--bone);
+  }
+  .hero h1{ font-size:40px; line-height:1; letter-spacing:.3px;
+            text-shadow:-.6px 0 rgba(255,31,79,.20), .6px 0 rgba(31,212,255,.20); }
+  .hero .epithet{ font-family:var(--serif); font-style:italic; font-size:14.5px; color:var(--faint); margin-bottom:3px; }
+  .hero .desig{ font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--dim); margin-top:4px; }
+
+  /* ---------- tab bar ---------- */
+  .tabs{ max-width:1080px; margin:18px auto 0; padding:0 26px; display:flex; gap:2px; border-bottom:1px solid var(--line); overflow-x:auto; }
+  .tabs button{
+    background:transparent; border:0; border-bottom:2px solid transparent; color:var(--dim);
+    font-size:13px; letter-spacing:.8px; text-transform:uppercase; padding:13px 16px; white-space:nowrap;
+  }
+  .tabs button:hover{ color:var(--bone); }
+  .tabs button.active{ color:var(--white); border-bottom-color:var(--white); }   /* white underline */
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:26px; }
+  .tabpanel{ display:none; }
+  .tabpanel.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
+
+  .panel{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+  .panel > .head{ display:flex; align-items:baseline; justify-content:space-between; margin:-2px 0 16px; }
+  .panel h2{ font-size:22px; }
+  .panel .sub{ font-size:11px; letter-spacing:1.4px; text-transform:uppercase; color:var(--faint); }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:820px){ .cols{ grid-template-columns:1fr; } }
+
+  /* ---------- core stats ---------- */
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .stat{ border:1px solid var(--line-2); border-top-width:2px; border-radius:9px; padding:14px 12px; text-align:center; background:var(--ink-3); }
+  .stat .name{ font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); }
+  .stat .val{ font-family:var(--serif); font-size:46px; line-height:1; margin:5px 0 4px; }
+  .stat .dom{ font-size:11px; color:var(--faint); line-height:1.45; min-height:30px; }
+  .stat.red{ border-top-color:var(--red); }    .stat.red .val{ color:var(--red); }
+  .stat.green{ border-top-color:var(--green); }.stat.green .val{ color:var(--green); }
+  .stat.blue{ border-top-color:var(--blue); }  .stat.blue .val{ color:var(--blue); }
+  .derived{ margin-top:8px; padding-top:9px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--dim); }
+  .derived b{ color:var(--bone); }
+
+  /* ---------- interactive resources ---------- */
+  .res{ display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .res:last-child{ border-bottom:0; }
+  .res .k{ width:120px; font-size:11px; letter-spacing:.8px; text-transform:uppercase; color:var(--dim); flex:none; }
+  .stepper{ display:flex; align-items:center; gap:9px; flex:none; }
+  .stepper button{ width:26px; height:26px; border-radius:7px; border:1px solid var(--line-2); background:var(--ink-3); color:var(--bone); font-size:15px; line-height:1; }
+  .stepper button:hover{ border-color:var(--white); color:var(--white); }
+  .stepper .v{ min-width:52px; text-align:center; font-variant-numeric:tabular-nums; font-size:15px; }
+  .bar{ flex:1; height:8px; border-radius:5px; background:rgba(255,255,255,.05); border:1px solid var(--line); overflow:hidden; }
+  .bar > i{ display:block; height:100%; }
+  .bar.hp > i{ background:var(--gold); }
+  .bar.temp > i{ background:var(--temp); }
+  .bar.fate > i{ background:var(--fate); }
+  .armorpips{ display:flex; gap:6px; flex:1; }
+  .apip{ width:26px; height:16px; border-radius:4px; border:1px solid var(--line-2); cursor:pointer; }
+  .apip.on{ background:var(--steel); border-color:var(--steel); }
+
+  /* ---------- archetypes ---------- */
+  .arc{ border:1px solid var(--line); border-radius:9px; padding:14px 15px; margin-bottom:12px; background:var(--ink-3); }
+  .arc .row1{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .arc .aname{ font-family:var(--serif); font-size:21px; }
+  .arc .tagline{ font-family:var(--serif); font-style:italic; color:var(--dim); font-size:15px; margin:1px 0 9px; }
+  .tag{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--line-2); white-space:nowrap; }
+  .tag.red{ color:var(--red); }   .tag.green{ color:var(--green); }   .tag.blue{ color:var(--blue); }
+  .drift{ display:flex; align-items:center; gap:9px; font-size:11px; color:var(--faint); letter-spacing:.4px; }
+  .notches{ display:flex; gap:4px; }
+  .notch{ width:11px; height:11px; border-radius:50%; border:1px solid var(--line-2); }
+  .notch.on{ background:var(--dim); border-color:var(--dim); }
+  .status{ font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; }
+  .status.active{ color:var(--green); }
+  .arc.faltering{ border-left:3px solid var(--gold); }
+  .arc.faltering .status{ color:var(--gold); }
+  .arc.silent{ opacity:.5; border-left:3px solid #6e6e72; }
+  .arc.silent .status{ color:var(--dim); }
+
+  /* ---------- bonds ---------- */
+  .bond{ border:1px solid var(--line); border-radius:9px; padding:12px 14px; margin-bottom:10px; background:var(--ink-3); }
+  .bond .to{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin-bottom:3px; }
+  .bond .line{ font-family:var(--serif); font-size:18px; }
+  .knot .old{ text-decoration:line-through; color:var(--faint); font-style:italic; display:block; font-size:15px; }
+  .knot .new{ display:block; margin-top:2px; }
+  .knot .seam{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); margin-top:6px; }
+  .tether-open .line{ color:var(--red); font-style:italic; }
+  .tether-open .to::after{ content:" · open / severed"; color:var(--red); }
+  .hold{ border-left:3px solid var(--gold); }
+  .hold.yielded{ border-left-color:var(--red); opacity:.72; }
+  .hold .meta{ display:flex; gap:16px; margin-top:6px; font-size:11.5px; color:var(--dim); }
+  .hold .meta b{ color:var(--bone); }
+  .hold.yielded .line{ text-decoration:line-through; color:var(--faint); }
+  .owed{ color:var(--red); }
+
+  /* ---------- designation & features ---------- */
+  .desig-hero{ padding:6px 2px 18px; border-bottom:1px solid var(--line); margin-bottom:18px; }
+  .desig-hero .big{ font-family:var(--serif); font-size:44px; line-height:1; letter-spacing:.5px;
+                    text-shadow:-.6px 0 rgba(255,31,79,.18), .6px 0 rgba(31,212,255,.18); }
+  .desig-hero .tag2{ font-family:var(--serif); font-style:italic; font-size:18px; color:var(--dim); margin-top:6px; }
+
+  .feature{ border:1px solid var(--line); border-radius:9px; padding:0; margin-bottom:14px; background:var(--ink-3); display:flex; }
+  .feature .stripe{ width:5px; flex:none; border-radius:9px 0 0 9px; }
+  .feature.major   .stripe{ background:var(--feat-major); }
+  .feature.minor   .stripe{ background:var(--feat-minor); }
+  .feature.passive .stripe{ background:var(--feat-passive); }
+  .feature .body{ padding:14px 16px; flex:1; }
+  .feature .frow{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .feature .fn{ font-family:var(--serif); font-size:21px; }
+  .feature .ft{ font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--faint); margin-left:10px; }
+  .feature .fd{ font-size:13.5px; color:var(--dim); margin-top:8px; line-height:1.55; }
+  .feature .fd b{ color:var(--bone); font-weight:600; }
+  .uses{ display:flex; align-items:center; gap:8px; }
+  .uses .ulbl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .ubox{ width:18px; height:18px; border-radius:5px; border:1px solid var(--line-2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ubox.on{ background:var(--bone); border-color:var(--bone); }
+  .ubox.on::after{ content:""; width:7px; height:7px; border-radius:2px; background:var(--ink); }
+  .ureset{ font-size:11px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:6px; padding:4px 9px; }
+  .ureset:hover{ color:var(--white); border-color:var(--white); }
+  .always{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); }
+
+  /* ---------- gear ---------- */
+  .item{ border:1px solid var(--line); border-radius:9px; padding:13px 15px; margin-bottom:12px; background:var(--ink-3); }
+  .item .iname{ font-family:var(--serif); font-size:19px; }
+  .item .imeta{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin:2px 0 6px; }
+  .item .iflavor{ font-style:italic; color:var(--dim); font-size:13.5px; font-family:var(--serif); }
+
+  /* ---------- cast ---------- */
+  .legend{ list-style:none; margin:0 0 16px; padding:0; }
+  .legend li{ padding:4px 0; font-size:14px; color:var(--bone); border-bottom:1px solid var(--line); }
+  .legend li:last-child{ border-bottom:0; }
+  .legend b{ color:var(--white); }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .castbtn{ font-size:13px; padding:9px 14px; border-radius:8px; border:1px solid var(--line-2); background:var(--ink-3); color:var(--bone); }
+  .castbtn.red:hover{ border-color:var(--red); }
+  .castbtn.green:hover{ border-color:var(--green); }
+  .castbtn.blue:hover{ border-color:var(--blue); }
+  .diff{ margin-left:auto; font-size:12.5px; color:var(--dim); }
+  .diff select{ background:var(--ink-3); color:var(--bone); border:1px solid var(--line-2); border-radius:6px; padding:5px 8px; }
+  .dice{ display:flex; gap:9px; flex-wrap:wrap; min-height:46px; align-items:center; }
+  .die{ width:42px; height:42px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:23px; background:var(--ink-3); border:1px solid var(--line-2); }
+  .die.hit{ border-color:var(--green); color:var(--green); }
+  .die.six{ border-color:var(--gold); color:var(--gold); }
+  .die.one{ border-color:var(--red); color:var(--red); }
+  .verdict{ margin-top:14px; font-family:var(--serif); font-size:21px; min-height:30px; }
+  .verdict .win{ color:var(--gold); } .verdict .down{ color:var(--red); } .verdict .ok{ color:var(--green); } .verdict .no{ color:var(--dim); }
+  .verdict small{ display:block; font-family:var(--sans); font-size:12px; color:var(--faint); margin-top:3px; }
+
+  .badge-mock{ position:fixed; bottom:14px; right:16px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); background:rgba(6,6,8,.85); border:1px solid var(--line); padding:6px 12px; border-radius:999px; z-index:40; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">VERTEX</div>
+    <div class="spacer"></div>
+    <div class="fontpick">
+      <span class="lbl">Aa</span>
+      <button onclick="setFont('Cormorant Garamond',this)" class="on">Cormorant</button>
+      <button onclick="setFont('Fraunces',this)">Fraunces</button>
+      <button onclick="setFont('IM Fell English',this)">IM Fell</button>
+    </div>
+    <div class="charname-chip">Mara Quill</div>
+    <button class="btn">Switch ▾</button>
+    <button class="btn">+ New</button>
+  </div>
+
+  <header class="hero">
+    <div class="portrait">MQ</div>
+    <div>
+      <div class="epithet">the version of you that you have never met</div>
+      <h1>Mara Quill</h1>
+      <div class="desig">Blacksmith</div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="active" onclick="tab('core',this)">Core</button>
+    <button onclick="tab('archetypes',this)">Archetypes</button>
+    <button onclick="tab('bonds',this)">Bonds</button>
+    <button onclick="tab('designation',this)">Designation</button>
+    <button onclick="tab('gear',this)">Gear</button>
+    <button onclick="tab('cast',this)">Cast</button>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- ===== CORE ===== -->
+    <section class="tabpanel active" id="tab-core">
+      <div class="cols">
+        <div class="panel">
+          <div class="head"><h2>Core Stats</h2></div>
+          <div class="stats">
+            <div class="stat red">
+              <div class="name">Red</div><div class="val">4</div>
+              <div class="dom">Force · Presence · Resilience · Fortitude</div>
+              <div class="derived">Max HP <b>4</b></div>
+            </div>
+            <div class="stat green">
+              <div class="name">Green</div><div class="val">2</div>
+              <div class="dom">Precision · Reflex · Balance · Stealth</div>
+              <div class="derived">Move <b>4u</b> · Difficulty <b>1</b></div>
+            </div>
+            <div class="stat blue">
+              <div class="name">Blue</div><div class="val">2</div>
+              <div class="dom">Intellect · Discourse · Perception · Abstraction</div>
+              <div class="derived">Feature Uses <b>2</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="head"><h2>Resources</h2></div>
+
+          <div class="res">
+            <span class="k">Hit Points</span>
+            <div class="stepper">
+              <button onclick="step('hp',-1)">−</button>
+              <span class="v" id="hp-v">3 / 4</span>
+              <button onclick="step('hp',1)">+</button>
+            </div>
+            <div class="bar hp"><i id="hp-bar" style="width:75%"></i></div>
+          </div>
+
+          <div class="res">
+            <span class="k">Temp HP</span>
+            <div class="stepper">
+              <button onclick="step('temp',-1)">−</button>
+              <span class="v" id="temp-v">0 / 4</span>
+              <button onclick="step('temp',1)">+</button>
+            </div>
+            <div class="bar temp"><i id="temp-bar" style="width:0%"></i></div>
+          </div>
+
+          <div class="res">
+            <span class="k">Armor</span>
+            <div class="armorpips" id="armor">
+              <span class="apip on" onclick="armorSet(1)"></span>
+              <span class="apip on" onclick="armorSet(2)"></span>
+              <span class="apip" onclick="armorSet(3)"></span>
+              <span class="apip" onclick="armorSet(4)"></span>
+              <span class="apip" onclick="armorSet(5)"></span>
+            </div>
+          </div>
+
+          <div class="res">
+            <span class="k">Fate</span>
+            <div class="stepper">
+              <button onclick="step('fate',-1)">−</button>
+              <span class="v" id="fate-v">6 / 10</span>
+              <button onclick="step('fate',1)">+</button>
+            </div>
+            <div class="bar fate"><i id="fate-bar" style="width:60%"></i></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ARCHETYPES ===== -->
+    <section class="tabpanel" id="tab-archetypes">
+      <div class="panel">
+        <div class="head"><h2>Archetypes</h2><span class="sub">forces in tension · drift &amp; the crossing</span></div>
+
+        <div class="arc">
+          <div class="row1"><div><span class="aname">Iron Anchor</span> &nbsp;<span class="status active">Active</span></div><span class="tag red">Red · +3</span></div>
+          <div class="tagline">“The floor is exactly where you put it, and it isn’t going anywhere.”</div>
+          <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 2 / 5</div>
+        </div>
+
+        <div class="arc">
+          <div class="row1"><div><span class="aname">Riposte</span> &nbsp;<span class="status active">Active</span></div><span class="tag green">Green · +1</span></div>
+          <div class="tagline">“Wait for the opening. Strike the flaw.”</div>
+          <div class="drift">Drift <span class="notches"><i class="notch"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 0 / 5</div>
+        </div>
+
+        <div class="arc faltering">
+          <div class="row1"><div><span class="aname">Splintered Faith</span> &nbsp;<span class="status">Faltering</span></div><span class="tag blue">Blue · +1</span></div>
+          <div class="tagline">“Break the glass. Bleed a little.”</div>
+          <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i><i class="notch on"></i></span> 5 / 5 — answer it at the next Crossing</div>
+        </div>
+
+        <div class="arc silent">
+          <div class="row1"><div><span class="aname">Total Devotion</span> &nbsp;<span class="status">Silent</span></div><span class="tag blue">Blue · suspended</span></div>
+          <div class="tagline">“Cling to the unbroken light.”</div>
+          <div class="drift">Numbed — grants neither Advantage nor Disadvantage. Wake it only through a Vignette.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BONDS ===== -->
+    <section class="tabpanel" id="tab-bonds">
+      <div class="cols">
+        <div class="panel">
+          <div class="head"><h2>Tethers</h2><span class="sub">what they are to you, now</span></div>
+          <div class="bond"><div class="to">to Cassian</div><div class="line">“The one who knows what I did and stayed anyway.”</div></div>
+          <div class="bond knot">
+            <div class="to">to Della · re-tied</div>
+            <div class="line"><span class="old">“The steadiest hand at the table.”</span><span class="new">“The hand that shakes now — and reaches anyway.”</span></div>
+            <div class="seam">⌇ knot · the moment it changed</div>
+          </div>
+          <div class="bond tether-open"><div class="to">to Wren</div><div class="line">“The thing I am most afraid of losing.”</div></div>
+        </div>
+        <div class="panel">
+          <div class="head"><h2>Conviction Holds</h2><span class="sub">the line you will not cross</span></div>
+          <div class="bond hold">
+            <div class="line">“I will not draw a weapon against someone who cannot fight back.”</div>
+            <div class="meta"><span>Status <b>Active</b></span><span>Honored under pressure <b>×2</b></span></div>
+          </div>
+          <div class="bond hold yielded">
+            <div class="line">“I will protect the people of this place for as long as I have the means.”</div>
+            <div class="meta"><span>Status <b>Yielded</b></span><span class="owed">⚑ Vignette owed — slot locked</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DESIGNATION & FEATURES ===== -->
+    <section class="tabpanel" id="tab-designation">
+      <div class="panel">
+        <div class="desig-hero">
+          <div class="big">BLACKSMITH</div>
+          <div class="tag2">“Iron bends, but you do not.”</div>
+        </div>
+
+        <div class="feature major">
+          <div class="stripe"></div>
+          <div class="body">
+            <div class="frow">
+              <div><span class="fn">Make Do</span><span class="ft">Major Action</span></div>
+              <div class="uses">
+                <span class="ulbl">Uses</span>
+                <span class="ubox on" onclick="toggleUse(this)"></span>
+                <span class="ubox on" onclick="toggleUse(this)"></span>
+                <button class="ureset" onclick="resetUses(this)">Reset</button>
+              </div>
+            </div>
+            <div class="fd"><b>Roll Red:</b> You restore a broken or damaged item without using resources. <b>Make Better:</b> You succeed regardless of your roll, but if you Yee-Haw! you can forgo a Windfall Roll to permanently enhance the item in a manner of your choosing, subject to the Host’s discretion.</div>
+          </div>
+        </div>
+
+        <div class="feature minor">
+          <div class="stripe"></div>
+          <div class="body">
+            <div class="frow">
+              <div><span class="fn">Quickforge</span><span class="ft">Minor Action</span></div>
+              <div class="uses">
+                <span class="ulbl">Uses</span>
+                <span class="ubox on" onclick="toggleUse(this)"></span>
+                <span class="ubox on" onclick="toggleUse(this)"></span>
+                <button class="ureset" onclick="resetUses(this)">Reset</button>
+              </div>
+            </div>
+            <div class="fd">Choose two weapons wielded by you or an ally. Those weapons gain +1 to their next to-hit rolls until the end of the encounter/scene.</div>
+          </div>
+        </div>
+
+        <div class="feature passive">
+          <div class="stripe"></div>
+          <div class="body">
+            <div class="frow">
+              <div><span class="fn">Anvil’s Resolve</span><span class="ft">Passive</span></div>
+              <span class="always">always active · costs no uses</span>
+            </div>
+            <div class="fd">Your reputation as a blacksmith earns respect from craftsmen, merchants, and working folk alike. Those who recognize your trade are more likely to trust your word and look to you for advice. Armor granted by wearable items is twice as effective when worn by you. You always have +1 Armor even when you are not wearing any items that would grant it. This Armor does not need to be repaired and is restored automatically at the end of a combat encounter or scene in which it was lost.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GEAR ===== -->
+    <section class="tabpanel" id="tab-gear">
+      <div class="panel">
+        <div class="head"><h2>Equipment &amp; Weapons</h2><span class="sub">Blacksmith starting items</span></div>
+        <div class="item">
+          <div class="iname">Blacksmith’s Hammer &amp; Tongs</div>
+          <div class="imeta">Weapon · Red-Based · Range 1</div>
+          <div class="iflavor">“Forged in fire and stained with soot, these tools remember every weapon and wound they ever shaped.”</div>
+        </div>
+        <div class="item">
+          <div class="iname">Leather Apron &amp; Gauntlets</div>
+          <div class="imeta">Wearable</div>
+          <div class="iflavor">“Sturdy protection against heat, sparks, and flying slag.”</div>
+        </div>
+        <div class="item">
+          <div class="iname">Portable Anvil &amp; Toolkit</div>
+          <div class="imeta">Accessory</div>
+          <div class="iflavor">“A collapsible anvil block plus hammers, chisels, and files. Enables blacksmithing anywhere.”</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CAST ===== -->
+    <section class="tabpanel" id="tab-cast">
+      <div class="panel">
+        <div class="head"><h2>Cast</h2></div>
+        <ul class="legend">
+          <li><b>5–6</b> = success</li>
+          <li><b>2+ sixes</b> = Windfall</li>
+          <li><b>2+ ones</b> = Downside</li>
+        </ul>
+        <div class="controls">
+          <button class="castbtn red"   onclick="cast(4,'Red')">Cast Red · 4d6</button>
+          <button class="castbtn green" onclick="cast(2,'Green')">Cast Green · 2d6</button>
+          <button class="castbtn blue"  onclick="cast(2,'Blue')">Cast Blue · 2d6</button>
+          <span class="diff">Difficulty <select id="difficulty"></select></span>
+        </div>
+        <div class="dice" id="dice"><span style="color:var(--faint);font-size:13px">Choose a stat to Cast…</span></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="badge-mock">mockup · look &amp; feel</div>
+
+<script>
+  /* ---- tabs ---- */
+  function tab(id, btn){
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ---- font switcher ---- */
+  function setFont(name, btn){
+    document.documentElement.style.setProperty('--serif', `"${name}", Georgia, serif`);
+    document.querySelectorAll('.fontpick button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  /* ---- interactive resources ---- */
+  const R = { hp:{cur:3,max:4}, temp:{cur:0,max:4}, fate:{cur:6,max:10} };
+  function step(key, d){
+    const s=R[key]; s.cur=Math.max(0, Math.min(s.max, s.cur+d));
+    document.getElementById(key+'-v').textContent = s.cur+' / '+s.max;
+    document.getElementById(key+'-bar').style.width = (100*s.cur/s.max)+'%';
+  }
+  let armor=2;
+  function armorSet(n){ armor = (armor===n? n-1 : n);
+    document.querySelectorAll('#armor .apip').forEach((p,i)=>p.classList.toggle('on', i<armor)); }
+
+  /* ---- per-feature use tracking ---- */
+  function toggleUse(el){ el.classList.toggle('on'); }
+  function resetUses(btn){ btn.parentElement.querySelectorAll('.ubox').forEach(b=>b.classList.add('on')); }
+
+  /* ---- difficulty options (well past 4) ---- */
+  const sel=document.getElementById('difficulty');
+  for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.textContent=i; if(i===2)o.selected=true; sel.appendChild(o); }
+
+  /* ---- cast demo (v004 resolution) ---- */
+  function cast(pool, label){
+    const diff=parseInt(sel.value,10);
+    const rolls=Array.from({length:pool},()=>1+Math.floor(Math.random()*6));
+    const dice=document.getElementById('dice'); dice.innerHTML='';
+    let successes=0, sixes=0, ones=0;
+    rolls.forEach(r=>{ const d=document.createElement('div'); d.className='die'; d.textContent=r;
+      if(r===6){d.classList.add('six');successes++;sixes++;}
+      else if(r===5){d.classList.add('hit');successes++;}
+      else if(r===1){d.classList.add('one');ones++;}
+      dice.appendChild(d); });
+    let win=sixes>=2, down=ones>=2;
+    if(win&&down){ const c=Math.min(sixes,ones); win=(sixes-c)>0; down=(ones-c)>0; }
+    const v=document.getElementById('verdict');
+    if(win)      v.innerHTML=`<span class="win">Windfall.</span> Automatic success — roll the Windfall Table.<small>${label} · ${sixes} sixes</small>`;
+    else if(down)v.innerHTML=`<span class="down">Downside.</span> Automatic failure — roll the Downside Table.<small>${label} · ${ones} ones</small>`;
+    else if(successes>=diff) v.innerHTML=`<span class="ok">Success.</span> Your intent becomes reality.<small>${label} · ${successes}/${diff}</small>`;
+    else v.innerHTML=`<span class="no">Not enough.</span> The truth refuses you.<small>${label} · ${successes}/${diff}</small>`;
+  }
+</script>
+</body>
+</html>

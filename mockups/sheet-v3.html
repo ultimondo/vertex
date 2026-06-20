@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — Character Sheet (mockup v3 · mood-board palette)</title>
+<!--
+  VERTEX · mockup v3
+  Palette + mood drawn from the creator's Pinterest mood board (read directly from /moodboard):
+    painterly crimson / emerald / indigo over warm near-black; the "dissolving self" motif; film + canvas grain.
+  Larger, more vibrant, more artful than v2. Left rail with a tall portrait (art-upload placeholder = gradient + initials).
+  Working character switcher (Mara Quill · Blacksmith  /  Rosa Delgado · Luchador). All Designation text is verbatim.
+  Self-contained single file. Cormorant display + Inter body.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- base: warm near-black, bone, oxblood undertone (mood board) ---- */
+    --ink:    #0a0607;
+    --ink-2:  #130c0e;
+    --ink-3:  #1a1013;
+    --bone:   #ece2d4;
+    --dim:    #9d9286;
+    --faint:  #5f564f;
+    --line:   rgba(236,226,212,.10);
+    --line-2: rgba(236,226,212,.18);
+
+    /* ---- the three Core Stats as painterly, jewel-toned chroma ---- */
+    --red:   #d23b2c;   --red-deep:#7d1812;
+    --green: #2fa074;   --green-deep:#11553c;
+    --blue:  #5277b8;   --blue-deep:#243a66;
+    --fate:  #9b6fe0;
+    --gold:  #c9a24a;   /* HP */
+    --steel: #9aa0aa;   /* Armor */
+    --temp:  #c4bdb0;   /* Temp HP */
+
+    /* feature-type tones — deliberately NOT the stat colors */
+    --feat-major:   #ece2d4;
+    --feat-minor:   #8d8478;
+    --feat-passive: #564d47;
+
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --sans:  "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 11px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; color:var(--bone); font-family:var(--sans); font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(125,24,18,.18), transparent 60%),
+      radial-gradient(90% 70% at 100% 110%, rgba(36,58,102,.16), transparent 60%),
+      var(--ink);
+    background-attachment:fixed;
+  }
+  /* grain overlay */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.04; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  h1,h2,h3{ font-family:var(--serif); font-weight:600; margin:0; }
+  button{ font-family:var(--sans); cursor:pointer; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:18px;
+    padding:15px 30px; background:rgba(10,6,7,.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  }
+  .brand{ position:relative; font-family:"Cinzel",serif; font-size:25px; letter-spacing:8px; color:#fff; }
+  .brand::before,.brand::after{ content:"VERTEX"; position:absolute; left:0; top:0; z-index:-1; letter-spacing:8px; mix-blend-mode:screen; pointer-events:none; }
+  .brand::before{ color:#ff1f49; animation:caL 5.5s ease-in-out infinite; }
+  .brand::after{  color:#19d3ff; animation:caR 5.5s ease-in-out infinite; }
+  @keyframes caL{ 0%,100%{transform:translate(-1.8px,0)} 50%{transform:translate(-2.7px,.5px)} }
+  @keyframes caR{ 0%,100%{transform:translate(1.8px,0)}  50%{transform:translate(2.7px,-.5px)} }
+  .spacer{ flex:1; }
+  .btn{ font-size:13px; color:var(--bone); background:var(--ink-3); border:1px solid var(--line-2); padding:9px 15px; border-radius:8px; }
+  .btn:hover{ border-color:var(--bone); color:#fff; }
+  .switchwrap{ position:relative; }
+  .menu{ position:absolute; right:0; top:46px; min-width:240px; background:var(--ink-2); border:1px solid var(--line-2); border-radius:10px; padding:6px; display:none; box-shadow:0 24px 60px -20px #000; }
+  .menu.open{ display:block; }
+  .menu .mi{ display:flex; gap:11px; align-items:center; padding:9px 10px; border-radius:8px; cursor:pointer; }
+  .menu .mi:hover{ background:var(--ink-3); }
+  .menu .mi .av{ width:34px; height:42px; border-radius:6px; flex:none; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:16px; color:#fff; }
+  .menu .mi .nm{ font-family:var(--serif); font-size:18px; line-height:1.1; }
+  .menu .mi .ds{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); }
+  .menu .mi.cur{ outline:1px solid var(--line-2); }
+
+  /* ---------- shell: left rail + content ---------- */
+  .shell{ max-width:1180px; margin:0 auto; padding:30px; display:grid; grid-template-columns:330px 1fr; gap:30px; position:relative; z-index:2; }
+  @media (max-width:900px){ .shell{ grid-template-columns:1fr; } }
+
+  .rail{ position:sticky; top:92px; align-self:start; }
+  .portrait{
+    width:100%; aspect-ratio:4/5; border-radius:14px; border:1px solid var(--line-2); overflow:hidden; position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .portrait .initials{ font-family:var(--serif); font-size:88px; font-weight:600; color:rgba(255,255,255,.92); letter-spacing:3px; text-shadow:0 6px 40px rgba(0,0,0,.6); }
+  .portrait .uploadhint{ position:absolute; bottom:10px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.55); }
+  .portrait::after{ content:""; position:absolute; inset:0; box-shadow:inset 0 -70px 80px -40px rgba(0,0,0,.7), inset 0 0 90px -20px rgba(0,0,0,.5); }
+  .rail h1{ font-size:46px; line-height:1; margin:18px 0 4px; letter-spacing:.4px;
+            text-shadow:-.8px 0 rgba(255,31,73,.28), .9px 0 rgba(25,211,255,.24); }
+  .rail .epithet{ font-family:var(--serif); font-style:italic; font-size:15px; color:var(--faint); }
+  .rail .desig{ margin-top:12px; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); }
+  .rail .desig b{ color:var(--bone); }
+  .rail .desigline{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--dim); margin-top:3px; }
+
+  /* ---------- tabs ---------- */
+  .tabs{ display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:24px; overflow-x:auto; }
+  .tabs button{ background:transparent; border:0; border-bottom:2px solid transparent; color:var(--dim);
+    font-size:13.5px; letter-spacing:.9px; text-transform:uppercase; padding:14px 17px; white-space:nowrap; }
+  .tabs button:hover{ color:var(--bone); }
+  .tabs button.active{ color:#fff; border-bottom-color:#fff; }
+
+  .tabpanel{ display:none; } .tabpanel.active{ display:block; animation:fade .28s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+  .panel{ background:linear-gradient(180deg, rgba(255,255,255,.018), transparent 40%), var(--ink-2);
+          border:1px solid var(--line); border-radius:var(--radius); padding:24px; margin-bottom:22px; }
+  .panel > .head{ display:flex; align-items:baseline; justify-content:space-between; margin:-3px 0 18px; }
+  .panel h2{ font-size:27px; letter-spacing:.3px; }
+  .panel .sub{ font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:var(--faint); }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:760px){ .cols{ grid-template-columns:1fr; } }
+
+  /* ---------- core stats ---------- */
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .stat{ border:1px solid var(--line-2); border-top-width:3px; border-radius:11px; padding:18px 12px; text-align:center; position:relative; overflow:hidden; }
+  .stat .name{ font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:var(--dim); }
+  .stat .val{ font-family:var(--serif); font-size:58px; font-weight:600; line-height:.95; margin:6px 0 6px; }
+  .stat .dom{ font-size:11px; color:var(--faint); line-height:1.5; min-height:44px; }
+  .stat .derived{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--dim); }
+  .stat .derived b{ color:var(--bone); }
+  .stat.red{   border-top-color:var(--red);   background:radial-gradient(120% 80% at 50% -20%, rgba(210,59,44,.14), transparent 60%), var(--ink-3); }
+  .stat.green{ border-top-color:var(--green); background:radial-gradient(120% 80% at 50% -20%, rgba(47,160,116,.13), transparent 60%), var(--ink-3); }
+  .stat.blue{  border-top-color:var(--blue);  background:radial-gradient(120% 80% at 50% -20%, rgba(82,119,184,.14), transparent 60%), var(--ink-3); }
+  .stat.red .val{   color:var(--red);   text-shadow:0 0 30px rgba(210,59,44,.5); }
+  .stat.green .val{ color:var(--green); text-shadow:0 0 30px rgba(47,160,116,.45); }
+  .stat.blue .val{  color:var(--blue);  text-shadow:0 0 30px rgba(82,119,184,.5); }
+
+  /* ---------- interactive resources ---------- */
+  .res{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .res:last-child{ border-bottom:0; }
+  .res .k{ width:118px; font-size:11.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); flex:none; }
+  .stepper{ display:flex; align-items:center; gap:10px; flex:none; }
+  .stepper button{ width:28px; height:28px; border-radius:8px; border:1px solid var(--line-2); background:var(--ink-3); color:var(--bone); font-size:16px; line-height:1; }
+  .stepper button:hover{ border-color:#fff; color:#fff; }
+  .stepper .v{ min-width:58px; text-align:center; font-variant-numeric:tabular-nums; font-size:16px; }
+  .bar{ flex:1; height:10px; border-radius:6px; background:rgba(255,255,255,.05); border:1px solid var(--line); overflow:hidden; }
+  .bar > i{ display:block; height:100%; transition:width .18s ease; }
+  .bar.hp > i{   background:linear-gradient(90deg,#9c7a22,var(--gold)); box-shadow:0 0 16px rgba(201,162,74,.5); }
+  .bar.temp > i{ background:var(--temp); }
+  .bar.fate > i{ background:linear-gradient(90deg,#6b3fc4,var(--fate)); box-shadow:0 0 16px rgba(155,111,224,.55); }
+  .armorpips{ display:flex; gap:7px; flex:1; }
+  .apip{ width:30px; height:18px; border-radius:5px; border:1px solid var(--line-2); cursor:pointer; }
+  .apip.on{ background:linear-gradient(180deg,#aeb4bd,#7c828c); border-color:var(--steel); }
+
+  /* ---------- archetypes ---------- */
+  .arc{ border:1px solid var(--line); border-radius:11px; padding:17px 18px; margin-bottom:14px;
+        background:linear-gradient(180deg, rgba(255,255,255,.015), transparent 50%), var(--ink-3); }
+  .arc .row1{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .arc .aname{ font-family:var(--serif); font-size:25px; font-weight:600; }
+  .arc .tagline{ font-family:var(--serif); font-style:italic; color:var(--dim); font-size:17px; margin:2px 0 11px; }
+  .tag{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); white-space:nowrap; }
+  .tag.red{ color:var(--red); border-color:rgba(210,59,44,.45); }
+  .tag.green{ color:var(--green); border-color:rgba(47,160,116,.45); }
+  .tag.blue{ color:var(--blue); border-color:rgba(82,119,184,.45); }
+  .drift{ display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--faint); letter-spacing:.4px; }
+  .notches{ display:flex; gap:5px; }
+  .notch{ width:12px; height:12px; border-radius:50%; border:1px solid var(--line-2); }
+  .notch.on{ background:var(--dim); border-color:var(--dim); box-shadow:0 0 8px rgba(157,146,134,.4); }
+  .status{ font-size:11px; letter-spacing:1.4px; text-transform:uppercase; }
+  .status.active{ color:var(--green); }
+  .arc.faltering{ border-left:3px solid var(--gold); }
+  .arc.faltering .status{ color:var(--gold); }
+  .arc.silent{ opacity:.5; border-left:3px solid #6e6e72; }
+  .arc.silent .status{ color:var(--dim); }
+  .arc.retired{ opacity:.42; } .arc.retired .aname{ text-decoration:line-through; } .arc.retired .status{ color:var(--dim); }
+
+  /* ---------- bonds ---------- */
+  .bond{ border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:12px; background:var(--ink-3); }
+  .bond .to{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin-bottom:4px; }
+  .bond .line{ font-family:var(--serif); font-size:20px; }
+  .knot .old{ text-decoration:line-through; color:var(--faint); font-style:italic; display:block; font-size:16px; }
+  .knot .new{ display:block; margin-top:3px; }
+  .knot .seam{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); margin-top:7px; }
+  .tether-open .line{ color:var(--red); font-style:italic; }
+  .tether-open .to::after{ content:" · open / severed"; color:var(--red); }
+  .hold{ border-left:3px solid var(--gold); }
+  .hold.yielded{ border-left-color:var(--red); opacity:.72; }
+  .hold .meta{ display:flex; gap:18px; margin-top:7px; font-size:12px; color:var(--dim); }
+  .hold .meta b{ color:var(--bone); }
+  .hold.yielded .line{ text-decoration:line-through; color:var(--faint); }
+  .owed{ color:var(--red); }
+
+  /* ---------- designation & features ---------- */
+  .desig-hero{ padding:4px 2px 20px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+  .desig-hero .big{ font-family:var(--serif); font-weight:700; font-size:54px; line-height:1; letter-spacing:1px;
+                    text-shadow:-.8px 0 rgba(255,31,73,.2), .9px 0 rgba(25,211,255,.2); }
+  .desig-hero .tag2{ font-family:var(--serif); font-style:italic; font-size:21px; color:var(--dim); margin-top:8px; }
+  .desig-hero .desc3{ font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); margin-top:8px; }
+
+  .feature{ border:1px solid var(--line); border-radius:11px; margin-bottom:16px; background:var(--ink-3); display:flex; overflow:hidden; }
+  .feature .stripe{ width:6px; flex:none; }
+  .feature.major .stripe{ background:var(--feat-major); }
+  .feature.minor .stripe{ background:var(--feat-minor); }
+  .feature.passive .stripe{ background:var(--feat-passive); }
+  .feature .body{ padding:16px 18px; flex:1; }
+  .feature .frow{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .feature .fn{ font-family:var(--serif); font-size:25px; font-weight:600; }
+  .feature .ft{ font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--faint); margin-left:11px; }
+  .feature .fd{ font-size:14px; color:var(--dim); margin-top:10px; line-height:1.6; }
+  .feature .fd b{ color:var(--bone); font-weight:600; }
+  .uses{ display:flex; align-items:center; gap:9px; }
+  .uses .ulbl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .ubox{ width:20px; height:20px; border-radius:5px; border:1px solid var(--line-2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ubox.on{ background:var(--bone); border-color:var(--bone); }
+  .ubox.on::after{ content:""; width:8px; height:8px; border-radius:2px; background:var(--ink); }
+  .ureset{ font-size:11px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:7px; padding:5px 10px; }
+  .ureset:hover{ color:#fff; border-color:#fff; }
+  .always{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); }
+
+  /* ---------- gear ---------- */
+  .item{ border:1px solid var(--line); border-radius:11px; padding:16px 18px; margin-bottom:14px; background:var(--ink-3); }
+  .item .iname{ font-family:var(--serif); font-size:22px; font-weight:600; }
+  .item .imeta{ font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--faint); margin:3px 0 8px; }
+  .item .iflavor{ font-style:italic; color:var(--dim); font-size:15px; font-family:var(--serif); }
+
+  /* ---------- cast ---------- */
+  .legend{ list-style:none; margin:0 0 20px; padding:0; }
+  .legend li{ padding:7px 0; font-size:16px; color:var(--bone); border-bottom:1px solid var(--line); font-family:var(--serif); }
+  .legend li:last-child{ border-bottom:0; }
+  .legend b{ color:#fff; }
+  .controls{ display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  .castbtn{ font-size:13.5px; padding:11px 16px; border-radius:9px; border:1px solid var(--line-2); background:var(--ink-3); color:var(--bone); }
+  .castbtn.red:hover{ border-color:var(--red); }
+  .castbtn.green:hover{ border-color:var(--green); }
+  .castbtn.blue:hover{ border-color:var(--blue); }
+  .diff{ margin-left:auto; font-size:13px; color:var(--dim); }
+  .diff select{ background:var(--ink-3); color:var(--bone); border:1px solid var(--line-2); border-radius:7px; padding:6px 9px; }
+  .dice{ display:flex; gap:10px; flex-wrap:wrap; min-height:52px; align-items:center; }
+  .die{ width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:26px; font-weight:600; background:var(--ink-3); border:1px solid var(--line-2); }
+  .die.hit{ border-color:var(--green); color:var(--green); box-shadow:0 0 16px -4px rgba(47,160,116,.6); }
+  .die.six{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 18px -3px rgba(201,162,74,.7); }
+  .die.one{ border-color:var(--red); color:var(--red); box-shadow:0 0 16px -3px rgba(210,59,44,.6); }
+  .verdict{ margin-top:16px; font-family:var(--serif); font-size:24px; min-height:32px; }
+  .verdict .win{ color:var(--gold); } .verdict .down{ color:var(--red); } .verdict .ok{ color:var(--green); } .verdict .no{ color:var(--dim); }
+  .verdict small{ display:block; font-family:var(--sans); font-size:12px; color:var(--faint); margin-top:4px; }
+
+  .badge-mock{ position:fixed; bottom:14px; right:16px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); background:rgba(10,6,7,.85); border:1px solid var(--line); padding:6px 12px; border-radius:999px; z-index:50; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">VERTEX</div>
+    <div class="spacer"></div>
+    <div class="switchwrap">
+      <button class="btn" onclick="toggleMenu(event)">Switch character ▾</button>
+      <div class="menu" id="menu"></div>
+    </div>
+    <button class="btn">+ New</button>
+  </div>
+
+  <div class="shell">
+    <!-- LEFT RAIL -->
+    <aside class="rail">
+      <div class="portrait" id="portrait">
+        <span class="initials" id="initials">MQ</span>
+        <span class="uploadhint">click to upload art</span>
+      </div>
+      <h1 id="charName">Mara Quill</h1>
+      <div class="epithet">the version of you that you have never met</div>
+      <div class="desig">Designation</div>
+      <div class="desigline" id="charDesig">Blacksmith</div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main>
+      <nav class="tabs" id="tabs">
+        <button class="active" data-tab="core" onclick="tab('core',this)">Core</button>
+        <button data-tab="archetypes" onclick="tab('archetypes',this)">Archetypes</button>
+        <button data-tab="bonds" onclick="tab('bonds',this)">Bonds</button>
+        <button data-tab="designation" onclick="tab('designation',this)">Designation</button>
+        <button data-tab="gear" onclick="tab('gear',this)">Gear</button>
+        <button data-tab="cast" onclick="tab('cast',this)">Cast</button>
+      </nav>
+
+      <section class="tabpanel active" id="tab-core"></section>
+      <section class="tabpanel" id="tab-archetypes"></section>
+      <section class="tabpanel" id="tab-bonds"></section>
+      <section class="tabpanel" id="tab-designation"></section>
+      <section class="tabpanel" id="tab-gear"></section>
+      <section class="tabpanel" id="tab-cast"></section>
+    </main>
+  </div>
+
+  <div class="badge-mock">mockup · look &amp; feel</div>
+
+<script>
+/* =========================================================================
+   CHARACTER DATA  (two demo characters; all Designation text is verbatim)
+   ========================================================================= */
+const CHARACTERS = {
+  mara: {
+    name:"Mara Quill", initials:"MQ",
+    designation:"Blacksmith", desigTagline:"“Iron bends, but you do not.”", desigDesc:"Burly · Stalwart · Hands-on",
+    portrait:"radial-gradient(120% 90% at 30% 12%, rgba(210,59,44,.7), transparent 55%), radial-gradient(110% 90% at 80% 95%, rgba(82,119,184,.35), transparent 55%), linear-gradient(160deg,#23100f,#0a0607)",
+    stats:{ red:4, green:2, blue:2 },
+    res:{ hp:{cur:3,max:4}, temp:{cur:0,max:4}, fate:{cur:6,max:10}, armor:2 },
+    archetypes:[
+      { name:"Iron Anchor", tag:"red", pts:"+3", status:"active", drift:2, dmax:5, tagline:"“The floor is exactly where you put it, and it isn’t going anywhere.”" },
+      { name:"Riposte", tag:"green", pts:"+1", status:"active", drift:0, dmax:5, tagline:"“Wait for the opening. Strike the flaw.”" },
+      { name:"Splintered Faith", tag:"blue", pts:"+1", status:"faltering", drift:5, dmax:5, tagline:"“Break the glass. Bleed a little.”" },
+      { name:"Total Devotion", tag:"blue", pts:"susp.", status:"silent", drift:0, dmax:5, tagline:"“Cling to the unbroken light.”" }
+    ],
+    tethers:[
+      { to:"Cassian", cls:"", line:"“The one who knows what I did and stayed anyway.”" },
+      { to:"Della · re-tied", cls:"knot", old:"“The steadiest hand at the table.”", line:"“The hand that shakes now — and reaches anyway.”" },
+      { to:"Wren", cls:"tether-open", line:"“The thing I am most afraid of losing.”" }
+    ],
+    holds:[
+      { line:"“I will not draw a weapon against someone who cannot fight back.”", cls:"", meta:"<span>Status <b>Active</b></span><span>Honored under pressure <b>×2</b></span>" },
+      { line:"“I will protect the people of this place for as long as I have the means.”", cls:"yielded", meta:"<span>Status <b>Yielded</b></span><span class='owed'>⚑ Vignette owed — slot locked</span>" }
+    ],
+    features:[
+      { name:"Make Do", type:"major", uses:2, desc:"<b>Roll Red:</b> You restore a broken or damaged item without using resources. <b>Make Better:</b> You succeed regardless of your roll, but if you Yee-Haw! you can forgo a Windfall Roll to permanently enhance the item in a manner of your choosing, subject to the Host’s discretion." },
+      { name:"Quickforge", type:"minor", uses:2, desc:"Choose two weapons wielded by you or an ally. Those weapons gain +1 to their next to-hit rolls until the end of the encounter/scene." },
+      { name:"Anvil’s Resolve", type:"passive", uses:0, desc:"Your reputation as a blacksmith earns respect from craftsmen, merchants, and working folk alike. Those who recognize your trade are more likely to trust your word and look to you for advice. Armor granted by wearable items is twice as effective when worn by you. You always have +1 Armor even when you are not wearing any items that would grant it. This Armor does not need to be repaired and is restored automatically at the end of a combat encounter or scene in which it was lost." }
+    ],
+    items:[
+      { name:"Blacksmith’s Hammer &amp; Tongs", meta:"Weapon · Red-Based · Range 1", flavor:"“Forged in fire and stained with soot, these tools remember every weapon and wound they ever shaped.”" },
+      { name:"Leather Apron &amp; Gauntlets", meta:"Wearable", flavor:"“Sturdy protection against heat, sparks, and flying slag.”" },
+      { name:"Portable Anvil &amp; Toolkit", meta:"Accessory", flavor:"“A collapsible anvil block plus hammers, chisels, and files. Enables blacksmithing anywhere.”" }
+    ]
+  },
+
+  rosa: {
+    name:"Rosa Delgado", initials:"RD",
+    designation:"Luchador", desigTagline:"“Fights with fists and flair.”", desigDesc:"Strong · Theatrical · Robust",
+    portrait:"radial-gradient(120% 90% at 28% 12%, rgba(201,162,74,.6), transparent 52%), radial-gradient(120% 90% at 85% 95%, rgba(210,59,44,.55), transparent 55%), linear-gradient(160deg,#241410,#0a0607)",
+    stats:{ red:5, green:1, blue:2 },
+    res:{ hp:{cur:5,max:5}, temp:{cur:0,max:5}, fate:{cur:8,max:10}, armor:1 },
+    archetypes:[
+      { name:"Grossly Incandescent", tag:"red", pts:"+3", status:"active", drift:2, dmax:5, tagline:"“Behold!”" },
+      { name:"Conviction", tag:"red", pts:"+1", status:"active", drift:0, dmax:5, tagline:"“Become the mountain.”" },
+      { name:"Vital Celebration", tag:"blue", pts:"+1", status:"faltering", drift:5, dmax:5, tagline:"“Every breath is a feast, and the world is pouring the wine.”" },
+      { name:"Sworn Nemesis", tag:"red", pts:"susp.", status:"retired", drift:0, dmax:5, tagline:"“Something in the dark has a name.”" }
+    ],
+    tethers:[
+      { to:"the Crowd", cls:"", line:"“The only family that never once asked me to take off the mask.”" },
+      { to:"Mateo", cls:"", line:"“My brother in the ring, and the one I could never beat.”" },
+      { to:"Vargas", cls:"tether-open", line:"“The hand that fed me, until I saw what it fed on.”" }
+    ],
+    holds:[
+      { line:"“I will never remove my mask where another soul can see.”", cls:"", meta:"<span>Status <b>Active</b></span><span>Honored under pressure <b>×3</b></span>" },
+      { line:"“I will not strike an opponent who has yielded the match.”", cls:"", meta:"<span>Status <b>Active</b></span><span>Honored under pressure <b>×1</b></span>" }
+    ],
+    features:[
+      { name:"El Gran Slam", type:"major", uses:2, desc:"<b>Roll Red:</b> You leap into the air and body slam down into the ground at a point up to 8 units away. All enemies within a 3x3 area of the impact take 1 damage and are knocked prone. Prone enemies must spend half their Maximum Movement Speed to stand on their next turn, and until then, the difficulty of to-hit rolls against them is reduced by 1. <b>Golpe del Sol:</b> If you Yee-Haw! you can forgo a Windfall Roll to increase the area of effect to a 5x5 space." },
+      { name:"Tendedero del Destino", type:"minor", uses:2, desc:"<b>Roll Red:</b> Move up to half your Movement Speed toward an enemy. On impact, deal 1 damage and knock the enemy 6 units directly away from you. If the enemy collides with a large object or a wall, they take 1 additional damage. If the enemy collides with another enemy, both take 1 additional damage." },
+      { name:"El Campeón del Regreso", type:"passive", uses:0, desc:"As a luchador, you fight with righteous zeal, turning every battle into a sacred performance for glory, justice, and spectacle. You may never remove your sacred Luchador Mask. If you do, something horrible will happen. The crowd—whether real or imagined—is always watching. When you are Downed, the Host becomes the referee and begins a ten-count. You must then roll 1d6 at a time as quickly as you can. If you roll two 6s before the count ends, you rise back to 1 HP. If not, you are Downed. Each time you are Downed again in the same combat encounter, the next countdown starts two numbers higher — the second time at 3, the third at 5, and so on." }
+    ],
+    items:[
+      { name:"Wrist Wraps", meta:"Weapon · Red-Based · Range 1", flavor:"“Sweat-soaked and fraying, these old bindings hum with the echoes of fights long finished but never forgotten.”" },
+      { name:"Signature Luchador Mask", meta:"Wearable", flavor:"“Distinctive, colorful, and sacred. Never leaves your face…or else.”" },
+      { name:"Flashy Costume or Serape", meta:"Accessory", flavor:"“Bold, brilliant, and blinding—meant to dazzle the crowd.”" }
+    ]
+  }
+};
+
+let activeId = "mara";
+let activeTab = "core";
+const C = () => CHARACTERS[activeId];
+
+/* ---------- derived values ---------- */
+function targetDifficulty(green){ return green<=3?1 : green<=6?2 : green<=9?3 : 4; }
+
+/* ---------- renderers ---------- */
+function renderCore(c){
+  const s=c.stats, r=c.res;
+  return `
+  <div class="cols">
+    <div class="panel">
+      <div class="head"><h2>Core Stats</h2></div>
+      <div class="stats">
+        <div class="stat red"><div class="name">Red</div><div class="val">${s.red}</div>
+          <div class="dom">Force · Presence · Resilience · Fortitude</div>
+          <div class="derived">Max HP <b>${s.red}</b></div></div>
+        <div class="stat green"><div class="name">Green</div><div class="val">${s.green}</div>
+          <div class="dom">Precision · Reflex · Balance · Stealth</div>
+          <div class="derived">Move <b>${s.green*2}u</b> · Difficulty <b>${targetDifficulty(s.green)}</b></div></div>
+        <div class="stat blue"><div class="name">Blue</div><div class="val">${s.blue}</div>
+          <div class="dom">Intellect · Discourse · Perception · Abstraction</div>
+          <div class="derived">Feature Uses <b>${s.blue}</b></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="head"><h2>Resources</h2></div>
+      <div class="res"><span class="k">Hit Points</span>
+        <div class="stepper"><button onclick="step('hp',-1)">−</button><span class="v" id="hp-v">${r.hp.cur} / ${r.hp.max}</span><button onclick="step('hp',1)">+</button></div>
+        <div class="bar hp"><i id="hp-bar" style="width:${100*r.hp.cur/r.hp.max}%"></i></div></div>
+      <div class="res"><span class="k">Armor</span>
+        <div class="armorpips" id="armor">${[1,2,3,4,5].map(n=>`<span class="apip ${n<=r.armor?'on':''}" onclick="armorSet(${n})"></span>`).join('')}</div></div>
+      <div class="res"><span class="k">Temp HP</span>
+        <div class="stepper"><button onclick="step('temp',-1)">−</button><span class="v" id="temp-v">${r.temp.cur} / ${r.temp.max}</span><button onclick="step('temp',1)">+</button></div>
+        <div class="bar temp"><i id="temp-bar" style="width:${100*r.temp.cur/r.temp.max}%"></i></div></div>
+      <div class="res"><span class="k">Fate</span>
+        <div class="stepper"><button onclick="step('fate',-1)">−</button><span class="v" id="fate-v">${r.fate.cur} / ${r.fate.max}</span><button onclick="step('fate',1)">+</button></div>
+        <div class="bar fate"><i id="fate-bar" style="width:${100*r.fate.cur/r.fate.max}%"></i></div></div>
+    </div>
+  </div>`;
+}
+
+function renderArchetypes(c){
+  const rows=c.archetypes.map(a=>{
+    const notches=Array.from({length:a.dmax},(_,i)=>`<i class="notch ${i<a.drift?'on':''}"></i>`).join('');
+    const driftText = a.status==='silent' ? "Numbed — grants neither Advantage nor Disadvantage. Wake it only through a Vignette."
+      : a.status==='retired' ? "Retired — struck through, kept as record. Its Core Stat points are suspended."
+      : `Drift <span class="notches">${notches}</span> ${a.drift} / ${a.dmax}${a.status==='faltering'?' — answer it at the next Crossing':''}`;
+    const statusLabel = a.status.charAt(0).toUpperCase()+a.status.slice(1);
+    return `<div class="arc ${a.status}">
+      <div class="row1"><div><span class="aname">${a.name}</span> &nbsp;<span class="status ${a.status==='active'?'active':''}">${statusLabel}</span></div>
+        <span class="tag ${a.tag}">${a.tag.charAt(0).toUpperCase()+a.tag.slice(1)} · ${a.pts}</span></div>
+      <div class="tagline">${a.tagline}</div>
+      <div class="drift">${driftText}</div></div>`;
+  }).join('');
+  return `<div class="panel"><div class="head"><h2>Archetypes</h2><span class="sub">forces in tension · drift &amp; the crossing</span></div>${rows}</div>`;
+}
+
+function renderBonds(c){
+  const tethers=c.tethers.map(t=>{
+    const body = t.cls==='knot'
+      ? `<div class="line"><span class="old">${t.old}</span><span class="new">${t.line}</span></div><div class="seam">⌇ knot · the moment it changed</div>`
+      : `<div class="line">${t.line}</div>`;
+    return `<div class="bond ${t.cls}"><div class="to">to ${t.to}</div>${body}</div>`;
+  }).join('');
+  const holds=c.holds.map(h=>`<div class="bond hold ${h.cls}"><div class="line">${h.line}</div><div class="meta">${h.meta}</div></div>`).join('');
+  return `<div class="cols">
+    <div class="panel"><div class="head"><h2>Tethers</h2><span class="sub">what they are to you, now</span></div>${tethers}</div>
+    <div class="panel"><div class="head"><h2>Conviction Holds</h2><span class="sub">the line you will not cross</span></div>${holds}</div>
+  </div>`;
+}
+
+function renderDesignation(c){
+  const feats=c.features.map((f,i)=>{
+    const right = f.type==='passive'
+      ? `<span class="always">always active · costs no uses</span>`
+      : `<div class="uses"><span class="ulbl">Uses</span>${Array.from({length:f.uses},(_,b)=>`<span class="ubox on" data-f="${i}" data-b="${b}" onclick="toggleUse(this)"></span>`).join('')}<button class="ureset" onclick="resetFeature(${i})">Reset</button></div>`;
+    return `<div class="feature ${f.type}"><div class="stripe"></div><div class="body">
+      <div class="frow"><div><span class="fn">${f.name}</span><span class="ft">${f.type==='major'?'Major Action':f.type==='minor'?'Minor Action':'Passive'}</span></div>${right}</div>
+      <div class="fd">${f.desc}</div></div></div>`;
+  }).join('');
+  return `<div class="panel">
+    <div class="desig-hero"><div class="big">${c.designation.toUpperCase()}</div><div class="tag2">${c.desigTagline}</div><div class="desc3">${c.desigDesc}</div></div>
+    ${feats}</div>`;
+}
+
+function renderGear(c){
+  const items=c.items.map(it=>`<div class="item"><div class="iname">${it.name}</div><div class="imeta">${it.meta}</div><div class="iflavor">${it.flavor}</div></div>`).join('');
+  return `<div class="panel"><div class="head"><h2>Equipment &amp; Weapons</h2><span class="sub">${c.designation} starting items</span></div>${items}</div>`;
+}
+
+function renderCast(c){
+  const s=c.stats;
+  return `<div class="panel"><div class="head"><h2>Cast</h2></div>
+    <ul class="legend"><li><b>5–6</b> = success</li><li><b>2+ sixes</b> = Windfall</li><li><b>2+ ones</b> = Downside</li></ul>
+    <div class="controls">
+      <button class="castbtn red" onclick="cast(${s.red},'Red')">Cast Red · ${s.red}d6</button>
+      <button class="castbtn green" onclick="cast(${s.green},'Green')">Cast Green · ${s.green}d6</button>
+      <button class="castbtn blue" onclick="cast(${s.blue},'Blue')">Cast Blue · ${s.blue}d6</button>
+      <span class="diff">Difficulty <select id="difficulty"></select></span>
+    </div>
+    <div class="dice" id="dice"><span style="color:var(--faint);font-size:13px">Choose a stat to Cast…</span></div>
+    <div class="verdict" id="verdict"></div></div>`;
+}
+
+function renderMenu(){
+  document.getElementById('menu').innerHTML = Object.entries(CHARACTERS).map(([id,c])=>`
+    <div class="mi ${id===activeId?'cur':''}" onclick="selectChar('${id}')">
+      <span class="av" style="background:${c.portrait}">${c.initials}</span>
+      <span><span class="nm">${c.name}</span><br><span class="ds">${c.designation}</span></span>
+    </div>`).join('');
+}
+
+function render(){
+  const c=C();
+  document.getElementById('portrait').style.background=c.portrait;
+  document.getElementById('initials').textContent=c.initials;
+  document.getElementById('charName').textContent=c.name;
+  document.getElementById('charDesig').textContent=c.designation;
+  document.getElementById('tab-core').innerHTML=renderCore(c);
+  document.getElementById('tab-archetypes').innerHTML=renderArchetypes(c);
+  document.getElementById('tab-bonds').innerHTML=renderBonds(c);
+  document.getElementById('tab-designation').innerHTML=renderDesignation(c);
+  document.getElementById('tab-gear').innerHTML=renderGear(c);
+  document.getElementById('tab-cast').innerHTML=renderCast(c);
+  const sel=document.getElementById('difficulty');
+  for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.textContent=i; if(i===2)o.selected=true; sel.appendChild(o); }
+  renderMenu();
+}
+
+/* ---------- interactions ---------- */
+function tab(id,btn){
+  activeTab=id;
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function selectChar(id){
+  activeId=id; render();
+  document.getElementById('menu').classList.remove('open');
+  // restore active tab
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+activeTab));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===activeTab));
+}
+function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu').classList.toggle('open'); }
+document.addEventListener('click', ()=>document.getElementById('menu').classList.remove('open'));
+
+function step(key,d){
+  const r=C().res[key]; r.cur=Math.max(0,Math.min(r.max,r.cur+d));
+  document.getElementById(key+'-v').textContent=r.cur+' / '+r.max;
+  document.getElementById(key+'-bar').style.width=(100*r.cur/r.max)+'%';
+}
+function armorSet(n){ const r=C().res; r.armor=(r.armor===n?n-1:n);
+  document.querySelectorAll('#armor .apip').forEach((p,i)=>p.classList.toggle('on', i<r.armor)); }
+function toggleUse(el){ el.classList.toggle('on'); }
+function resetFeature(i){ document.querySelectorAll(`.ubox[data-f="${i}"]`).forEach(b=>b.classList.add('on')); }
+
+function cast(pool,label){
+  const sel=document.getElementById('difficulty'); const diff=parseInt(sel.value,10);
+  const rolls=Array.from({length:pool},()=>1+Math.floor(Math.random()*6));
+  const dice=document.getElementById('dice'); dice.innerHTML='';
+  let successes=0,sixes=0,ones=0;
+  rolls.forEach(rl=>{ const d=document.createElement('div'); d.className='die'; d.textContent=rl;
+    if(rl===6){d.classList.add('six');successes++;sixes++;} else if(rl===5){d.classList.add('hit');successes++;} else if(rl===1){d.classList.add('one');ones++;}
+    dice.appendChild(d); });
+  let win=sixes>=2, down=ones>=2; if(win&&down){ const x=Math.min(sixes,ones); win=(sixes-x)>0; down=(ones-x)>0; }
+  const v=document.getElementById('verdict');
+  if(win) v.innerHTML=`<span class="win">Windfall.</span> Automatic success — roll the Windfall Table.<small>${label} · ${sixes} sixes</small>`;
+  else if(down) v.innerHTML=`<span class="down">Downside.</span> Automatic failure — roll the Downside Table.<small>${label} · ${ones} ones</small>`;
+  else if(successes>=diff) v.innerHTML=`<span class="ok">Success.</span> Your intent becomes reality.<small>${label} · ${successes}/${diff}</small>`;
+  else v.innerHTML=`<span class="no">Not enough.</span> The truth refuses you.<small>${label} · ${successes}/${diff}</small>`;
+}
+
+render();
+</script>
+</body>
+</html>

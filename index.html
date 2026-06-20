@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+
+  <!-- ============ title bar + tabs ============ -->
+  <div class="topbar">
+    <div class="brand">VERTEX</div>
+    <nav class="tabs" id="tabs">
+      <button class="active" data-tab="core" onclick="Vertex.app.setTab('core',this)">Core</button>
+      <button data-tab="archetypes" onclick="Vertex.app.setTab('archetypes',this)">Archetypes</button>
+      <button data-tab="bonds" onclick="Vertex.app.setTab('bonds',this)">Bonds</button>
+      <button data-tab="designation" onclick="Vertex.app.setTab('designation',this)">Designation</button>
+      <button data-tab="gear" onclick="Vertex.app.setTab('gear',this)">Gear</button>
+      <button data-tab="cast" onclick="Vertex.app.setTab('cast',this)">Cast</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="switchwrap">
+      <button class="btn" onclick="Vertex.app.toggleMenu(event)">Switch character ▾</button>
+      <div class="menu" id="menu"></div>
+    </div>
+    <button class="btn" onclick="Vertex.create.open()">+ New</button>
+  </div>
+
+  <!-- ============ page ============ -->
+  <div class="page">
+    <div class="idband">
+      <h1 id="idName" contenteditable="true" spellcheck="false"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+          onblur="Vertex.app.editName(this.textContent)">Mara Quill</h1>
+      <span class="epithet" id="idEpithet">the version of you that you have never met</span>
+      <span class="dot">·</span>
+      <span class="desig">Designation <b id="idDesig">Blacksmith</b></span>
+    </div>
+
+    <div class="shell">
+      <aside class="rail">
+        <div class="portrait" id="portrait" onclick="Vertex.app.choosePortrait()"></div>
+        <input type="file" id="portraitInput" accept="image/*" hidden onchange="Vertex.app.onPortraitFile(this.files[0])">
+        <input type="file" id="importInput" accept="application/json,.json" hidden onchange="Vertex.app.onImportFile(this.files[0])">
+      </aside>
+      <main>
+        <section class="tabpanel active" id="tab-core"></section>
+        <section class="tabpanel" id="tab-archetypes"></section>
+        <section class="tabpanel" id="tab-bonds"></section>
+        <section class="tabpanel" id="tab-designation"></section>
+        <section class="tabpanel" id="tab-gear"></section>
+        <section class="tabpanel" id="tab-cast"></section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div id="overlay"></div>
+
+  <!-- ============ scripts (classic, ordered; no build step) ============ -->
+  <script src="data/seed.js"></script>
+  <script src="src/dice.js"></script>
+  <script src="src/model.js"></script>
+  <script src="src/storage.js"></script>
+  <script src="src/render.js"></script>
+  <script src="src/create.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
