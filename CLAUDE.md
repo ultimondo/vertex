@@ -408,6 +408,12 @@ From the creator's design instructions (philosophy/voice still fully current):
 - **Voice for player-facing text:** second person, bolded declarative lead-ins, aphoristic one-sentence
   punches, prose over bullets in explanatory sections, never moralizing.
 - Keep Vertex **confidential/unpublished** and walled off from the creator's legal/client work.
+- **Use Git + GitHub continuously — never lose work.** This repo is version-controlled at the **private**
+  GitHub remote **`ultimondo/vertex`** (`origin/main`). As you work, **commit each meaningful change with a
+  clean, descriptive commit message and push to GitHub regularly** (don't batch a whole session into one
+  commit) so the project's status is always saved and we can revert any change. The creator has given
+  **standing authorization to push**; keep the repo **private**. End every commit message with
+  `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. See §15 for repo details.
 
 ---
 
@@ -459,6 +465,13 @@ add a backend behind `Vertex.storage` (see below) without touching the rules/UI.
 
 **To run:** double-click `D:\TTRPG\Vertex\App\index.html` (or `Start-Process` it). No local server required.
 Google Fonts load over the network (graceful system fallback offline).
+
+**Version control (commit + push as you work — see §12):** private GitHub repo **`ultimondo/vertex`**,
+default branch **`main`** tracking `origin/main`. Commit identity is **repo-local** (name `ultimondo`,
+no-reply email — global git config untouched). `moodboard/` is **gitignored** (third-party art, local-only);
+the canonical guides under `D:\TTRPG\Vertex\System\` live outside the repo and are not versioned here.
+Workflow: `git add` → commit with a clean message (+ the `Co-Authored-By` trailer) → `git push` after each
+meaningful change, so no status or work is ever lost.
 
 **File map (project root):**
 | File | Role |
