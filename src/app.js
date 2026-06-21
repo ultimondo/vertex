@@ -187,15 +187,18 @@ Vertex.app = (function () {
   }
   function exportCurrent() { S().exportCharacter(active()); closeMenu(); }
   function importPrompt() { document.getElementById("importInput").click(); }
+  // Ingest a parsed character object (from a local file OR Google Drive).
+  function onImportData(obj) {
+    if (!obj || typeof obj !== "object") { toast("That file is not a Vertex character."); return; }
+    M().normalize(obj);
+    if (!obj.id || state.list.some(c => c.id === obj.id)) obj.id = M().uid();
+    state.list.push(obj); state.activeId = obj.id;
+    closeMenu(); save(); renderAll(); setTab("core");
+    toast(`Imported “${obj.name}”.`);
+  }
   function onImportFile(file) {
     if (!file) return;
-    S().importCharacter(file).then(obj => {
-      M().normalize(obj);
-      if (!obj.id || state.list.some(c => c.id === obj.id)) obj.id = M().uid();
-      state.list.push(obj); state.activeId = obj.id;
-      closeMenu(); save(); renderAll(); setTab("core");
-      toast(`Imported “${obj.name}”.`);
-    }).catch(err => toast(err.message || "Import failed."));
+    S().importCharacter(file).then(onImportData).catch(err => toast(err.message || "Import failed."));
   }
 
   /* ---------------- menu + misc ---------------- */
@@ -214,6 +217,6 @@ Vertex.app = (function () {
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, toggleUse, resetFeature,
     setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
-    switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, toggleMenu
+    switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData, toggleMenu
   };
 })();

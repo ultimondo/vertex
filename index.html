@@ -61,6 +61,10 @@
   <div class="toast" id="toast"></div>
   <div id="overlay"></div>
 
+  <!-- ============ Google APIs (for "Load from Drive"; async, order-independent) ============ -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- ============ scripts (classic, ordered; no build step) ============ -->
   <script src="data/seed.js"></script>
   <script src="src/dice.js"></script>
@@ -69,5 +73,6 @@
   <script src="src/render.js"></script>
   <script src="src/create.js"></script>
   <script src="src/app.js"></script>
+  <script src="src/drive.js"></script>
 </body>
 </html>
