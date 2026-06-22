@@ -26,9 +26,11 @@ Vertex.create = (function () {
 
   let draft = null;
   let step = 0;
+  let mode = "create";   // "create" | "edit"
 
   /* ---------------- lifecycle ---------------- */
   function open() {
+    mode = "create";
     draft = M().newCharacter("");
     draft.name = "";
     draft.designation = { name: "", tagline: "", descriptors: "" };
@@ -137,7 +139,7 @@ Vertex.create = (function () {
     o.innerHTML = `
       <div class="wz" role="dialog" aria-modal="true">
         <aside class="wz-rail">
-          <div class="wz-brand">Create Character</div>
+          <div class="wz-brand">${mode === "edit" ? "Edit Character" : "Create Character"}</div>
           ${rail}
           <button class="wz-cancel" onclick="Vertex.create.close()">Cancel</button>
         </aside>
@@ -147,9 +149,11 @@ Vertex.create = (function () {
           <footer class="wz-foot">
             <button class="wz-ghost" ${step === 0 ? "disabled" : ""} onclick="Vertex.create.prev()">‹ Back</button>
             <span class="wz-count">Step ${step + 1} of ${STEPS.length}</span>
-            ${last
-              ? `<button class="wz-go" onclick="Vertex.create.commit()">Manifest character</button>`
-              : `<button class="wz-go" onclick="Vertex.create.next()">Next ›</button>`}
+            ${mode === "edit"
+              ? `<button class="wz-go" onclick="Vertex.create.commitEdit()">Save changes</button>`
+              : last
+                ? `<button class="wz-go" onclick="Vertex.create.commit()">Manifest character</button>`
+                : `<button class="wz-go" onclick="Vertex.create.next()">Next ›</button>`}
           </footer>
         </div>
       </div>`;
@@ -184,11 +188,14 @@ Vertex.create = (function () {
     const d = draft.designation;
     const blue = computeStats(draft).blue;
     const feats = draft.features.map((f, i) => {
+      const topts = ["major", "minor", "passive"].map(t =>
+        `<option value="${t}" ${f.type === t ? "selected" : ""}>${cap(t)} ${t === "passive" ? "Feature" : "Action"}</option>`).join("");
       const usesRow = f.type === "passive"
         ? `<div class="wz-mini">Passive · always true, costs no Uses.</div>`
         : `<div class="wz-mini">Usable up to your <b class="blue">Blue</b> score (now ${blue}) per encounter/scene — each Feature keeps its own track.</div>`;
       return `<div class="wz-card">
-        <div class="wz-card-h"><span class="ftype ${f.type}">${cap(f.type)} ${f.type === "passive" ? "Feature" : "Action"}</span></div>
+        <div class="wz-card-h"><select class="ftype-sel ${f.type}" onchange="Vertex.create.setFeatureType(${i},this.value)">${topts}</select>
+          <button class="wz-x" title="Remove" onclick="Vertex.create.removeFeature(${i})">✕</button></div>
         ${field("Name", inp(f.name, `Vertex.create.setFeature(${i},'name',this.value)`, f.type === "major" ? "the thing only you do" : ""))}
         ${field("What it enables — and what it costs", ta(f.desc, `Vertex.create.setFeature(${i},'desc',this.value)`, "", 2))}
         ${usesRow}
@@ -202,13 +209,18 @@ Vertex.create = (function () {
       <h3 class="wz-sub">Features <em>· each usable up to your Blue score</em></h3>
       <p class="wz-mini">Feature Uses are set by <b class="blue">Blue</b>, which you raise through Archetype Core Stat Tags in the next step (and freely on the Core tab).</p>
       ${feats}
-      <h3 class="wz-sub">Starting Items <em>· no built-in Features at creation</em></h3>${items}`;
+      <h3 class="wz-sub">Items <em>· weapons, wearables, accessories</em></h3>${items}
+      <div class="wz-additem">
+        <button class="wz-add" onclick="Vertex.create.addItem('weapon')">+ Weapon</button>
+        <button class="wz-add" onclick="Vertex.create.addItem('wearable')">+ Wearable</button>
+        <button class="wz-add" onclick="Vertex.create.addItem('accessory')">+ Accessory</button>
+      </div>`;
   }
 
   function itemCard(it, i) {
     if (it.kind === "weapon") {
       const opts = ["red", "green", "blue"].map(s => `<option value="${s}" ${it.stat === s ? "selected" : ""}>${cap(s)}</option>`).join("");
-      return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Weapon</span></div>
+      return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Weapon</span><button class="wz-x" title="Remove" onclick="Vertex.create.removeItem(${i})">✕</button></div>
         ${field("Name", inp(it.name, `Vertex.create.setItem(${i},'name',this.value)`, "e.g. Forge Hammer"))}
         <div class="wz-row">
           ${field("Core Stat", `<select onchange="Vertex.create.setItem(${i},'stat',this.value)">${opts}</select>`, "how it strikes")}
@@ -218,7 +230,7 @@ Vertex.create = (function () {
     }
     if (it.kind === "wearable") {
       const opts = SLOTS.map(s => `<option value="${s}" ${it.slot === s ? "selected" : ""}>${s}</option>`).join("");
-      return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Wearable</span></div>
+      return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Wearable</span><button class="wz-x" title="Remove" onclick="Vertex.create.removeItem(${i})">✕</button></div>
         ${field("Name", inp(it.name, `Vertex.create.setItem(${i},'name',this.value)`, "e.g. Leather Apron"))}
         <div class="wz-row">
           ${field("Slot", `<select onchange="Vertex.create.setItem(${i},'slot',this.value)">${opts}</select>`)}
@@ -226,7 +238,7 @@ Vertex.create = (function () {
         </div>
         ${field("Flavor", ta(it.flavor, `Vertex.create.setItem(${i},'flavor',this.value)`, "", 2))}</div>`;
     }
-    return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Accessory</span></div>
+    return `<div class="wz-card"><div class="wz-card-h"><span class="ftype">Accessory</span><button class="wz-x" title="Remove" onclick="Vertex.create.removeItem(${i})">✕</button></div>
       ${field("Name", inp(it.name, `Vertex.create.setItem(${i},'name',this.value)`, "e.g. Cracked Pocket Watch"))}
       ${field("Flavor", ta(it.flavor, `Vertex.create.setItem(${i},'flavor',this.value)`, "", 2))}</div>`;
   }
@@ -351,13 +363,7 @@ Vertex.create = (function () {
     d.features = d.features.filter(f => (f.name || "").trim());
     d.holds = d.holds.filter(h => (h.line || "").trim());
     d.tethers = d.tethers.filter(t => (t.line || "").trim());
-    d.items = d.items.filter(it => (it.name || "").trim()).map(it => {
-      let meta;
-      if (it.kind === "weapon") meta = ["Weapon", cap(it.stat), it.range].filter(Boolean).join(" · ");
-      else if (it.kind === "wearable") meta = ["Wearable", it.slot, it.armor > 0 ? "Armor " + it.armor : ""].filter(Boolean).join(" · ");
-      else meta = "Accessory";
-      return { name: it.name, kind: it.kind, meta: meta, flavor: it.flavor || "", stat: it.stat, range: it.range, slot: it.slot, armor: it.armor };
-    });
+    d.items = d.items.filter(it => (it.name || "").trim()).map(finalizeItem);
 
     // v004 stats from archetype tags; start at full HP; armor from worn pieces
     d.stats = computeStats(d);
@@ -370,11 +376,77 @@ Vertex.create = (function () {
     close();
   }
 
+  /* ---------------- edit mode (reuses every step editor) ---------------- */
+  function openEdit(stepKey) {
+    const src = Vertex.app.getActive();
+    if (!src) return;
+    draft = JSON.parse(JSON.stringify(src));
+    M().normalize(draft);
+    if (!draft.designation) draft.designation = { name: "", tagline: "", descriptors: "" };
+    draft.backstory = Object.assign({ origin: "", shaped: "", unique: "", wish: "" }, draft.backstory);
+    if (typeof draft.epithet !== "string") draft.epithet = "";
+    (draft.items || []).forEach(hydrateItem);
+    mode = "edit";
+    step = STEPS.findIndex(s => s.key === stepKey);
+    if (step < 0) step = 0;
+    mount();
+    render();
+  }
+
+  // Edit-mode keeps the character's live stats/res; only authored content changes.
+  function commitEdit() {
+    const d = draft;
+    d.archetypes = d.archetypes.filter(a => (a.name || "").trim());
+    d.features = d.features.filter(f => (f.name || "").trim());
+    d.holds = d.holds.filter(h => (h.line || "").trim());
+    d.tethers = d.tethers.filter(t => (t.line || "").trim());
+    d.items = d.items.filter(it => (it.name || "").trim()).map(finalizeItem);
+    d.name = (d.name || "").trim() || "Unnamed";
+    const dz = d.designation || {};
+    if (!((dz.name || "") + (dz.tagline || "") + (dz.descriptors || "")).trim()) d.designation = null;
+    Vertex.app.saveCharacter(d);
+    close();
+  }
+
+  // Legacy/seed items carry only a meta string; infer structured fields so they edit cleanly.
+  function hydrateItem(it) {
+    if (it.kind) return;
+    const m = it.meta || "";
+    if (/^weapon/i.test(m)) { it.kind = "weapon"; it.stat = /green/i.test(m) ? "green" : /blue/i.test(m) ? "blue" : "red"; const r = m.match(/range\s+([^·]+)/i); it.range = r ? r[1].trim() : ""; }
+    else if (/^wearable/i.test(m)) { it.kind = "wearable"; it.slot = it.slot || "Torso"; const a = m.match(/armor\s+(\d+)/i); it.armor = a ? +a[1] : (it.armor || 0); }
+    else it.kind = "accessory";
+  }
+
+  function itemMeta(it) {
+    if (it.kind === "weapon") return ["Weapon", cap(it.stat || "red"), it.range].filter(Boolean).join(" · ");
+    if (it.kind === "wearable") return ["Wearable", it.slot, it.armor > 0 ? "Armor " + it.armor : ""].filter(Boolean).join(" · ");
+    if (it.kind === "accessory") return "Accessory";
+    return it.meta || "";
+  }
+  function finalizeItem(it) {
+    return {
+      name: it.name, kind: it.kind, meta: itemMeta(it), flavor: it.flavor || "",
+      stat: it.stat, range: it.range, slot: it.slot, armor: it.armor,
+      equipped: !!it.equipped, broken: !!it.broken
+    };
+  }
+
+  function setFeatureType(i, v) { setFeature(i, "type", v); render(); }
+  function addFeature() { draft.features.push({ name: "", type: "minor", desc: "" }); render(); }
+  function removeFeature(i) { draft.features.splice(i, 1); render(); }
+  function addItem(kind) {
+    draft.items.push(kind === "weapon" ? { kind, name: "", stat: "red", range: "", flavor: "" }
+      : kind === "wearable" ? { kind, name: "", slot: "Torso", armor: 0, flavor: "" }
+      : { kind: "accessory", name: "", flavor: "" });
+    render();
+  }
+  function removeItem(i) { draft.items.splice(i, 1); render(); }
+
   return {
-    open, close, go, next, prev,
-    set, setDesig, setFeature, setItem, setBack,
+    open, openEdit, close, go, next, prev,
+    set, setDesig, setFeature, setFeatureType, addFeature, removeFeature, setItem, addItem, removeItem, setBack,
     setArch, addArch, removeArch, stepArchPoints,
     addHold, removeHold, setHold, addTether, removeTether, setTether,
-    chooseImage, onImage, clearImage, commit
+    chooseImage, onImage, clearImage, commit, commitEdit
   };
 })();

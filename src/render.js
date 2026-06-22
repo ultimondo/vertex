@@ -71,7 +71,7 @@ Vertex.render = (function () {
   }
 
   function archetypes(c) {
-    if (!c.archetypes.length) return tabLead("Archetypes · forces in tension") + `<div class="empty">No Archetypes yet.</div>`;
+    if (!c.archetypes.length) return tabLead("Archetypes · forces in tension", "archetypes") + `<div class="empty">No Archetypes yet.</div>`;
     const cards = c.archetypes.map((a, i) => {
       const max = a.driftMax || 5;
       const frozen = a.status === "silent" || a.status === "retired";
@@ -86,7 +86,7 @@ Vertex.render = (function () {
         <div class="drow"><span class="statchip ${a.tag}">${chip}</span>${drift}</div>
       </div>`;
     }).join("");
-    return tabLead("Archetypes · forces in tension · drift and the Crossing") + `<div class="ix-grid">${cards}</div>`;
+    return tabLead("Archetypes · forces in tension · drift and the Crossing", "archetypes") + `<div class="ix-grid">${cards}</div>`;
   }
 
   function bonds(c) {
@@ -107,12 +107,12 @@ Vertex.render = (function () {
       return `<div class="ix-bond hold ${h.status === "yielded" ? "yielded" : ""}"><div class="line">${esc(h.line)}</div><div class="meta">${meta}</div></div>`;
     }).join("") : `<div class="empty">No Conviction Holds yet.</div>`;
 
-    return tabLead("Tethers · what they are to you, now") + tethers
+    return tabLead("Tethers · what they are to you, now", "bonds") + tethers
       + `<div class="tablead" style="margin-top:34px">Conviction Holds · the line you will not cross</div>` + holds;
   }
 
   function designation(c) {
-    if (!c.designation && !c.features.length) return `<div class="empty">No Designation selected yet.</div>`;
+    if (!c.designation && !c.features.length) return tabLead("Designation", "designation") + `<div class="empty">No Designation selected yet. Use Edit to choose one.</div>`;
     const dz = c.designation || { name: "—", tagline: "", descriptors: "" };
     const uses = M().derived(c).featureUses;   // = Blue score; each Feature is usable this many times
     const feats = c.features.map((f, i) => {
@@ -129,7 +129,7 @@ Vertex.render = (function () {
       </div>`;
     }).join("");
     return `<div class="ld-hero">
-        <div class="ld-eyebrow">Designation</div>
+        <div class="ld-herotop"><span class="ld-eyebrow">Designation</span><button class="editbtn" onclick="Vertex.app.editSection('designation')">Edit</button></div>
         <div class="ld-bigname">${c.designation ? esc("The " + dz.name) : "—"}</div>
         <div class="ld-htag">${esc(dz.tagline)}</div>
         <div class="ld-hdesc">${esc(dz.descriptors)}</div>
@@ -138,13 +138,16 @@ Vertex.render = (function () {
 
   function gear(c) {
     const lead = c.designation ? `Equipment & Weapons · ${esc(c.designation.name)} kit` : "Equipment & Weapons · what you carry";
-    if (!c.items.length) return tabLead(lead) + `<div class="empty">No items yet.</div>`;
+    if (!c.items.length) return tabLead(lead, "designation") + `<div class="empty">No items yet.</div>`;
     const cards = c.items.map(it =>
       `<div class="ix-card"><div class="imeta">${esc(it.meta)}</div><div class="iname">${esc(it.name)}</div><div class="iflav">${esc(it.flavor)}</div></div>`).join("");
-    return tabLead(lead) + `<div class="ix-bento">${cards}</div>`;
+    return tabLead(lead, "designation") + `<div class="ix-bento">${cards}</div>`;
   }
 
-  function tabLead(label) { return `<div class="tablead">${label}</div>`; }
+  function tabLead(label, editKey) {
+    const edit = editKey ? `<button class="editbtn" onclick="Vertex.app.editSection('${editKey}')">Edit</button>` : "";
+    return `<div class="tablead"><span>${label}</span>${edit}</div>`;
+  }
 
   function cast(c, state) {
     const s = c.stats;

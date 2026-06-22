@@ -183,6 +183,16 @@ Vertex.app = (function () {
     toast(`“${c.name}” manifested.`);
     if (window.Vertex.drive && Vertex.drive.onCharacterCreated) Vertex.drive.onCharacterCreated();
   }
+  // Called by the wizard in edit mode — replace the existing character in place (keeps its id).
+  function saveCharacter(c) {
+    M().normalize(c);
+    const i = state.list.findIndex(x => x.id === c.id);
+    if (i >= 0) state.list[i] = c; else { c.id = c.id || M().uid(); state.list.push(c); }
+    state.activeId = c.id;
+    closeMenu(); save(); renderAll(); setTab(state.activeTab);
+    toast("Saved.");
+  }
+  function editSection(key) { Vertex.create.openEdit(key); }
   function deleteCharacter(id) {
     const c = state.list.find(x => x.id === id);
     if (!c) return;
@@ -234,7 +244,7 @@ Vertex.app = (function () {
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, toggleUse, resetFeature,
     setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
-    switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
+    switchTo, createNew, commitNewCharacter, saveCharacter, editSection, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
     getActive, onDriveSaved, refreshMenu, toggleMenu
   };
 })();

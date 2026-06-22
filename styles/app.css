@@ -211,7 +211,9 @@ input, textarea{ font-family:inherit; }
 .owed{ color:var(--red); }
 
 /* ---------- shared editorial bits (Designation / Archetypes / Gear / Bonds) ---------- */
-.tablead{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); padding:24px 2px 12px; margin-bottom:16px; border-bottom:1px solid var(--line); }
+.tablead{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); padding:24px 2px 12px; margin-bottom:16px; border-bottom:1px solid var(--line); }
+.editbtn{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); background:transparent; border:1px solid var(--line-2); border-radius:var(--r-sm); padding:4px 11px; flex:none; transition:border-color .14s ease, color .14s ease; }
+.editbtn:hover{ color:var(--bone); border-color:var(--bone); }
 .statchip{ font-family:var(--mono); font-size:10px; letter-spacing:.8px; text-transform:uppercase; padding:4px 11px; border-radius:var(--r-pill); border:1px solid var(--line-2); color:var(--dim); white-space:nowrap; }
 .statchip.red{ color:var(--red); border-color:rgba(231,75,59,.5);} .statchip.green{ color:var(--green); border-color:rgba(51,180,135,.5);} .statchip.blue{ color:var(--blue); border-color:rgba(95,146,218,.5);}
 .st{ font-family:var(--mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; }
@@ -219,6 +221,7 @@ input, textarea{ font-family:inherit; }
 
 /* ---------- designation (Ledger) ---------- */
 .ld-hero{ padding:24px 2px 24px; border-bottom:1px solid var(--line-2); margin-bottom:4px; }
+.ld-herotop{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .ld-eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); }
 .ld-bigname{ font-family:var(--serif); font-weight:700; font-size:64px; line-height:1; letter-spacing:.4px; margin-top:6px; }
 .ld-htag{ font-family:var(--serif); font-style:italic; font-size:22px; color:var(--dim); margin-top:10px; }
@@ -355,6 +358,9 @@ input, textarea{ font-family:inherit; }
 .wz-none{ color:var(--faint); font-style:italic; font-family:var(--serif); font-size:16px; margin-bottom:10px; }
 .wz-add{ width:100%; background:transparent; border:1px dashed var(--line-2); color:var(--dim); border-radius:var(--r-sm); padding:11px; font-size:13px; }
 .wz-add:hover:not(:disabled){ color:var(--bone); border-color:var(--bone); } .wz-add:disabled{ opacity:.35; cursor:default; }
+.wz-additem{ display:flex; gap:8px; }
+.wz-additem .wz-add{ flex:1; }
+.wz .ftype-sel{ width:auto; padding:5px 10px; font-family:var(--mono); font-size:11px; letter-spacing:.5px; text-transform:uppercase; }
 
 .wz-pts{ display:flex; align-items:center; gap:12px; }
 .wz-pts button{ width:30px; height:30px; border-radius:var(--r-sm); border:1px solid var(--line-2); background:var(--ink); color:var(--bone); font-size:17px; }
