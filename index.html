@@ -16,18 +16,18 @@
     <div class="brand">VERTEX</div>
     <nav class="tabs" id="tabs">
       <button class="active" data-tab="core" onclick="Vertex.app.setTab('core',this)">Core</button>
-      <button data-tab="archetypes" onclick="Vertex.app.setTab('archetypes',this)">Archetypes</button>
-      <button data-tab="bonds" onclick="Vertex.app.setTab('bonds',this)">Bonds</button>
       <button data-tab="designation" onclick="Vertex.app.setTab('designation',this)">Designation</button>
       <button data-tab="gear" onclick="Vertex.app.setTab('gear',this)">Gear</button>
-      <button data-tab="cast" onclick="Vertex.app.setTab('cast',this)">Cast</button>
+      <button data-tab="archetypes" onclick="Vertex.app.setTab('archetypes',this)">Archetypes</button>
+      <button data-tab="bonds" onclick="Vertex.app.setTab('bonds',this)">Bonds</button>
     </nav>
-    <div class="spacer"></div>
-    <div class="switchwrap">
-      <button class="btn" onclick="Vertex.app.toggleMenu(event)">Switch character ▾</button>
-      <div class="menu" id="menu"></div>
+    <div class="topctrl">
+      <div class="switchwrap">
+        <button class="btn" onclick="Vertex.app.toggleMenu(event)">Switch character ▾</button>
+        <div class="menu" id="menu"></div>
+      </div>
+      <button class="btn" onclick="Vertex.create.open()">+ New</button>
     </div>
-    <button class="btn" onclick="Vertex.create.open()">+ New</button>
   </div>
 
   <!-- ============ page ============ -->
@@ -53,7 +53,9 @@
         <section class="tabpanel" id="tab-bonds"></section>
         <section class="tabpanel" id="tab-designation"></section>
         <section class="tabpanel" id="tab-gear"></section>
-        <section class="tabpanel" id="tab-cast"></section>
+        <!-- Cast tab removed from the UI (2026-06-21); its engine + render code
+             are preserved (Vertex.render.cast/castResult, Vertex.app.doCast,
+             Vertex.dice) for reuse elsewhere. -->
       </main>
     </div>
   </div>

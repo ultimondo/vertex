@@ -55,7 +55,7 @@ Vertex.app = (function () {
     document.getElementById("idDesig").textContent = c.designation ? c.designation.name : "—";
     renderPortrait();
     renderTab("core"); renderTab("archetypes"); renderTab("bonds");
-    renderTab("designation"); renderTab("gear"); renderTab("cast");
+    renderTab("designation"); renderTab("gear");
     document.getElementById("menu").innerHTML = R().menu(state.list, state.activeId);
   }
 
@@ -68,7 +68,7 @@ Vertex.app = (function () {
     else if (id === "bonds") el.innerHTML = R().bonds(c);
     else if (id === "designation") el.innerHTML = R().designation(c);
     else if (id === "gear") el.innerHTML = R().gear(c);
-    else if (id === "cast") el.innerHTML = R().cast(c, state.cast);
+    else if (id === "cast") el.innerHTML = R().cast(c, state.cast);  // PRESERVED for reuse; no tab mounts #tab-cast now
   }
 
   function renderPortrait() {
@@ -95,7 +95,7 @@ Vertex.app = (function () {
     const c = active();
     c.stats[key] = M().clamp(c.stats[key] + d, 1, 12);
     M().clampRes(c);
-    save(); renderTab("core"); renderTab("cast"); renderTab("designation"); // Blue drives Feature Uses
+    save(); renderTab("core"); renderTab("designation"); // Blue drives Feature Uses
   }
   function stepRes(key, d) {
     const c = active();

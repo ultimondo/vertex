@@ -55,16 +55,16 @@ button{ font-family:var(--sans); cursor:pointer; }
 input, textarea{ font-family:inherit; }
 
 /* ---------- title bar with tabs ---------- */
-.topbar{ position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:26px;
+.topbar{ position:sticky; top:0; z-index:40; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:26px;
   padding:0 26px; height:62px; background:rgba(0,0,0,.82); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
 .brand{ position:relative; font-family:"Cinzel",serif; font-size:24px; letter-spacing:8px; color:#fff; flex:none; user-select:none; }
 /* chromatic-aberration wordmark removed for the black-and-white redesign — flat white now */
-.tabs{ display:flex; gap:2px; height:100%; overflow-x:auto; }
+.tabs{ display:flex; gap:2px; height:100%; overflow-x:auto; justify-content:center; }
 .tabs button{ background:transparent; border:0; border-bottom:2px solid transparent; color:var(--dim);
   font-size:13px; letter-spacing:.8px; text-transform:uppercase; padding:0 15px; height:100%; white-space:nowrap; }
 .tabs button:hover{ color:var(--bone); }
 .tabs button.active{ color:#fff; border-bottom-color:#fff; }
-.spacer{ flex:1; }
+.topctrl{ display:flex; align-items:center; gap:18px; justify-self:end; }
 .btn{ font-size:13px; color:var(--bone); background:rgba(255,255,255,.04); border:1px solid var(--line-2); padding:8px 14px; border-radius:9px; flex:none; }
 .btn:hover{ border-color:var(--bone); color:#fff; }
 .switchwrap{ position:relative; flex:none; }
