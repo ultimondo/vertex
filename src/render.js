@@ -79,32 +79,64 @@ Vertex.render = (function () {
       const drift = frozen
         ? `<span class="dnote">${a.status === "silent" ? "numbed · woken at a Crossing" : "retired · kept as record"}</span>`
         : `<span class="notch">${Array.from({ length: max }, (_, n) =>
-            `<i class="${n < a.drift ? "on" : ""}" title="set drift to ${n + 1}" onclick="Vertex.app.setDrift(${i},${n + 1})"></i>`).join("")}</span>`;
+            `<i class="${n < a.drift ? "on" : ""}" title="set drift to ${n + 1}" onclick="Vertex.app.setDrift(${i},${n + 1})"></i>`).join("")}<button class="driftadd" title="Mark Drift +1" onclick="Vertex.app.markDrift(${i})">+</button></span>`;
       return `<div class="ix-arc ${a.tag} ${a.status}">
         <div class="a1"><span class="nm">${esc(a.name)}</span><span class="st ${a.status}">${cap(a.status)}</span></div>
         <div class="tl">${esc(a.tagline)}</div>
         <div class="drow"><span class="statchip ${a.tag}">${chip}</span>${drift}</div>
       </div>`;
     }).join("");
-    return tabLead("Archetypes · forces in tension · drift and the Crossing", "archetypes") + `<div class="ix-grid">${cards}</div>`;
+    return tabLead("Archetypes · forces in tension · drift and the Crossing", "archetypes")
+      + `<div class="ix-grid">${cards}</div>`
+      + `<div class="tabactions"><button class="editbtn" onclick="Vertex.app.openCrossing()">Call the Crossing</button></div>`;
+  }
+
+  // The Crossing — a reckoning at arc boundaries (modal in #overlay).
+  function crossingModal(c) {
+    const rows = c.archetypes.length ? c.archetypes.map((a, i) => {
+      const acts = a.status === "silent"
+        ? `<button onclick="Vertex.app.crossWake(${i})">Wake</button>`
+        : a.status === "retired"
+          ? `<span class="dnote">kept as record</span>`
+          : `<button onclick="Vertex.app.crossRevise(${i})">Revise</button><button onclick="Vertex.app.crossRetire(${i})">Retire</button><button onclick="Vertex.app.crossSilence(${i})">Let fall Silent</button>`;
+      return `<div class="cross-row">
+        <div><span class="nm">${esc(a.name)}</span> <span class="st ${a.status}">${cap(a.status)}</span>
+          <div class="cross-tl">${esc(a.tagline)}</div></div>
+        <div class="cross-acts">${acts}</div></div>`;
+    }).join("") : `<div class="empty">No Archetypes to reckon with.</div>`;
+    return `<div class="cross" role="dialog" aria-modal="true">
+      <div class="cross-head"><h3>The Crossing</h3>
+        <p>The reckoning. <b>Revise</b> to clear Drift, <b>Retire</b> or let one fall <b>Silent</b>
+        (its Core-Stat points suspend, lowering the stat), or <b>Wake</b> a Silent one.</p></div>
+      <div class="cross-body">${rows}</div>
+      <div class="cross-foot">
+        <button class="editbtn" onclick="Vertex.app.editSection('backstory')">Revise Backstory</button>
+        <button class="wz-go" onclick="Vertex.app.closeCrossing()">Done</button></div>
+    </div>`;
   }
 
   function bonds(c) {
-    const tethers = c.tethers.length ? c.tethers.map(t => {
+    const tethers = c.tethers.length ? c.tethers.map((t, i) => {
+      const acts = t.status === "open"
+        ? `<div class="acts"><button onclick="Vertex.app.tetherRetie(${i})">Re-tie</button></div>`
+        : `<div class="acts"><button onclick="Vertex.app.tetherAct(${i})">Act · +2</button><button onclick="Vertex.app.tetherDraw(${i})">Draw · Adv</button><button onclick="Vertex.app.tetherFray(${i})">Fray · +2</button><button onclick="Vertex.app.tetherSever(${i})">Sever</button></div>`;
       if (t.status === "knot")
         return `<div class="ix-bond"><div class="to">to ${esc(t.to)} · re-tied</div>
           <div class="line"><span class="old">${esc(t.old)}</span><span class="new">${esc(t.line)}</span></div>
-          <div class="meta"><span>Knot · the moment it changed</span></div></div>`;
+          <div class="meta"><span>Knot · the moment it changed</span></div>${acts}</div>`;
       if (t.status === "open")
-        return `<div class="ix-bond severed"><div class="to">to ${esc(t.to)} · open / severed</div><div class="line">${esc(t.line)}</div></div>`;
-      return `<div class="ix-bond"><div class="to">to ${esc(t.to)}</div><div class="line">${esc(t.line)}</div><div class="meta"><span>Active</span></div></div>`;
-    }).join("") : `<div class="empty">No Tethers yet. A character who holds none is Isolated.</div>`;
+        return `<div class="ix-bond severed"><div class="to">to ${esc(t.to)} · open / severed</div><div class="line">${esc(t.line)}</div>${acts}</div>`;
+      return `<div class="ix-bond"><div class="to">to ${esc(t.to)}</div><div class="line">${esc(t.line)}</div><div class="meta"><span>Active</span></div>${acts}</div>`;
+    }).join("") : `<div class="empty">No Tethers yet. A character who holds none is Isolated.<div class="acts"><button onclick="Vertex.app.isolationAward()">Succeeded alone · +2</button></div></div>`;
 
-    const holds = c.holds.length ? c.holds.map(h => {
+    const holds = c.holds.length ? c.holds.map((h, i) => {
       const meta = h.status === "yielded"
         ? `<span>Yielded</span>${h.vignetteOwed ? `<span class="owed">Vignette owed · slot locked</span>` : ""}`
         : `<span>Active</span><span>Honored under pressure <b>×${h.timesHonored || 0}</b></span>`;
-      return `<div class="ix-bond hold ${h.status === "yielded" ? "yielded" : ""}"><div class="line">${esc(h.line)}</div><div class="meta">${meta}</div></div>`;
+      const acts = h.status === "yielded"
+        ? (h.vignetteOwed ? `<div class="acts"><button onclick="Vertex.app.holdVignettePlayed(${i})">Vignette played</button></div>` : "")
+        : `<div class="acts"><button onclick="Vertex.app.holdHonor(${i})">Honor · +3</button><button onclick="Vertex.app.holdYield(${i})">Yield · +6</button><button onclick="Vertex.app.holdHoldLine(${i})">Hold the Line · −5</button></div>`;
+      return `<div class="ix-bond hold ${h.status === "yielded" ? "yielded" : ""}"><div class="line">${esc(h.line)}</div><div class="meta">${meta}</div>${acts}</div>`;
     }).join("") : `<div class="empty">No Conviction Holds yet.</div>`;
 
     return tabLead("Tethers · what they are to you, now", "bonds") + tethers
@@ -212,5 +244,5 @@ Vertex.render = (function () {
       </div>`;
   }
 
-  return { core, archetypes, bonds, designation, gear, cast, castResult, menu };
+  return { core, archetypes, bonds, designation, gear, cast, castResult, menu, crossingModal };
 })();

@@ -115,8 +115,76 @@ Vertex.app = (function () {
     const a = active().archetypes[ai]; if (!a) return;
     const max = a.driftMax || 5;
     a.drift = (a.drift === n ? n - 1 : Math.min(n, max));
+    // Drift at threshold → Faltering; below → Active (don't touch Silent/Retired).
+    if (a.status === "active" || a.status === "faltering") a.status = a.drift >= max ? "faltering" : "active";
     save(); renderTab("archetypes");
   }
+  function markDrift(i) { const a = active().archetypes[i]; if (a) setDrift(i, (a.drift || 0) + 1); }
+
+  /* ---------------- assistive Fate / Tethers / Holds (P1) ---------------- */
+  function addFate(delta) { const c = active(); c.res.fate.cur = M().clamp(c.res.fate.cur + delta, 0, 10); }
+
+  function tetherAct(i)  { addFate(2); save(); renderTab("core"); toast("Acted on the Tether · +2 Fate"); }
+  function tetherDraw(i) { const t = active().tethers[i]; toast(`Draw on ${t ? t.to : "the Tether"} — your next Cast has Advantage.`); }
+  function tetherFray(i) { addFate(2); save(); renderTab("core"); toast("Frayed under pressure · +2 Fate"); }
+  function tetherSever(i) {
+    const t = active().tethers[i]; if (!t) return;
+    t.status = "open"; addFate(2); save(); renderTab("core"); renderTab("bonds");
+    toast("Severed · +2 Fate · re-tie it when its truth returns");
+  }
+  function tetherRetie(i) {
+    const t = active().tethers[i]; if (!t) return;
+    const nl = prompt("Re-tie the Tether — the truth as it is now:", t.line || "");
+    if (nl == null) return;
+    if (!Array.isArray(t.record)) t.record = [];
+    t.record.push(t.line); t.old = t.line; t.line = (nl.trim() || t.line); t.status = "knot";
+    save(); renderTab("bonds"); toast("Re-tied · a Knot in the Record");
+  }
+  function isolationAward() { addFate(2); save(); renderTab("core"); toast("Succeeded entirely alone · +2 Fate"); }
+
+  function holdHonor(i) {
+    const h = active().holds[i]; if (!h) return;
+    h.timesHonored = (h.timesHonored || 0) + 1; addFate(3); save(); renderTab("core"); renderTab("bonds");
+    toast("Honored under pressure · +3 Fate");
+  }
+  function holdYield(i) {
+    const h = active().holds[i]; if (!h) return;
+    h.status = "yielded"; h.vignetteOwed = true; addFate(6); save(); renderTab("core"); renderTab("bonds");
+    toast("Yielded · +6 Fate · a Vignette is owed");
+  }
+  function holdHoldLine(i) {
+    const c = active(); if (c.res.fate.cur < 5) { toast("Not enough Fate (need 5)."); return; }
+    addFate(-5); save(); renderTab("core"); toast("Held the Line · −5 Fate");
+  }
+  function holdVignettePlayed(i) {
+    const h = active().holds[i]; if (!h) return;
+    h.vignetteOwed = false; save(); renderTab("bonds"); toast("The Vignette is played · the slot is free");
+  }
+
+  /* ---------------- the Crossing (P1) ---------------- */
+  // Changing counted↔suspended adjusts the archetype's Core-Stat points on its tag (v004 §6.2).
+  function setArchStatus(i, newStatus) {
+    const c = active(); const a = c.archetypes[i]; if (!a) return;
+    const wasCounted = a.status === "active" || a.status === "faltering";
+    const willCount = newStatus === "active" || newStatus === "faltering";
+    if (wasCounted && !willCount) c.stats[a.tag] = M().clamp(c.stats[a.tag] - (a.points || 0), 1, 12);
+    if (!wasCounted && willCount) c.stats[a.tag] = M().clamp(c.stats[a.tag] + (a.points || 0), 1, 12);
+    a.status = newStatus;
+    if (newStatus === "active") a.drift = 0;   // Revise / Wake clears Drift
+    M().clampRes(c);
+    save(); renderTab("core"); renderTab("designation"); renderTab("archetypes"); refreshCrossing();
+  }
+  function crossRevise(i)  { setArchStatus(i, "active"); }
+  function crossRetire(i)  { setArchStatus(i, "retired"); }
+  function crossSilence(i) { setArchStatus(i, "silent"); }
+  function crossWake(i)    { setArchStatus(i, "active"); }
+  function openCrossing() {
+    const o = document.getElementById("overlay");
+    o.innerHTML = R().crossingModal(active());
+    o.onclick = e => { if (e.target === o) closeCrossing(); };
+  }
+  function closeCrossing() { const o = document.getElementById("overlay"); if (o) { o.innerHTML = ""; o.onclick = null; } }
+  function refreshCrossing() { const o = document.getElementById("overlay"); if (o && o.querySelector(".cross")) o.innerHTML = R().crossingModal(active()); }
 
   /* ---------------- Designation: feature uses (per-feature house rule) ---------------- */
   function toggleUse(fi, bi) {
@@ -242,8 +310,11 @@ Vertex.app = (function () {
   else init();
 
   return {
-    init, setTab, stepStat, stepRes, setArmor, setDrift, toggleUse, resetFeature,
+    init, setTab, stepStat, stepRes, setArmor, setDrift, markDrift, toggleUse, resetFeature,
     setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
+    tetherAct, tetherDraw, tetherFray, tetherSever, tetherRetie, isolationAward,
+    holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
+    openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,
     switchTo, createNew, commitNewCharacter, saveCharacter, editSection, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
     getActive, onDriveSaved, refreshMenu, toggleMenu
   };
