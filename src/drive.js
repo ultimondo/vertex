@@ -19,6 +19,11 @@ Vertex.drive = (function () {
   const CLIENT_ID = "232162680124-2sg5ig257kdlj74ftb3hu87o2iel25d3.apps.googleusercontent.com";  // OAuth 2.0 Client ID
   const API_KEY   = "AIzaSyCcbEouGRkrWTf0xAer1_Vvusf8YmlQeo4";  // API key (the Picker's "developer key")
   const APP_ID    = "232162680124";                             // GCP project NUMBER (Picker App ID)
+
+  // Auto-share every saved character with the Host's Google account, so the Host
+  // collects a live copy of each player's character. Set "" to turn this off.
+  const SHARE_WITH_EMAIL = "taylorlanson@gmail.com";  // the Host (collector) account
+  const SHARE_ROLE       = "reader";                  // "reader" = view + copy · "writer" = also edit
   /* ===========================================================
      ▲▲▲  NOTHING BELOW NEEDS EDITING  ▲▲▲
      =========================================================== */
@@ -244,6 +249,23 @@ Vertex.drive = (function () {
     });
   }
 
+  // Grant the Host's account access to an app-created file (best-effort, idempotent).
+  // drive.file lets us manage sharing on files the app created. We never email a
+  // notification (that would spam the Host), and a failure here never blocks the save.
+  function shareWithHost(fileId, token) {
+    if (!SHARE_WITH_EMAIL) return Promise.resolve(false);
+    const url = "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(fileId) +
+                "/permissions?sendNotificationEmail=false&fields=id";
+    return fetch(url, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "user", role: SHARE_ROLE, emailAddress: SHARE_WITH_EMAIL })
+    }).then((r) => {
+      if (r.ok || r.status === 400) return true;   // 400 = already shared / can't share with self → fine
+      return r.text().then((t) => { console.warn("Vertex.drive: share failed", r.status, t); return false; });
+    }).catch((e) => { console.warn("Vertex.drive: share error", e); return false; });
+  }
+
   /* =====================================================================
      ▼▼▼  SEAM — hand the parsed character object to the character sheet  ▼▼▼
      This is the placeholder you asked for. It is already wired to your
@@ -288,10 +310,20 @@ Vertex.drive = (function () {
     if (!char) { notify("No character is loaded to save."); return; }
 
     notify("Saving “" + (char.name || "character") + "” to Drive…");
+    let savedId = null;
     getToken()
       .then((token) => saveFlow(char, token, false))
       .then((fileId) => {
-        if (Vertex.app && typeof Vertex.app.onDriveSaved === "function") Vertex.app.onDriveSaved(char.id, fileId);
+        savedId = fileId;
+        // Auto-share the file with the Host — skip the call if it's already shared.
+        const already = char.driveSharedWith === SHARE_WITH_EMAIL;
+        if (!SHARE_WITH_EMAIL || already) return already;
+        return getToken().then((t) => shareWithHost(savedId, t));
+      })
+      .then((shared) => {
+        const sharedEmail = shared ? SHARE_WITH_EMAIL : null;
+        if (Vertex.app && typeof Vertex.app.onDriveSaved === "function")
+          Vertex.app.onDriveSaved(char.id, savedId, sharedEmail);
         notify("Saved “" + (char.name || "character") + "” to Google Drive.");
       })
       .catch((err) => { console.error("Vertex.drive:", err); notify(err.message || "Could not save to Drive."); });

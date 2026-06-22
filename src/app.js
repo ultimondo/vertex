@@ -202,9 +202,12 @@ Vertex.app = (function () {
   }
   // ---- Google Drive seams (used by Vertex.drive) ----
   function getActive() { return active(); }
-  function onDriveSaved(id, fileId) {
+  function onDriveSaved(id, fileId, sharedEmail) {
     const c = state.list.find(x => x.id === id);
-    if (c && fileId) { c.driveFileId = fileId; save(); }   // remember the file for in-place updates
+    if (!c) return;
+    if (fileId) c.driveFileId = fileId;        // remember the file for in-place updates
+    if (sharedEmail) c.driveSharedWith = sharedEmail;  // remember we've shared it with the Host
+    save();
   }
 
   /* ---------------- menu + misc ---------------- */
