@@ -37,16 +37,19 @@ before making product or design assumptions** — name the decision ("X vs Y") r
   pickable data (extract from the guides; creator verifies). Character creation = a browsable picker.
 - **Creation stat model:** **v004** — start **1/1/1**, allocate **up to +5** via Archetype Core Stat
   Tags (≤ +3 per Archetype). *(Resolved; the "+3/+2/+1" doc is stale.)*
-- **Aesthetic:** **setting-neutral "core Vertex"** — the **chrome is deep dark purple** over near-black
-  (a *neutral* accent that does NOT favor any one stat; the creator was explicit the base must not read as
-  "Red"). The three Core Stats appear as **painterly crimson / emerald / indigo ONLY where semantic**
-  (stat values, tags, meters), never as the background. Fate = brighter purple. **Film/canvas grain +
-  inky cloud texture**, atmospheric washes, the **dissolving-self** motif, and **chromatic aberration** on
-  the wordmark + character names. **Portrait placeholders are identical for every character** — one shared
-  dark-purple gloss + initials (art-upload later). Display **Cormorant Garamond**; body **Inter**.
-  **Layout:** tabs live in the title bar; a full-width identity band (Name · epithet · Designation) sits
-  beneath it; portrait card (large, near the left edge) + content cards start on one line below.
-  Weird West parchment = a later skin.
+- **Aesthetic — REVISED 2026-06-21 → BLACK & WHITE.** The creator reversed the deep-purple direction: the
+  app is now **pure black (`#000`) chrome + pure white (`#fff`) text, flat, with NO background glows/washes
+  and no chromatic-aberration wordmark** (called out as reading "AI-generated"). **Color is reserved for
+  SEMANTICS only:** the three Core Stats (**red `#d23b2c` / green `#2fa074` / blue `#5277b8`**, kept) and the
+  **Core-tab resource bars** — **Fate `#a274ec` · HP gold `#c9a24a` · Armor steel `#9aa0aa` · Temp HP
+  `#c4bdcf`** (kept). Everything else (incl. former gold status accents, purple buttons/dots) is monochrome.
+  Colorings should be **flat or a professional gradient — never random**. Implemented in `styles/app.css`
+  (token-driven `:root`). *Kept from before:* display **Cormorant Garamond** / body **Inter**; identical
+  per-character **portrait placeholders** (now a neutral charcoal gloss + initials); **Layout** — tabs in the
+  title bar, full-width identity band (Name · epithet · Designation), large left portrait + content cards.
+  > ⚠️ This **supersedes the deep-purple palette in §9-decisions above and all of §11** (still written for the
+  > old look — pending rewrite as the redesign settles; the creator is iterating "one thing at a time").
+  > The Weird West parchment skin remains a possible later setting-skin.
 - **HOUSE RULE — Feature Uses (refines v004):** the app tracks Feature Uses **per-feature**
   (each Major/Minor Feature has its own independent use track + reset), and **each track's maximum equals
   the character's Blue score** (creator clarification, 2026-06-20). So at Blue 2, every Feature is
@@ -358,6 +361,11 @@ Total Armor from equipped Wearables · effective stats after Crossing suspension
 ---
 
 ## 11. Aesthetic — the "core Vertex" visual language (from the creator's mood board)
+
+> ⚠️ **SUPERSEDED 2026-06-21 (deep-purple → black & white).** Everything below describes the *old*
+> deep-purple chrome and is **stale for the live app**. The current direction is **pure black/white, flat,
+> color only for the Core Stats + Core-tab resource bars** — see the revised Aesthetic decision in §1.
+> This section is kept for history/mood-board reference until it's rewritten for the new look.
 
 The creator's **mood board** (`D:\TTRPG\Vertex\App\moodboard\`, ~90 images, read 2026-06-20) is the
 authority on the look. It is remarkably coherent: **painterly portraiture of the dissolving self** —
