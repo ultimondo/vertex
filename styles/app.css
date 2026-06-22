@@ -263,6 +263,32 @@ input, textarea{ font-family:inherit; }
   padding:10px 18px; border-radius:10px; z-index:60; opacity:0; transition:.25s; font-size:13px; box-shadow:0 20px 50px -20px #000; pointer-events:none; }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
+/* ================== Google Drive: disclosure + auto-sync ================== */
+.drive-modal{ position:fixed; inset:0; z-index:130; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:rgba(5,4,9,.74); backdrop-filter:blur(7px); animation:fade .2s ease; }
+.drive-card{ width:min(440px,94vw); padding:26px 26px 22px; border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 30%), var(--ink-2);
+  border:1px solid var(--line-2); box-shadow:0 40px 120px -30px #000; }
+.drive-card h3{ font-size:24px; margin-bottom:12px; }
+.drive-card p{ color:var(--dim); font-size:13.5px; margin:0 0 11px; }
+.drive-card p b{ color:var(--bone); }
+.drive-card .drow{ display:flex; gap:10px; margin-top:18px; }
+.drive-card .drow button{ flex:1; padding:11px; border-radius:10px; font-size:13px; }
+.drive-card .ok{ background:var(--fate); border:1px solid var(--fate); color:#170c29; font-weight:600; }
+.drive-card .ok:hover{ filter:brightness(1.08); }
+.drive-card .no{ background:transparent; border:1px solid var(--line-2); color:var(--dim); }
+.drive-card .no:hover{ color:#fff; border-color:var(--bone); }
+
+.menu .syncrow{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 10px 4px; margin-top:3px; border-top:1px solid var(--line); }
+.menu .syncrow .lab{ font-size:12px; color:var(--dim); line-height:1.25; }
+.menu .syncrow .lab em{ display:block; font-style:normal; font-size:10px; letter-spacing:.3px; color:var(--faint); }
+.menu .syncrow .tg{ flex:none; font-size:11px; color:var(--dim); background:transparent;
+  border:1px solid var(--line-2); border-radius:999px; padding:5px 14px; }
+.menu .syncrow .tg:hover{ color:#fff; }
+.menu .syncrow .tg.on{ color:#170c29; background:var(--fate); border-color:var(--fate); font-weight:600; }
+.menu .syncrow .tg.on:hover{ color:#170c29; filter:brightness(1.08); }
+
 /* ======================= creation wizard ======================= */
 #overlay:empty{ display:none; }
 #overlay{ position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:24px;

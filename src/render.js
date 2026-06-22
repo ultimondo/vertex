@@ -181,6 +181,7 @@ Vertex.render = (function () {
         <span class="who"><span class="nm">${esc(c.name)}</span><br><span class="ds">${esc(c.designation ? c.designation.name : "No designation")}</span></span>
         <button class="del" title="Delete" onclick="event.stopPropagation();Vertex.app.deleteCharacter('${c.id}')">✕</button>
       </div>`).join("");
+    const syncOn = !!(window.Vertex.drive && Vertex.drive.autoSyncPref && Vertex.drive.autoSyncPref());
     return `<div class="mlabel">Characters</div>${items}
       <div class="mfoot">
         <button onclick="Vertex.app.exportCurrent()">Export</button>
@@ -188,6 +189,10 @@ Vertex.render = (function () {
         <button onclick="Vertex.app.importPrompt()">Import</button>
         <button onclick="Vertex.drive.open()">Load from Drive</button>
         <button onclick="Vertex.create.open()">+ New</button>
+      </div>
+      <div class="syncrow">
+        <span class="lab">Auto-sync to Drive<em>${syncOn ? "backing up as you play" : "off — saves stay on this device"}</em></span>
+        <button class="tg ${syncOn ? "on" : ""}" onclick="event.stopPropagation();Vertex.drive.toggleAutoSync()">${syncOn ? "On" : "Off"}</button>
       </div>`;
   }
 

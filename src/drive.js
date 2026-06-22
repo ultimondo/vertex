@@ -41,9 +41,17 @@ Vertex.drive = (function () {
   const FOLDER_NAME = "Vertex Characters";
   const FOLDER_KEY  = "vertex.driveFolderId";   // cached folder id (localStorage)
 
+  // localStorage keys for auto-sync state.
+  const AUTOSYNC_KEY  = "vertex.driveAutoSync";   // "1" on · "0" off
+  const CONNECTED_KEY = "vertex.driveConnected";  // "1" once the user has granted access
+  const NOTICE_KEY    = "vertex.driveNoticeAck";  // disclosure acknowledged
+  const OFFER_KEY     = "vertex.driveOffered";    // connect offered on creation (once)
+
   let tokenClient = null;   // GIS token client (created once)
   let accessToken = null;   // current short-lived OAuth access token
   let pickerLoaded = false; // has gapi's 'picker' module finished loading?
+  const timers     = {};    // per-character debounce timers (charId -> timeout)
+  const lastSynced = {};    // charId -> last payload we pushed (skip no-op syncs)
 
   /* ---------- small helpers (no external deps) ---------- */
 
@@ -103,6 +111,7 @@ Vertex.drive = (function () {
           return reject(new Error("Google sign-in was cancelled or failed."));
         }
         accessToken = resp.access_token;
+        markConnected();
         resolve(accessToken);
       };
       // Prompt for consent the first time; silently refresh afterward.
@@ -266,6 +275,116 @@ Vertex.drive = (function () {
     }).catch((e) => { console.warn("Vertex.drive: share error", e); return false; });
   }
 
+  /* ---------- one-time disclosure notice ---------- */
+
+  // Shown once before the first Drive action. Resolves on "continue",
+  // rejects with "cancelled" on "not now" (the caller then aborts quietly).
+  function ensureDisclosure() {
+    if (localStorage.getItem(NOTICE_KEY) === "1") return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const wrap = document.createElement("div");
+      wrap.className = "drive-modal";
+      const hostLine = SHARE_WITH_EMAIL
+        ? "<p>When you save a character to Google Drive, a copy is automatically shared with your game’s Host (<b>" + SHARE_WITH_EMAIL + "</b>) so they always have it.</p>"
+        : "";
+      wrap.innerHTML =
+        '<div class="drive-card" role="dialog" aria-modal="true">' +
+          "<h3>Saving to Google Drive</h3>" +
+          hostLine +
+          "<p><b>Auto-sync</b> keeps your character backed up to your own Google Drive as you play. You can turn it off anytime from the character menu.</p>" +
+          "<p>You’ll sign in with your own Google account, and Vertex only ever touches the files you save or pick — never the rest of your Drive.</p>" +
+          '<div class="drow">' +
+            '<button class="no" type="button">Not now</button>' +
+            '<button class="ok" type="button">Got it, continue</button>' +
+          "</div>" +
+        "</div>";
+      const finish = (ok) => { wrap.remove(); ok ? resolve() : reject(new Error("cancelled")); };
+      wrap.querySelector(".ok").addEventListener("click", () => { localStorage.setItem(NOTICE_KEY, "1"); finish(true); });
+      wrap.querySelector(".no").addEventListener("click", () => finish(false));
+      wrap.addEventListener("click", (e) => { if (e.target === wrap) finish(false); });
+      document.body.appendChild(wrap);
+    });
+  }
+
+  /* ---------- connection + auto-sync state ---------- */
+
+  function markConnected() {
+    localStorage.setItem(CONNECTED_KEY, "1");
+    if (localStorage.getItem(AUTOSYNC_KEY) === null) localStorage.setItem(AUTOSYNC_KEY, "1");  // default on
+    refreshMenu();
+  }
+  function autoSyncPref()    { return localStorage.getItem(AUTOSYNC_KEY) === "1"; }
+  function autoSyncEnabled() { return configured() && localStorage.getItem(CONNECTED_KEY) === "1" && autoSyncPref(); }
+  function refreshMenu()     { if (Vertex.app && typeof Vertex.app.refreshMenu === "function") Vertex.app.refreshMenu(); }
+  function activeChar()      { return (Vertex.app && typeof Vertex.app.getActive === "function") ? Vertex.app.getActive() : null; }
+
+  function toggleAutoSync() {
+    if (autoSyncPref()) {                                       // turn OFF
+      localStorage.setItem(AUTOSYNC_KEY, "0");
+      Object.keys(timers).forEach((k) => clearTimeout(timers[k]));
+      refreshMenu(); notify("Auto-sync to Drive is off.");
+    } else {                                                    // turn ON
+      localStorage.setItem(AUTOSYNC_KEY, "1");
+      if (localStorage.getItem(CONNECTED_KEY) === "1") {
+        refreshMenu(); notify("Auto-sync to Drive is on."); scheduleAutoSave(activeChar(), 200);
+      } else {
+        ensureDisclosure().then(() => save()).catch(() => {});  // connect first; save() handles upload + share
+      }
+    }
+  }
+
+  /* ---------- silent auto-save ---------- */
+
+  // Get a token WITHOUT ever showing UI; resolves null if interaction would be needed.
+  function requestTokenSilent() {
+    return ensureTokenClient().then(() => new Promise((resolve) => {
+      tokenClient.callback = (resp) => {
+        if (resp && resp.access_token) { accessToken = resp.access_token; markConnected(); resolve(accessToken); }
+        else resolve(null);
+      };
+      try { tokenClient.requestAccessToken({ prompt: "" }); } catch (_) { resolve(null); }
+    })).catch(() => null);
+  }
+  function getTokenSilent() { return accessToken ? Promise.resolve(accessToken) : requestTokenSilent(); }
+
+  function scheduleAutoSave(char, delay) {
+    if (!autoSyncEnabled() || !char) return;
+    clearTimeout(timers[char.id]);
+    timers[char.id] = setTimeout(() => { delete timers[char.id]; autoSave(char); }, delay == null ? 2500 : delay);
+  }
+
+  function autoSave(char) {
+    if (!autoSyncEnabled() || !char) return;
+    const payload = JSON.stringify(char);
+    if (lastSynced[char.id] === payload) return;        // nothing changed since last sync
+    getTokenSilent().then((token) => {
+      if (!token) return;                               // can't get a token silently — skip; retry on next change
+      lastSynced[char.id] = payload;                    // optimistic: dedupe concurrent triggers
+      return saveFlow(char, token, false).then((fileId) => {
+        const already = char.driveSharedWith === SHARE_WITH_EMAIL;
+        const shareP  = (!SHARE_WITH_EMAIL || already) ? Promise.resolve(already) : shareWithHost(fileId, token);
+        return shareP.then((shared) => {
+          if (Vertex.app && typeof Vertex.app.onDriveSaved === "function")
+            Vertex.app.onDriveSaved(char.id, fileId, shared ? SHARE_WITH_EMAIL : null);
+          notify("Synced to Drive ✓");
+        });
+      });
+    }).catch((e) => { console.warn("Vertex.drive auto-save:", e); lastSynced[char.id] = null; });
+  }
+
+  // Called by the controller after every local save (edits).
+  function noteChange() {
+    if (!autoSyncEnabled()) return;
+    scheduleAutoSave(activeChar(), 2500);
+  }
+  // Called by the controller right after a character is created.
+  function onCharacterCreated() {
+    if (autoSyncEnabled()) { scheduleAutoSave(activeChar(), 600); return; }
+    if (localStorage.getItem(OFFER_KEY) === "1") return;        // only offer to connect once
+    localStorage.setItem(OFFER_KEY, "1");
+    save();   // disclosure → connect → upload + share; aborts quietly if declined
+  }
+
   /* =====================================================================
      ▼▼▼  SEAM — hand the parsed character object to the character sheet  ▼▼▼
      This is the placeholder you asked for. It is already wired to your
@@ -292,11 +411,12 @@ Vertex.drive = (function () {
     }
     // All async work is kicked off by a real user click, which keeps the
     // OAuth popup and the Picker from being blocked by the browser.
-    ensureTokenClient()
+    ensureDisclosure()
+      .then(ensureTokenClient)
       .then(loadPicker)
       .then(requestToken)
       .then(showPicker)
-      .catch((err) => { console.error("Vertex.drive:", err); notify(err.message || "Could not open Google Drive."); });
+      .catch((err) => { if (err && err.message === "cancelled") return; console.error("Vertex.drive:", err); notify(err.message || "Could not open Google Drive."); });
   }
 
   // SAVE: push the active character UP to Drive — updates its file in place if it
@@ -309,9 +429,9 @@ Vertex.drive = (function () {
     const char = (Vertex.app && typeof Vertex.app.getActive === "function") ? Vertex.app.getActive() : null;
     if (!char) { notify("No character is loaded to save."); return; }
 
-    notify("Saving “" + (char.name || "character") + "” to Drive…");
     let savedId = null;
-    getToken()
+    ensureDisclosure()
+      .then(() => { notify("Saving “" + (char.name || "character") + "” to Drive…"); return getToken(); })
       .then((token) => saveFlow(char, token, false))
       .then((fileId) => {
         savedId = fileId;
@@ -326,8 +446,11 @@ Vertex.drive = (function () {
           Vertex.app.onDriveSaved(char.id, savedId, sharedEmail);
         notify("Saved “" + (char.name || "character") + "” to Google Drive.");
       })
-      .catch((err) => { console.error("Vertex.drive:", err); notify(err.message || "Could not save to Drive."); });
+      .catch((err) => { if (err && err.message === "cancelled") return; console.error("Vertex.drive:", err); notify(err.message || "Could not save to Drive."); });
   }
 
-  return { open, save };
+  // Once loaded, refresh the menu so the auto-sync toggle reflects saved state.
+  setTimeout(refreshMenu, 0);
+
+  return { open, save, noteChange, onCharacterCreated, autoSyncPref, toggleAutoSync };
 })();

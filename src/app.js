@@ -34,10 +34,17 @@ Vertex.app = (function () {
     setTab(state.activeTab);
   }
 
+  let suppressAutoSync = false;
   function save() {
     const ok = S().saveAll(state.list);
     S().setActiveId(state.activeId);
     if (!ok) toast("Couldn’t save — storage may be full (large portrait image?).");
+    // Nudge the silent Drive auto-save (no-op unless the player enabled it).
+    if (!suppressAutoSync && window.Vertex.drive && Vertex.drive.noteChange) Vertex.drive.noteChange();
+  }
+  function refreshMenu() {
+    const m = document.getElementById("menu");
+    if (m) m.innerHTML = R().menu(state.list, state.activeId);
   }
 
   /* ---------------- rendering ---------------- */
@@ -174,6 +181,7 @@ Vertex.app = (function () {
     state.list.push(c); state.activeId = c.id;
     closeMenu(); save(); renderAll(); setTab("core");
     toast(`“${c.name}” manifested.`);
+    if (window.Vertex.drive && Vertex.drive.onCharacterCreated) Vertex.drive.onCharacterCreated();
   }
   function deleteCharacter(id) {
     const c = state.list.find(x => x.id === id);
@@ -207,7 +215,7 @@ Vertex.app = (function () {
     if (!c) return;
     if (fileId) c.driveFileId = fileId;        // remember the file for in-place updates
     if (sharedEmail) c.driveSharedWith = sharedEmail;  // remember we've shared it with the Host
-    save();
+    suppressAutoSync = true; save(); suppressAutoSync = false;   // persist without re-triggering auto-save
   }
 
   /* ---------------- menu + misc ---------------- */
@@ -227,6 +235,6 @@ Vertex.app = (function () {
     init, setTab, stepStat, stepRes, setArmor, setDrift, toggleUse, resetFeature,
     setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
     switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
-    getActive, onDriveSaved, toggleMenu
+    getActive, onDriveSaved, refreshMenu, toggleMenu
   };
 })();
