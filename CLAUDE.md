@@ -427,6 +427,17 @@ Weird West direction, not the core identity.
 
 ## 12. How to Work on This Project (creator's standing preferences)
 
+**Efficiency & concision (2026-06-22 — applies to every response; prioritize this over thoroughness of commentary).**
+- **Be concise; save usage.** Give the shortest reply that fully does the job. Cut preamble, recaps of what
+  you just did, restating the request, and narrating paths you won't take. Lead with the result.
+- **Thorough on steps, terse elsewhere.** When explaining how to do something, be complete about the actual
+  steps; drop the surrounding commentary and background.
+- **Succinct code.** Smallest correct change; match the surrounding style; no scaffolding, comments, or
+  abstraction the task doesn't need.
+- **Implement surgically.** Touch only what the change requires. Don't refactor untouched code, rename, or
+  sweep the project to land one feature. Find the minimal edit path; if a wider refactor is truly warranted,
+  name it and ask first.
+
 From the creator's design instructions (philosophy/voice still fully current):
 - **Be a creative collaborator, not a yes-machine.** Lead with the honest read; push back when something
   fights the Three Pillars; flag pitfalls before they bite.
