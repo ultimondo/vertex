@@ -32,32 +32,29 @@
 
   <!-- ============ page ============ -->
   <div class="page">
-    <div class="idband">
-      <h1 id="idName" contenteditable="true" spellcheck="false"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
-          onblur="Vertex.app.editName(this.textContent)">Mara Quill</h1>
-      <span class="epithet" id="idEpithet">the version of you that you have never met</span>
-      <span class="dot">·</span>
-      <span class="desig">Designation <b id="idDesig">Blacksmith</b></span>
-    </div>
+    <header class="idband">
+      <div class="portrait" id="portrait" onclick="Vertex.app.choosePortrait()" title="Click to set the character image"></div>
+      <div class="idtext">
+        <h1 id="idName" contenteditable="true" spellcheck="false"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+            onblur="Vertex.app.editName(this.textContent)">Mara Quill</h1>
+        <div class="desig">Designation <b id="idDesig">Blacksmith</b></div>
+      </div>
+    </header>
 
-    <div class="shell">
-      <aside class="rail">
-        <div class="portrait" id="portrait" onclick="Vertex.app.choosePortrait()"></div>
-        <input type="file" id="portraitInput" accept="image/*" hidden onchange="Vertex.app.onPortraitFile(this.files[0])">
-        <input type="file" id="importInput" accept="application/json,.json" hidden onchange="Vertex.app.onImportFile(this.files[0])">
-      </aside>
-      <main>
-        <section class="tabpanel active" id="tab-core"></section>
-        <section class="tabpanel" id="tab-archetypes"></section>
-        <section class="tabpanel" id="tab-bonds"></section>
-        <section class="tabpanel" id="tab-designation"></section>
-        <section class="tabpanel" id="tab-gear"></section>
-        <!-- Cast tab removed from the UI (2026-06-21); its engine + render code
-             are preserved (Vertex.render.cast/castResult, Vertex.app.doCast,
-             Vertex.dice) for reuse elsewhere. -->
-      </main>
-    </div>
+    <input type="file" id="portraitInput" accept="image/*" hidden onchange="Vertex.app.onPortraitFile(this.files[0])">
+    <input type="file" id="importInput" accept="application/json,.json" hidden onchange="Vertex.app.onImportFile(this.files[0])">
+
+    <main>
+      <section class="tabpanel active" id="tab-core"></section>
+      <section class="tabpanel" id="tab-archetypes"></section>
+      <section class="tabpanel" id="tab-bonds"></section>
+      <section class="tabpanel" id="tab-designation"></section>
+      <section class="tabpanel" id="tab-gear"></section>
+      <!-- Cast tab removed from the UI (2026-06-21); its engine + render code
+           are preserved (Vertex.render.cast/castResult, Vertex.app.doCast,
+           Vertex.dice) for reuse elsewhere. -->
+    </main>
   </div>
 
   <div class="toast" id="toast"></div>

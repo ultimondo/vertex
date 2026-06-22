@@ -17,48 +17,60 @@ Vertex.render = (function () {
   function core(c) {
     const s = c.stats, r = c.res, d = M().derived(c);
     const spent = M().archetypePointsSpent(c);
-    const statRow = (key, label, derivedHTML) => `
-      <div class="statrow ${key}">
-        <div class="sval">${s[key]}</div>
-        <div class="sname">${label}</div>
-        <div class="sdom">${DOMAINS[key]}</div>
-        <div class="sder">${derivedHTML}</div>
-        <div class="ministep">
-          <button title="decrease" onclick="Vertex.app.stepStat('${key}',-1)">−</button>
-          <button title="increase" onclick="Vertex.app.stepStat('${key}',1)">+</button>
+    // The Monument: each Core Stat is a large serif numeral carrying its colour,
+    // with a ghost numeral behind for depth and quiet hover steppers to edit it.
+    const mono = (key, label, derivedHTML) => `
+      <div class="mn ${key}">
+        <span class="ghost" aria-hidden="true">${s[key]}</span>
+        <div class="mnstep">
+          <button title="decrease ${label}" onclick="Vertex.app.stepStat('${key}',-1)">−</button>
+          <button title="increase ${label}" onclick="Vertex.app.stepStat('${key}',1)">+</button>
         </div>
+        <div class="big">${s[key]}</div>
+        <div class="lbl">${label}</div>
+        <div class="dom">${DOMAINS[key]}</div>
+        <div class="der">${derivedHTML}</div>
       </div>`;
     const note = spent > 5
       ? `<div class="statnote warn">⚠ ${spent} of 5 Archetype Core-Stat points allocated — over the v004 limit of 5.</div>`
       : `<div class="statnote">Start 1 / 1 / 1 · ${spent} of 5 Archetype Core-Stat points allocated.</div>`;
     return `
-    <div class="panel">
-      <div class="head"><h2>Core Stats</h2></div>
-      ${statRow("red", "Red", `Max HP <b class="red">${d.maxHP}</b>`)}
-      ${statRow("green", "Green", `Move <b class="green">${d.move}u</b> · Difficulty <b class="green">${d.difficulty}</b>`)}
-      ${statRow("blue", "Blue", `Feature Uses <b class="blue">${d.featureUses}</b>`)}
-      ${note}
+    <div class="monnum">
+      ${mono("red", "Red", `Max HP <b class="red">${d.maxHP}</b>`)}
+      ${mono("green", "Green", `Move <b class="green">${d.move}u</b> · Difficulty <b class="green">${d.difficulty}</b>`)}
+      ${mono("blue", "Blue", `Feature Uses <b class="blue">${d.featureUses}</b>`)}
     </div>
-    <div class="panel">
-      <div class="head"><h2>Resources</h2></div>
-      ${meter("fate", "Fate", r.fate.cur, d.fateMax)}
-      ${meter("hp", "Hit Points", r.hp.cur, d.maxHP)}
-      <div class="res"><span class="k">Armor</span>
-        <div class="armorpips">${[1,2,3,4,5].map(n => `<span class="apip ${n <= r.armor ? "on" : ""}" onclick="Vertex.app.setArmor(${n})"></span>`).join("")}</div>
+    ${note}
+    <div class="monlow">
+      <div class="resblock">
+        <div class="blabel">Resources</div>
+        <div class="resgrid">
+          ${meter("fate", "Fate", r.fate.cur, d.fateMax)}
+          ${meter("hp", "Hit Points", r.hp.cur, d.maxHP)}
+          ${armorMeter(r.armor)}
+          ${meter("temp", "Temp HP", r.temp.cur, d.tempMax)}
+        </div>
       </div>
-      ${meter("temp", "Temp HP", r.temp.cur, d.tempMax)}
     </div>`;
   }
 
   function meter(key, label, cur, max) {
     const pct = max > 0 ? (100 * cur / max) : 0;
-    return `<div class="res"><span class="k">${label}</span>
+    return `<div class="meter ${key}"><span class="mk">${label}</span>
       <div class="stepper">
         <button onclick="Vertex.app.stepRes('${key}',-1)">−</button>
-        <span class="v">${cur} / ${max}</span>
+        <span class="mv">${cur} / ${max}</span>
         <button onclick="Vertex.app.stepRes('${key}',1)">+</button>
       </div>
-      <div class="bar ${key}"><i style="width:${pct}%"></i></div></div>`;
+      <div class="track"><i style="width:${pct}%"></i></div></div>`;
+  }
+
+  function armorMeter(armor) {
+    const pips = [1,2,3,4,5].map(n =>
+      `<span class="p ${n <= armor ? "on" : ""}" onclick="Vertex.app.setArmor(${n})"></span>`).join("");
+    return `<div class="meter armor"><span class="mk">Armor</span>
+      <div class="stepper"><span class="mv">${armor} / 5</span></div>
+      <div class="pips">${pips}</div></div>`;
   }
 
   function archetypes(c) {

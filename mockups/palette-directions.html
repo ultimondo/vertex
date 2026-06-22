@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — palette directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== shared type + component system (token-driven; tokens swap per direction) ===== */
+  :root{
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Inter",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --r-lg:16px; --r:11px; --r-sm:8px; --r-pill:999px;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--sans); background:#000; color:#fff; }
+
+  .intro{ max-width:1100px; margin:0 auto; padding:54px 32px 18px; }
+  .intro .kicker{ font-family:var(--mono); font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#888; }
+  .intro h1{ font-family:var(--serif); font-weight:600; font-size:46px; margin:10px 0 14px; }
+  .intro p{ max-width:62ch; color:#b4b4b4; font-size:15px; line-height:1.6; }
+  .intro b{ color:#fff; font-weight:600; }
+
+  /* ===== one direction band ===== */
+  .dir{ position:relative; padding:56px 0 72px; background:var(--canvas); color:var(--bone); border-top:1px solid var(--line); overflow:hidden; }
+  .dir.grain::after{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .wrap{ position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 32px; }
+
+  /* direction header */
+  .dirhead{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;
+    padding-bottom:26px; margin-bottom:34px; border-bottom:1px solid var(--line); }
+  .dirhead .lead{ display:flex; align-items:baseline; gap:16px; }
+  .dirhead .num{ font-family:var(--mono); font-size:13px; letter-spacing:2px; color:var(--faint); }
+  .dirhead h2{ font-family:var(--serif); font-weight:600; font-size:34px; margin:0; }
+  .dirhead .why{ font-family:var(--mono); font-size:11px; letter-spacing:.4px; color:var(--dim); max-width:40ch; line-height:1.5; text-align:right; }
+  .sw{ display:flex; gap:7px; margin-top:14px; }
+  .sw i{ width:30px; height:30px; border-radius:7px; border:1px solid var(--line); display:block; }
+
+  /* identity band */
+  .idband{ margin-bottom:40px; }
+  .idband .name{ font-family:var(--serif); font-weight:600; font-size:62px; line-height:1; letter-spacing:.2px; }
+  .idband .ep{ font-family:var(--serif); font-style:italic; font-size:20px; color:var(--faint); margin-top:8px; display:block; }
+  .idband .ds{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin-top:14px; display:block; }
+  .idband .ds b{ color:var(--bone); font-weight:600; }
+
+  /* stat triptych — the impact move: huge serif numerals carry the stat colors */
+  .trip{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-bottom:44px; }
+  .stat{ padding:4px 26px; border-left:1px solid var(--line); }
+  .stat:first-child{ padding-left:0; border-left:0; }
+  .stat .num{ font-family:var(--serif); font-weight:600; font-size:108px; line-height:.92; }
+  .stat .nm{ font-family:var(--mono); font-size:12px; letter-spacing:4px; text-transform:uppercase; margin-top:4px; }
+  .stat .dom{ font-size:12.5px; color:var(--dim); margin-top:12px; line-height:1.5; max-width:22ch; }
+  .stat .der{ font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+  .stat .der b{ color:var(--bone); font-weight:600; }
+  .stat.red .num,.stat.red .nm{ color:var(--red); }
+  .stat.green .num,.stat.green .nm{ color:var(--green); }
+  .stat.blue .num,.stat.blue .nm{ color:var(--blue); }
+  .stat .der b.red{ color:var(--red); } .stat .der b.green{ color:var(--green); } .stat .der b.blue{ color:var(--blue); }
+
+  /* lower grid: resources + one archetype */
+  .lower{ display:grid; grid-template-columns:1.1fr 1fr; gap:30px; align-items:start; }
+  .block .blabel{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); margin-bottom:16px; }
+
+  .meter{ display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .meter:last-child{ border-bottom:0; }
+  .meter .mk{ width:96px; font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:var(--dim); flex:none; }
+  .meter .mv{ font-family:var(--mono); font-size:12.5px; color:var(--bone); width:54px; flex:none; font-variant-numeric:tabular-nums; }
+  .meter .track{ flex:1; height:8px; border-radius:var(--r-pill); background:var(--track); overflow:hidden; }
+  .meter .track i{ display:block; height:100%; border-radius:var(--r-pill); }
+  .meter.fate i{ background:var(--fate); } .meter.hp i{ background:var(--gold); } .meter.temp i{ background:var(--temp); }
+  .pips{ flex:1; display:flex; gap:6px; }
+  .pips .p{ flex:1; max-width:34px; height:18px; border-radius:6px; border:1px solid var(--line2); }
+  .pips .p.on{ background:var(--steel); border-color:var(--steel); }
+
+  .arc{ border:1px solid var(--line); border-radius:var(--r); padding:20px 22px; background:var(--card); }
+  .arc .ar1{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+  .arc .an{ font-family:var(--serif); font-weight:600; font-size:27px; }
+  .arc .tagchip{ font-family:var(--mono); font-size:10px; letter-spacing:.8px; text-transform:uppercase; padding:4px 11px; border-radius:var(--r-pill); border:1px solid var(--line2); color:var(--red); }
+  .arc .tl{ font-family:var(--serif); font-style:italic; font-size:18px; color:var(--dim); margin:6px 0 16px; }
+  .arc .drift{ font-family:var(--mono); font-size:11px; color:var(--faint); display:flex; align-items:center; gap:10px; }
+  .arc .notches{ display:flex; gap:5px; }
+  .arc .notch{ width:11px; height:11px; border-radius:50%; border:1px solid var(--line2); }
+  .arc .notch.on{ background:var(--dim); border-color:var(--dim); }
+  .arc .st{ font-family:var(--mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--green); }
+
+  @media (max-width:760px){ .trip{ grid-template-columns:1fr; } .stat{ border-left:0; padding:18px 0; border-top:1px solid var(--line); }
+    .stat:first-child{ border-top:0; padding-top:4px; } .lower{ grid-template-columns:1fr; } }
+
+  /* ============================ DIRECTION TOKENS ============================ */
+  /* 01 — Warm Ink: warm near-black, candlelit, mood-board-true */
+  .warm{ --canvas:#0d0b08; --bone:#f4ece0; --dim:#b1a692; --faint:#796f5e;
+    --line:rgba(244,236,224,.12); --line2:rgba(244,236,224,.22); --card:#171209; --track:rgba(244,236,224,.07);
+    --red:#db4a3c; --green:#3bab7c; --blue:#5f86c8; --fate:#a87fe6; --gold:#cda84e; --steel:#a6aab2; --temp:#cabfd2; }
+
+  /* 02 — Cold Archive: cool graphite, archival, serious */
+  .cold{ --canvas:#0a0d11; --bone:#e9eef3; --dim:#9aa3ad; --faint:#636c76;
+    --line:rgba(233,238,243,.11); --line2:rgba(233,238,243,.2); --card:#141921; --track:rgba(233,238,243,.06);
+    --red:#e44b3c; --green:#33b487; --blue:#5f92da; --fate:#a07ff0; --gold:#c9a850; --steel:#99a1ac; --temp:#c4bdd6; }
+
+  /* 03 — Editorial Bone: warm light, manuscript / museum label */
+  .bone{ --canvas:#f3f0e8; --bone:#1b1713; --dim:#5b5346; --faint:#8b8275;
+    --line:rgba(27,23,19,.12); --line2:rgba(27,23,19,.22); --card:#fbf9f4; --track:rgba(27,23,19,.08);
+    --red:#b3392b; --green:#2b7c55; --blue:#3d62a4; --fate:#7a4fc0; --gold:#9c7a22; --steel:#7d838c; --temp:#9b8fb0; }
+  .bone .arc .st{ color:var(--green); }
+</style>
+</head>
+<body>
+
+  <div class="intro">
+    <div class="kicker">Vertex · design exploration</div>
+    <h1>Three palette directions</h1>
+    <p>Same elevated Core layout, three different canvases. The big move is the
+    <b>stat triptych</b> (the three Core Stats as oversized serif numerals carrying their colors),
+    plus a warmer or cooler base than pure black. Tell me which world feels like <b>Vertex</b>,
+    and I'll apply it to the real app. Each is built from swappable tokens, so the winner ports cleanly.</p>
+  </div>
+
+  <!-- 01 WARM INK -->
+  <section class="dir warm grain">
+    <div class="wrap">
+      <div class="dirhead">
+        <div>
+          <div class="lead"><span class="num">01</span><h2>Warm Ink</h2></div>
+          <div class="sw"><i style="background:#0d0b08"></i><i style="background:#171209"></i><i style="background:#db4a3c"></i><i style="background:#3bab7c"></i><i style="background:#5f86c8"></i><i style="background:#f4ece0"></i></div>
+        </div>
+        <div class="why">Warm near-black, candlelit oil-painting base. Closest to your mood board. The self dissolving in firelight.</div>
+      </div>
+
+      <div class="idband">
+        <div class="name">Mara Quill</div>
+        <span class="ep">the version of you that you have never met</span>
+        <span class="ds">Designation <b>Blacksmith</b></span>
+      </div>
+
+      <div class="trip">
+        <div class="stat red"><div class="num">3</div><div class="nm">Red</div><div class="dom">Force. Presence. Resilience. Fortitude.</div><div class="der">Max HP <b class="red">3</b></div></div>
+        <div class="stat green"><div class="num">2</div><div class="nm">Green</div><div class="dom">Precision. Reflex. Balance. Stealth.</div><div class="der">Move <b class="green">4u</b> · Difficulty <b class="green">1</b></div></div>
+        <div class="stat blue"><div class="num">2</div><div class="nm">Blue</div><div class="dom">Intellect. Discourse. Perception. Abstraction.</div><div class="der">Feature Uses <b class="blue">2</b></div></div>
+      </div>
+
+      <div class="lower">
+        <div class="block">
+          <div class="blabel">Resources</div>
+          <div class="meter fate"><span class="mk">Fate</span><span class="mv">4 / 10</span><div class="track"><i style="width:40%"></i></div></div>
+          <div class="meter hp"><span class="mk">Hit Points</span><span class="mv">3 / 3</span><div class="track"><i style="width:100%"></i></div></div>
+          <div class="meter"><span class="mk">Armor</span><span class="mv">2 / 5</span><div class="pips"><span class="p on"></span><span class="p on"></span><span class="p"></span><span class="p"></span><span class="p"></span></div></div>
+          <div class="meter temp"><span class="mk">Temp HP</span><span class="mv">0 / 3</span><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+        <div class="block">
+          <div class="blabel">Archetype</div>
+          <div class="arc">
+            <div class="ar1"><span class="an">Temper</span><span class="tagchip">Red · +2</span></div>
+            <div class="tl">Heat reveals what the metal always was.</div>
+            <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 2 / 5 <span class="st">· Active</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 COLD ARCHIVE -->
+  <section class="dir cold grain">
+    <div class="wrap">
+      <div class="dirhead">
+        <div>
+          <div class="lead"><span class="num">02</span><h2>Cold Archive</h2></div>
+          <div class="sw"><i style="background:#0a0d11"></i><i style="background:#141921"></i><i style="background:#e44b3c"></i><i style="background:#33b487"></i><i style="background:#5f92da"></i><i style="background:#e9eef3"></i></div>
+        </div>
+        <div class="why">Cool graphite base. The stat colors read crisp and clinical. Erosion as cold clarity, not warmth.</div>
+      </div>
+
+      <div class="idband">
+        <div class="name">Mara Quill</div>
+        <span class="ep">the version of you that you have never met</span>
+        <span class="ds">Designation <b>Blacksmith</b></span>
+      </div>
+
+      <div class="trip">
+        <div class="stat red"><div class="num">3</div><div class="nm">Red</div><div class="dom">Force. Presence. Resilience. Fortitude.</div><div class="der">Max HP <b class="red">3</b></div></div>
+        <div class="stat green"><div class="num">2</div><div class="nm">Green</div><div class="dom">Precision. Reflex. Balance. Stealth.</div><div class="der">Move <b class="green">4u</b> · Difficulty <b class="green">1</b></div></div>
+        <div class="stat blue"><div class="num">2</div><div class="nm">Blue</div><div class="dom">Intellect. Discourse. Perception. Abstraction.</div><div class="der">Feature Uses <b class="blue">2</b></div></div>
+      </div>
+
+      <div class="lower">
+        <div class="block">
+          <div class="blabel">Resources</div>
+          <div class="meter fate"><span class="mk">Fate</span><span class="mv">4 / 10</span><div class="track"><i style="width:40%"></i></div></div>
+          <div class="meter hp"><span class="mk">Hit Points</span><span class="mv">3 / 3</span><div class="track"><i style="width:100%"></i></div></div>
+          <div class="meter"><span class="mk">Armor</span><span class="mv">2 / 5</span><div class="pips"><span class="p on"></span><span class="p on"></span><span class="p"></span><span class="p"></span><span class="p"></span></div></div>
+          <div class="meter temp"><span class="mk">Temp HP</span><span class="mv">0 / 3</span><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+        <div class="block">
+          <div class="blabel">Archetype</div>
+          <div class="arc">
+            <div class="ar1"><span class="an">Temper</span><span class="tagchip">Red · +2</span></div>
+            <div class="tl">Heat reveals what the metal always was.</div>
+            <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 2 / 5 <span class="st">· Active</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 EDITORIAL BONE -->
+  <section class="dir bone">
+    <div class="wrap">
+      <div class="dirhead">
+        <div>
+          <div class="lead"><span class="num">03</span><h2>Editorial Bone</h2></div>
+          <div class="sw"><i style="background:#f3f0e8"></i><i style="background:#fbf9f4"></i><i style="background:#b3392b"></i><i style="background:#2b7c55"></i><i style="background:#3d62a4"></i><i style="background:#1b1713"></i></div>
+        </div>
+        <div class="why">Warm light, manuscript / museum-label. A printed character record. The boldest departure from where you were.</div>
+      </div>
+
+      <div class="idband">
+        <div class="name">Mara Quill</div>
+        <span class="ep">the version of you that you have never met</span>
+        <span class="ds">Designation <b>Blacksmith</b></span>
+      </div>
+
+      <div class="trip">
+        <div class="stat red"><div class="num">3</div><div class="nm">Red</div><div class="dom">Force. Presence. Resilience. Fortitude.</div><div class="der">Max HP <b class="red">3</b></div></div>
+        <div class="stat green"><div class="num">2</div><div class="nm">Green</div><div class="dom">Precision. Reflex. Balance. Stealth.</div><div class="der">Move <b class="green">4u</b> · Difficulty <b class="green">1</b></div></div>
+        <div class="stat blue"><div class="num">2</div><div class="nm">Blue</div><div class="dom">Intellect. Discourse. Perception. Abstraction.</div><div class="der">Feature Uses <b class="blue">2</b></div></div>
+      </div>
+
+      <div class="lower">
+        <div class="block">
+          <div class="blabel">Resources</div>
+          <div class="meter fate"><span class="mk">Fate</span><span class="mv">4 / 10</span><div class="track"><i style="width:40%"></i></div></div>
+          <div class="meter hp"><span class="mk">Hit Points</span><span class="mv">3 / 3</span><div class="track"><i style="width:100%"></i></div></div>
+          <div class="meter"><span class="mk">Armor</span><span class="mv">2 / 5</span><div class="pips"><span class="p on"></span><span class="p on"></span><span class="p"></span><span class="p"></span><span class="p"></span></div></div>
+          <div class="meter temp"><span class="mk">Temp HP</span><span class="mv">0 / 3</span><div class="track"><i style="width:0%"></i></div></div>
+        </div>
+        <div class="block">
+          <div class="blabel">Archetype</div>
+          <div class="arc">
+            <div class="ar1"><span class="an">Temper</span><span class="tagchip">Red · +2</span></div>
+            <div class="tl">Heat reveals what the metal always was.</div>
+            <div class="drift">Drift <span class="notches"><i class="notch on"></i><i class="notch on"></i><i class="notch"></i><i class="notch"></i><i class="notch"></i></span> 2 / 5 <span class="st">· Active</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

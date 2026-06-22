@@ -51,7 +51,6 @@ Vertex.app = (function () {
   function renderAll() {
     const c = active();
     document.getElementById("idName").textContent = c.name;
-    document.getElementById("idEpithet").textContent = c.epithet || "";
     document.getElementById("idDesig").textContent = c.designation ? c.designation.name : "—";
     renderPortrait();
     renderTab("core"); renderTab("archetypes"); renderTab("bonds");
@@ -74,12 +73,13 @@ Vertex.app = (function () {
   function renderPortrait() {
     const c = active();
     const el = document.getElementById("portrait");
+    el.title = c.portrait ? "Click to change the character image" : "Click to set the character image";
     if (c.portrait) {
       el.classList.add("hasart");
-      el.innerHTML = `<img src="${c.portrait}" alt="${c.name}"><span class="uploadhint">click to change art</span>`;
+      el.innerHTML = `<img src="${c.portrait}" alt="${c.name}">`;
     } else {
       el.classList.remove("hasart");
-      el.innerHTML = `<span class="initials">${M().initials(c.name)}</span><span class="uploadhint">click to upload art</span>`;
+      el.innerHTML = `<span class="initials">${M().initials(c.name)}</span>`;
     }
   }
 

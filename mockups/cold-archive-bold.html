@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — Cold Archive, bold takes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Inter",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --r-lg:16px; --r:11px; --r-sm:8px; --r-pill:999px;
+
+    /* Cold Archive palette */
+    --canvas:#0a0d11; --panel:#0e1318; --card:#141a21;
+    --bone:#e9eef3; --dim:#9aa3ad; --faint:#5f6873;
+    --line:rgba(233,238,243,.10); --line2:rgba(233,238,243,.20); --line3:rgba(233,238,243,.045);
+    --red:#e74b3b; --green:#33b487; --blue:#5f92da;
+    --fate:#a07ff0; --gold:#c9a850; --steel:#99a1ac; --temp:#c4bdd6;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--sans); background:var(--canvas); color:var(--bone); -webkit-font-smoothing:antialiased; }
+  /* global cool grain */
+  body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+
+  .intro{ max-width:1180px; margin:0 auto; padding:52px 40px 0; position:relative; z-index:1; }
+  .intro .k{ font-family:var(--mono); font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--faint); }
+  .intro h1{ font-family:var(--serif); font-weight:600; font-size:44px; margin:10px 0 12px; }
+  .intro p{ max-width:64ch; color:var(--dim); font-size:15px; line-height:1.6; } .intro b{ color:var(--bone); font-weight:600; }
+
+  .take{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:34px 40px 80px; }
+  .takemark{ display:flex; align-items:baseline; gap:14px; padding:46px 0 30px; margin-top:36px; border-top:1px solid var(--line); }
+  .takemark .tn{ font-family:var(--mono); font-size:12px; letter-spacing:2px; color:var(--faint); }
+  .takemark h2{ font-family:var(--serif); font-weight:600; font-size:30px; margin:0; }
+  .takemark .note{ font-family:var(--mono); font-size:11px; color:var(--dim); margin-left:auto; max-width:44ch; text-align:right; line-height:1.5; }
+
+  .topstrip{ display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; }
+  .wm{ font-family:"Cinzel",serif; font-size:18px; letter-spacing:7px; color:var(--bone); }
+  .meta{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); }
+
+  /* shared bits */
+  .der b.red{ color:var(--red); } .der b.green{ color:var(--green); } .der b.blue{ color:var(--blue); }
+
+  /* ========================= TAKE A — THE DOSSIER ========================= */
+  .dossier{ display:grid; grid-template-columns:340px 1fr; gap:0; border:1px solid var(--line2); border-radius:var(--r-lg); overflow:hidden; background:var(--panel); }
+  .por{ position:relative; min-height:520px; background:#05080b; overflow:hidden; }
+  .por img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.08) brightness(.86); }
+  .por::after{ content:""; position:absolute; inset:0; background:
+     linear-gradient(180deg, rgba(10,13,17,0) 40%, rgba(10,13,17,.9) 100%),
+     radial-gradient(120% 80% at 50% 18%, rgba(95,146,218,.18), transparent 55%); mix-blend-mode:screen; }
+  .por .pgrain{ position:absolute; inset:0; opacity:.18; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .por .pcap{ position:absolute; left:20px; bottom:18px; right:20px; z-index:2; }
+  .por .pcap .pn{ font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); }
+
+  .dbody{ padding:34px 36px 30px; min-width:0; }
+  .dname{ font-family:var(--serif); font-weight:600; font-size:60px; line-height:.96; letter-spacing:.3px; }
+  .dep{ font-family:var(--serif); font-style:italic; font-size:21px; color:var(--faint); margin-top:10px; }
+  .dds{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin-top:16px; }
+  .dds b{ color:var(--bone); font-weight:600; }
+
+  .rule{ height:1px; background:var(--line); margin:28px 0; }
+
+  .band{ display:grid; grid-template-columns:repeat(3,1fr); }
+  .scell{ padding:2px 22px; border-left:1px solid var(--line); }
+  .scell:first-child{ border-left:0; padding-left:0; }
+  .scell .snum{ font-family:var(--serif); font-weight:600; font-size:88px; line-height:.9; }
+  .scell .snm{ font-family:var(--mono); font-size:11px; letter-spacing:4px; text-transform:uppercase; margin-top:2px; }
+  .scell .der{ font-family:var(--mono); font-size:11px; color:var(--faint); margin-top:12px; }
+  .scell.red .snum,.scell.red .snm{ color:var(--red); }
+  .scell.green .snum,.scell.green .snm{ color:var(--green); }
+  .scell.blue .snum,.scell.blue .snm{ color:var(--blue); }
+
+  .drow{ display:grid; grid-template-columns:1.15fr 1fr; gap:34px; align-items:start; }
+  .blabel{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); margin-bottom:16px; }
+  .meter{ display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .meter:last-child{ border-bottom:0; }
+  .meter .mk{ width:92px; font-size:11.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--dim); flex:none; }
+  .meter .mv{ font-family:var(--mono); font-size:12px; color:var(--bone); width:52px; flex:none; }
+  .track{ flex:1; height:7px; border-radius:var(--r-pill); background:var(--line3); overflow:hidden; }
+  .track i{ display:block; height:100%; }
+  .meter.fate i{ background:var(--fate); } .meter.hp i{ background:var(--gold); } .meter.temp i{ background:var(--temp); }
+  .pips{ flex:1; display:flex; gap:6px; } .pips .p{ flex:1; max-width:32px; height:16px; border-radius:5px; border:1px solid var(--line2); }
+  .pips .p.on{ background:var(--steel); border-color:var(--steel); }
+
+  .arc{ border:1px solid var(--line); border-radius:var(--r); padding:18px 20px; background:var(--card); }
+  .arc .a1{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .arc .an{ font-family:var(--serif); font-weight:600; font-size:25px; }
+  .arc .chip{ font-family:var(--mono); font-size:10px; letter-spacing:.8px; text-transform:uppercase; padding:4px 10px; border-radius:var(--r-pill); border:1px solid rgba(231,75,59,.4); color:var(--red); }
+  .arc .tl{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--dim); margin:5px 0 14px; }
+  .arc .drift{ font-family:var(--mono); font-size:11px; color:var(--faint); display:flex; align-items:center; gap:9px; }
+  .notch{ width:10px; height:10px; border-radius:50%; border:1px solid var(--line2); display:inline-block; }
+  .notch.on{ background:var(--dim); border-color:var(--dim); }
+  .arc .st{ color:var(--green); }
+
+  /* ========================= TAKE B — THE MONUMENT ========================= */
+  .mon .mtop{ display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding-bottom:30px; }
+  .mon .mname{ font-family:var(--serif); font-weight:600; font-size:104px; line-height:.86; letter-spacing:-.5px; max-width:9ch; }
+  .mon .mep{ font-family:var(--serif); font-style:italic; font-size:22px; color:var(--faint); margin-top:18px; max-width:34ch; }
+  .mon .mside{ text-align:right; flex:none; padding-top:10px; }
+  .mon .mside .mds{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); line-height:2; }
+  .mon .mside .mds b{ color:var(--bone); }
+
+  .monnum{ display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line2); border-bottom:1px solid var(--line2); }
+  .mn{ position:relative; padding:40px 26px 34px; border-left:1px solid var(--line); overflow:hidden; }
+  .mn:first-child{ border-left:0; }
+  .mn .big{ font-family:var(--serif); font-weight:700; font-size:200px; line-height:.8; letter-spacing:-4px; }
+  .mn .lbl{ font-family:var(--mono); font-size:12px; letter-spacing:6px; text-transform:uppercase; margin-top:8px; }
+  .mn .dom{ font-size:12px; color:var(--faint); margin-top:14px; line-height:1.5; max-width:24ch; }
+  .mn .der{ font-family:var(--mono); font-size:11.5px; color:var(--dim); margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+  .mn.red .big,.mn.red .lbl{ color:var(--red); }
+  .mn.green .big,.mn.green .lbl{ color:var(--green); }
+  .mn.blue .big,.mn.blue .lbl{ color:var(--blue); }
+  .mn .ghost{ position:absolute; right:-10px; top:-30px; font-family:var(--serif); font-weight:700; font-size:240px; line-height:1; color:var(--bone); opacity:.025; pointer-events:none; }
+
+  .monlow{ display:grid; grid-template-columns:1fr 1fr; gap:48px; padding-top:36px; }
+
+  @media (max-width:880px){
+    .dossier{ grid-template-columns:1fr; } .por{ min-height:360px; }
+    .drow,.monlow{ grid-template-columns:1fr; gap:28px; }
+    .band,.monnum{ grid-template-columns:1fr; }
+    .scell,.mn{ border-left:0; border-top:1px solid var(--line); padding:18px 0; }
+    .scell:first-child,.mn:first-child{ border-top:0; }
+    .mon .mtop{ flex-direction:column; } .mon .mname{ font-size:62px; } .mn .big{ font-size:128px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="intro">
+    <div class="k">Vertex · Cold Archive · two bold takes</div>
+    <h1>Same character, two arguments</h1>
+    <p>Both use the <b>Cold Archive</b> graphite palette you picked. <b>Take A</b> treats the sheet as an
+    archival dossier built around a cool, grain-treated portrait. <b>Take B</b> throws out the portrait as the
+    anchor and makes the three Core Stats <b>monumental</b>, the numbers as architecture. Veto freely. We can also
+    take the portrait treatment from A and the numerals from B, or anything in between.</p>
+  </div>
+
+  <!-- =================== TAKE A — DOSSIER =================== -->
+  <div class="take">
+    <div class="takemark"><span class="tn">A</span><h2>The Dossier</h2>
+      <span class="note">Portrait-led. The cool, grain-treated image gives the page archival weight. Asymmetric, editorial.</span></div>
+
+    <div class="topstrip"><span class="wm">VERTEX</span><span class="meta">Character Record</span></div>
+
+    <div class="dossier">
+      <div class="por">
+        <img src="https://picsum.photos/seed/maraquill-vertex/680/900" alt="">
+        <div class="pgrain"></div>
+        <div class="pcap"><div class="pn">Capture · the image that holds her presence</div></div>
+      </div>
+      <div class="dbody">
+        <div class="dname">Mara Quill</div>
+        <div class="dep">the version of you that you have never met</div>
+        <div class="dds">Designation <b>Blacksmith</b></div>
+
+        <div class="rule"></div>
+
+        <div class="band">
+          <div class="scell red"><div class="snum">3</div><div class="snm">Red</div><div class="der">Max HP <b class="red">3</b></div></div>
+          <div class="scell green"><div class="snum">2</div><div class="snm">Green</div><div class="der">Move <b class="green">4u</b> · Diff <b class="green">1</b></div></div>
+          <div class="scell blue"><div class="snum">2</div><div class="snm">Blue</div><div class="der">Uses <b class="blue">2</b></div></div>
+        </div>
+
+        <div class="rule"></div>
+
+        <div class="drow">
+          <div>
+            <div class="blabel">Resources</div>
+            <div class="meter fate"><span class="mk">Fate</span><span class="mv">4 / 10</span><div class="track"><i style="width:40%"></i></div></div>
+            <div class="meter hp"><span class="mk">Hit Points</span><span class="mv">3 / 3</span><div class="track"><i style="width:100%"></i></div></div>
+            <div class="meter"><span class="mk">Armor</span><span class="mv">2 / 5</span><div class="pips"><span class="p on"></span><span class="p on"></span><span class="p"></span><span class="p"></span><span class="p"></span></div></div>
+            <div class="meter temp"><span class="mk">Temp HP</span><span class="mv">0 / 3</span><div class="track"><i style="width:0%"></i></div></div>
+          </div>
+          <div>
+            <div class="blabel">Archetype</div>
+            <div class="arc">
+              <div class="a1"><span class="an">Temper</span><span class="chip">Red · +2</span></div>
+              <div class="tl">Heat reveals what the metal always was.</div>
+              <div class="drift">Drift <span class="notch on"></span><span class="notch on"></span><span class="notch"></span><span class="notch"></span><span class="notch"></span> 2 / 5 · <span class="st">Active</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== TAKE B — MONUMENT =================== -->
+  <div class="take mon">
+    <div class="takemark"><span class="tn">B</span><h2>The Monument</h2>
+      <span class="note">Typography-led. The stats are the architecture. Stark, vast, the numbers carry everything.</span></div>
+
+    <div class="topstrip"><span class="wm">VERTEX</span><span class="meta">Blacksmith</span></div>
+
+    <div class="mtop">
+      <div>
+        <div class="mname">Mara Quill</div>
+        <div class="mep">the version of you that you have never met</div>
+      </div>
+      <div class="mside"><div class="mds">Designation<br><b>Blacksmith</b></div></div>
+    </div>
+
+    <div class="monnum">
+      <div class="mn red"><span class="ghost">3</span><div class="big">3</div><div class="lbl">Red</div><div class="dom">Force. Presence. Resilience. Fortitude.</div><div class="der">Max HP <b class="red">3</b></div></div>
+      <div class="mn green"><span class="ghost">2</span><div class="big">2</div><div class="lbl">Green</div><div class="dom">Precision. Reflex. Balance. Stealth.</div><div class="der">Move <b class="green">4u</b> · Difficulty <b class="green">1</b></div></div>
+      <div class="mn blue"><span class="ghost">2</span><div class="big">2</div><div class="lbl">Blue</div><div class="dom">Intellect. Discourse. Perception. Abstraction.</div><div class="der">Feature Uses <b class="blue">2</b></div></div>
+    </div>
+
+    <div class="monlow">
+      <div>
+        <div class="blabel">Resources</div>
+        <div class="meter fate"><span class="mk">Fate</span><span class="mv">4 / 10</span><div class="track"><i style="width:40%"></i></div></div>
+        <div class="meter hp"><span class="mk">Hit Points</span><span class="mv">3 / 3</span><div class="track"><i style="width:100%"></i></div></div>
+        <div class="meter"><span class="mk">Armor</span><span class="mv">2 / 5</span><div class="pips"><span class="p on"></span><span class="p on"></span><span class="p"></span><span class="p"></span><span class="p"></span></div></div>
+        <div class="meter temp"><span class="mk">Temp HP</span><span class="mv">0 / 3</span><div class="track"><i style="width:0%"></i></div></div>
+      </div>
+      <div>
+        <div class="blabel">Archetype</div>
+        <div class="arc">
+          <div class="a1"><span class="an">Temper</span><span class="chip">Red · +2</span></div>
+          <div class="tl">Heat reveals what the metal always was.</div>
+          <div class="drift">Drift <span class="notch on"></span><span class="notch on"></span><span class="notch"></span><span class="notch"></span><span class="notch"></span> 2 / 5 · <span class="st">Active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
