@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A **web-based application that is a fully functional interface for playing Vertex**, centered on a
 **fully interactive digital character sheet** that:
 
-- **Follows the aesthetic style of Vertex** (see **§9 Aesthetic**).
+- **Follows the aesthetic style of Vertex** (see **§11 Aesthetic**).
 - Is **fully interactive** — not a static form. It knows the rules: it rolls dice correctly, derives
   values automatically (Max HP, movement, Feature Uses, target Difficulty), tracks resources, and
   surfaces the game's living state (Drift, Faltering/Silent Archetypes, frayed/severed Tethers,
@@ -37,31 +37,49 @@ before making product or design assumptions** — name the decision ("X vs Y") r
   pickable data (extract from the guides; creator verifies). Character creation = a browsable picker.
 - **Creation stat model:** **v004** — start **1/1/1**, allocate **up to +5** via Archetype Core Stat
   Tags (≤ +3 per Archetype). *(Resolved; the "+3/+2/+1" doc is stale.)*
-- **Aesthetic — REVISED 2026-06-21 → BLACK & WHITE.** The creator reversed the deep-purple direction: the
-  app is now **pure black (`#000`) chrome + pure white (`#fff`) text, flat, with NO background glows/washes
-  and no chromatic-aberration wordmark** (called out as reading "AI-generated"). **Color is reserved for
-  SEMANTICS only:** the three Core Stats (**red `#d23b2c` / green `#2fa074` / blue `#5277b8`**, kept) and the
-  **Core-tab resource bars** — **Fate `#a274ec` · HP gold `#c9a24a` · Armor steel `#9aa0aa` · Temp HP
-  `#c4bdcf`** (kept). Everything else (incl. former gold status accents, purple buttons/dots) is monochrome.
-  Colorings should be **flat or a professional gradient — never random**. Implemented in `styles/app.css`
-  (token-driven `:root`). *Kept from before:* display **Cormorant Garamond** / body **Inter**; identical
-  per-character **portrait placeholders** (now a neutral charcoal gloss + initials); **Layout** — tabs in the
-  title bar, full-width identity band (Name · epithet · Designation), large left portrait + content cards.
-  > ⚠️ This **supersedes the deep-purple palette in §9-decisions above and all of §11** (still written for the
-  > old look — pending rewrite as the redesign settles; the creator is iterating "one thing at a time").
-  > The Weird West parchment skin remains a possible later setting-skin.
+- **Aesthetic — CURRENT (2026-06-22): COLD ARCHIVE + the MONUMENT / LEDGER / INDEX framework.** The palette
+  arc was deep-purple → pure black/white → **Cold Archive**. The live app is a **cool near-black graphite**
+  canvas with **cool off-white** text, **flat** (no glows, no chromatic aberration, no gradient washes — all
+  read "AI-generated" to the creator). **Color is reserved for SEMANTICS only:** the three Core Stats
+  (**red `#e74b3b` / green `#33b487` / blue `#5f92da`**) and the Core-tab resource meters (**Fate deep-purple
+  `#6a2eb8` · HP gold `#f5c518` · Armor steel `#6f757e` · Temp HP white `#ffffff`**). A small **status
+  palette** is a documented exception beyond stats+meters: **green = active/affirm, red = severed/yielded/
+  danger, white = held/faltering, dim/strikethrough = silent/retired.**
+  - **Type — three deliberate layers:** display/names/prose **Cormorant Garamond** (serif), UI **Inter**
+    (sans), and the **data layer** — numbers, derived values, drift counts, all meta — **IBM Plex Mono**.
+  - **One radius scale** (`--r-lg/--r/--r-sm/--r-xs/--r-pill`); flat solid surfaces carried by 1px lines +
+    whitespace. Token NAMES in `styles/app.css` `:root` are stable so the whole palette swaps in one block.
+  - **Layout:** centered tabs in the title bar (the **Cast tab is removed from the UI**; its engine is kept);
+    a **persistent identity header** = small portrait **thumbnail** + character name on one line +
+    `Designation: the <name>` (epithet removed from the header, still on the model + creation wizard);
+    **full-width content** below (the old big left-portrait rail is gone).
+  - **Per-tab framework (the design language each tab speaks):**
+    - **Core = the MONUMENT** — the three Core Stats as oversized **centered serif numerals** (lining
+      figures, no descender clipping) carrying their colors; domains on one line; derived values stacked in
+      mono (Red → *Maximum Hit Points*; Green → *Initiative / Movement Speed / Difficulty*; Blue → *Feature
+      Uses*). Resources sit **above** the stats as a **full-width ordered list**: Fate, Hit Points, Armor,
+      Temporary Hit Points.
+    - **Designation = the LEDGER** — big serif designation name, then each Feature as a hairline-divided
+      editorial entry (mono type kicker, serif name, use-tracker, rule text). Borderless and airy.
+    - **Archetypes / Gear / Bonds = the INDEX** — Archetypes: a grid of beliefs with the stat color on the
+      left edge, Drift as clickable pips, status markers. Gear: a bento of item tiles. Bonds: Tether/Hold
+      cards with status edges (severed red, held white, yielded faded) and the knot **Record** shown.
+  > ⚠️ This **supersedes** the pure-black/white decision (now history) and all of the old deep-purple **§11**,
+  > which is rewritten below for the live look. The Weird West parchment skin and a light **Editorial Bone**
+  > skin (explored in `mockups/palette-directions.html`) remain possible later setting-skins.
 - **HOUSE RULE — Feature Uses (refines v004):** the app tracks Feature Uses **per-feature**
   (each Major/Minor Feature has its own independent use track + reset), and **each track's maximum equals
   the character's Blue score** (creator clarification, 2026-06-20). So at Blue 2, every Feature is
   independently usable twice per encounter/scene — vs v004's single shared pool of Blue. The per-feature
   count is **derived live from Blue, never stored** (raise Blue → every Feature gains a use-slot). Passives
   cost no uses.
-- **Working mockups:** `mockups/sheet-v4.html` is the current look-and-feel reference — deep-purple chrome,
-  tabs-in-titlebar layout, full-width identity band, large left portrait, horizontal Core Stats rows,
-  Fate-first resources, working character switcher (Mara Quill·Blacksmith / Rosa Delgado·Luchador),
-  interactive resources, per-feature use tracks. (`sheet-v1/v2/v3.html` are superseded passes.) Demo
-  mockups, not the app. The creator's **mood board** lives at `D:\TTRPG\Vertex\App\moodboard\` (~90 images)
-  — the Read tool can open them directly; Pinterest itself is not fetchable.
+- **Design-exploration mockups (current):** the redesign was driven by comparative mockups the creator
+  chose from — `mockups/palette-directions.html` (Warm Ink / Cold Archive / Editorial Bone palettes),
+  `mockups/cold-archive-bold.html` (the Monument vs a portrait-led Dossier), and `mockups/tabs-directions.html`
+  (Ledger vs Index for each non-Core tab). These are reference artifacts, **not** the app. (`sheet-v1..v4.html`
+  are superseded earlier passes from the deep-purple era.) The creator's **mood board** lives at
+  `D:\TTRPG\Vertex\App\moodboard\` (~90 images) — the Read tool can open them directly; Pinterest itself is
+  not fetchable.
 - **THE REAL APP NOW EXISTS** at the project root (build started 2026-06-20) — see **§15 Build & Architecture**.
 
 ### Relationship to prior work
@@ -360,45 +378,50 @@ Total Armor from equipped Wearables · effective stats after Crossing suspension
 
 ---
 
-## 11. Aesthetic — the "core Vertex" visual language (from the creator's mood board)
+## 11. Aesthetic — the live design system (COLD ARCHIVE)
 
-> ⚠️ **SUPERSEDED 2026-06-21 (deep-purple → black & white).** Everything below describes the *old*
-> deep-purple chrome and is **stale for the live app**. The current direction is **pure black/white, flat,
-> color only for the Core Stats + Core-tab resource bars** — see the revised Aesthetic decision in §1.
-> This section is kept for history/mood-board reference until it's rewritten for the new look.
+> **This describes the CURRENT live app (2026-06-22).** Palette arc: deep-purple → pure black/white →
+> Cold Archive; the earlier looks are history. §1 "Aesthetic" is the canonical summary; this is the detail.
 
-The creator's **mood board** (`D:\TTRPG\Vertex\App\moodboard\`, ~90 images, read 2026-06-20) is the
-authority on the look. It is remarkably coherent: **painterly portraiture of the dissolving self** —
-faces fragmenting, melting, masked, faceless, eyes hidden — rendered in the three Core Stat colors as
-saturated, jewel-toned, painterly fields (oil, watercolor, ink-bleed, peeling paper) over warm near-black,
-with film/canvas grain. The three stats are not just labels — **they are the palette and the soul.**
+**Palette (cool graphite, flat).** Cool near-black canvas, cool off-white text, no glows / chromatic
+aberration / gradient washes. Token-driven in `styles/app.css` `:root` (names stable, values swap):
+- **Chrome:** ink `#0a0d11` · panel `#0e1318` · inset `#141a21` · card `#121820` · bone (text) `#e9eef3` ·
+  dim `#9aa3ad` · faint `#5f6873` · lines `rgba(233,238,243,.10 / .20)`.
+- **Core Stats (semantic only — the palette and the soul):** Red `#e74b3b` · Green `#33b487` · Blue `#5f92da`.
+- **Resource meters:** Fate `#6a2eb8` (deep purple) · HP `#f5c518` (gold) · Armor `#6f757e` (steel) ·
+  Temp HP `#ffffff` (white). UI order: **Fate, Hit Points, Armor, Temporary Hit Points.**
+- **Feature-type indicators (monochrome, NOT stat colors):** Major `#e9eef3` → Minor `#7e8893` → Passive `#475059`.
+- **Status palette (the only color used beyond stats + meters):** green = active/affirm · red = severed/
+  yielded/danger · white = held/faltering · dim + strikethrough = silent/retired.
 
-**Core-Vertex design tokens (as implemented in `sheet-v4.html`):**
-- **Base / chrome (deep purple, neutral):** ink `#09070e` · panel `#130f1d` · card `#15111f` · placeholder
-  `#190f29` · bone text `#ece7ef`. Background = radial **deep-purple** washes (`#5a2f96`/`#2a1742`) over ink.
-  *(Purple is the neutral chrome — NOT a stat color.)*
-- **Core stat colors (painterly, semantic only):** Red `#d23b2c` · Green `#2fa074` · Blue `#5277b8`
-- **Resource meters:** Fate **purple `#a274ec`** (brighter than chrome) · HP **gold `#c9a24a`** ·
-  Temp HP **`#c4bdcf`** · Armor **steel `#9aa0aa`**. Resource order in UI: **Fate, HP, Armor, Temp HP.**
-- **Portrait placeholder (identical for all characters):** linear gloss `#3b2560 → #1d1230 → #120b20` + top
-  highlight + inner vignette + initials.
-- **Feature-type indicators:** deliberately **NOT** the stat colors — monochrome tones
-  (Major `#ece2d4` → Minor `#8d8478` → Passive `#564d47`).
-- **Typography:** display **Cormorant Garamond** · body **Inter** · wordmark **Cinzel** w/ chromatic aberration.
-- **Texture/effects:** SVG film grain overlay, radial vignette washes, chromatic-aberration split on the
-  wordmark + names (the "erosion of certainty").
+**Type — three layers.** Serif **Cormorant Garamond** (display, names, prose, and the big stat numerals —
+set in **lining figures** so they sit on the baseline without descender clipping); sans **Inter** (UI, body);
+mono **IBM Plex Mono** (the **data layer**: numbers, derived values, drift counts, labels, all meta).
+Wordmark **Cinzel**, flat (no chromatic aberration).
 
-**Legacy skin (Weird West / FoundryVTT `vertex-custom.css`):** worn parchment, leather, typewriter
-(Garamond + Special Elite); stat colors `darkred`/`#3A7C22`/`#0070C0`; name `#f0d299`. Keep as **one
-future setting-skin**, not the core identity.
+**System.** One radius scale (`--r-lg 14 / --r 11 / --r-sm 8 / --r-xs 6 / --r-pill`); flat solid surfaces;
+1px lines + whitespace do the structural work. A near-invisible desaturated film grain on a fixed layer.
 
-**Status visual language (reuse these conventions in the app):**
-- Archetype: **Faltering** = goldenrod left-border + faint gold wash · **Silent** = 55% opacity + gray
-  border · **Retired** = strikethrough + 35% opacity.
-- Tether: **Severed** = strikethrough, gray, italic · **Open** (severed, not re-tied) = red italic.
-- Hold: **Active** = gold left-border · **Yielded** = darkred left-border, faded.
-- Feature: **Major** = red left-border · **Minor** = green · **Passive** = blue.
-- NPC **Difficulty Rating** = circular darkred badge (die-face look).
+**Layout & per-tab framework.** Centered title-bar tabs; a persistent identity header (portrait **thumbnail**
++ name on one line + `Designation: the <name>`); full-width content. Each tab speaks one language:
+- **Core = the MONUMENT** — oversized **centered serif stat numerals** carrying their colors; domains on one
+  line; derived values stacked in mono. Resources sit **above** the stats as a full-width ordered list.
+- **Designation = the LEDGER** — big serif name + hairline-divided feature entries (mono type kicker, serif
+  name, use-tracker, rule text). Borderless, editorial, airy.
+- **Archetypes / Gear / Bonds = the INDEX** — Archetypes: a stat-edged grid of beliefs with **clickable Drift
+  pips** and status markers. Gear: a bento of item tiles. Bonds: Tether/Hold **status-edge cards** (severed
+  red, held white, yielded faded) showing the knot **Record**.
+
+**Mood board (inspiration / history).** `D:\TTRPG\Vertex\App\moodboard\` (~90 images, read 2026-06-20):
+painterly portraiture of the dissolving self, jewel-toned in the three stat colors over warm near-black,
+film grain. It informed the **soul** (the three stats as palette) and the portrait treatment; the live
+chrome is cool graphite, not the mood board's warm purple.
+
+**Setting-skins (later).** Because the look is token-driven, alternate skins drop in by swapping the `:root`
+block: a Weird West **parchment** skin, and a light **Editorial Bone** skin (warm off-white, explored in
+`mockups/palette-directions.html`) are candidates. The **legacy** FoundryVTT skin (`vertex-custom.css`:
+worn parchment/leather, Garamond + Special Elite, `darkred`/`#3A7C22`/`#0070C0`) is prior art for the
+Weird West direction, not the core identity.
 
 ---
 
@@ -431,8 +454,8 @@ From the creator's design instructions (philosophy/voice still fully current):
 *(The big direction calls are settled — see **Decisions Locked** in §1. These remain open.)*
 
 1. ~~**Mood-board palette**~~ — **RESOLVED.** Ingested from `D:\TTRPG\Vertex\App\moodboard\` (Pinterest
-   itself is not fetchable; the Read tool opens the saved images directly). Palette captured in §11 and
-   applied in `sheet-v3.html`.
+   itself is not fetchable; the Read tool opens the saved images directly). The live palette is now the
+   **Cold Archive** direction (§11); the mood board informed the soul + portrait treatment, not the chrome.
 2. ~~**Tech stack / framework**~~ — **RESOLVED.** Plain **no-build vanilla JS** (classic `<script>` tags,
    global `Vertex.*` namespace), static files, runs from `file://` *or* any static host. Chosen so the
    non-coder can just open `index.html`, with no Node/compile step. See §15.
@@ -492,8 +515,8 @@ the `/vertex/` sub-path. The site is fully public and search-indexable.
 **File map (project root):**
 | File | Role |
 |------|------|
-| `index.html` | App shell: title bar + tabs, identity band, portrait rail, empty tab panels filled by JS. |
-| `styles/app.css` | All styling (deep-purple chrome, §11 palette). |
+| `index.html` | App shell: centered title-bar tabs, persistent identity header (portrait thumbnail + name + designation), full-width tab panels filled by JS. |
+| `styles/app.css` | All styling — Cold Archive palette + the Monument / Ledger / Index framework (§11), token-driven `:root`. |
 | `data/seed.js` | `Vertex.SEED` — two starter characters (Mara·Blacksmith, Rosa·Luchador), loaded only on first run. |
 | `src/dice.js` | `Vertex.dice` — **pure** Cast engine (v004 resolution, Windfall/Downside + 1:1 cancel, 1-die edge case, Advantage/Disadvantage). No DOM. |
 | `src/model.js` | `Vertex.model` — character schema, **derived values** (never stored), normalize/clamp helpers, `archetypePointsSpent`. |
@@ -509,9 +532,12 @@ Feature is derived from Blue** (house rule, §1) — not stored. Changing Blue r
 
 **Status — what the build does now:** create / switch / delete / export / import
 characters (auto-saved in-browser); editable stats with live-derived values; editable resources
-(Fate/HP/Armor/Temp HP); portrait image upload; per-feature use tracking; clickable Drift; and a working
-**Cast** tab (Normal/Advantage/Disadvantage, real dice, Windfall/Downside). Archetypes/Bonds/Designation/
-Gear render from data (display). **Guided character creation** (`src/create.js`) is built: a step-by-step
+(Fate/HP/Armor/Temp HP); portrait image upload; per-feature use tracking; clickable Drift. All five tabs are
+redesigned in the **Cold Archive** language (§11): **Core = the Monument**, **Designation = the Ledger**,
+**Archetypes / Gear / Bonds = the Index** — rendering from data (display + the existing inline interactions).
+The **Cast** engine (Normal/Advantage/Disadvantage, real dice, Windfall/Downside, `Vertex.render.cast`) is
+**preserved but no longer surfaced as a tab** (to be re-surfaced elsewhere later). **Guided character
+creation** (`src/create.js`) is built: a step-by-step
 wizard (Identity → Designation → Archetypes → Backstory → Convictions & Tethers → Image → Review) that
 authors everything free-form, allocates Archetype Core-Stat points (≤3 each, ≤5 total) that auto-apply to
 starting stats, and drops empty rows on commit.
