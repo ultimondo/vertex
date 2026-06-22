@@ -16,9 +16,9 @@ Vertex.drive = (function () {
      Generate these in the Google Cloud Console (see the setup
      steps that came with this file). Nothing else needs editing.
      =========================================================== */
-  const CLIENT_ID = "PASTE_YOUR_OAUTH_CLIENT_ID_HERE";    // OAuth 2.0 Client ID  → ends in .apps.googleusercontent.com
-  const API_KEY   = "PASTE_YOUR_API_KEY_HERE";            // API key (the Picker needs it as the "developer key")
-  const APP_ID    = "PASTE_YOUR_PROJECT_NUMBER_HERE";     // Your GCP project NUMBER (used by the Picker as the App ID)
+  const CLIENT_ID = "232162680124-2sg5ig257kdlj74ftb3hu87o2iel25d3.apps.googleusercontent.com";  // OAuth 2.0 Client ID
+  const API_KEY   = "AIzaSyCcbEouGRkrWTf0xAer1_Vvusf8YmlQeo4";  // API key (the Picker's "developer key")
+  const APP_ID    = "232162680124";                             // GCP project NUMBER (Picker App ID)
   /* ===========================================================
      ▲▲▲  NOTHING BELOW NEEDS EDITING  ▲▲▲
      =========================================================== */
