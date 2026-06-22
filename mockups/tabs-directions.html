@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vertex — other tabs, design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0d11; --ink-2:#0e1318; --card:#121820; --bone:#e9eef3; --dim:#9aa3ad; --faint:#5f6873;
+    --line:rgba(233,238,243,.10); --line-2:rgba(233,238,243,.20);
+    --red:#e74b3b; --green:#33b487; --blue:#5f92da;
+    --feat-major:#e9eef3; --feat-minor:#7e8893; --feat-passive:#475059;
+    --serif:"Cormorant Garamond",Georgia,serif; --sans:"Inter",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --r-lg:14px; --r:11px; --r-sm:8px; --r-pill:999px;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--sans); background:var(--ink); color:var(--bone); font-size:15px; -webkit-font-smoothing:antialiased; }
+  body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .wrap{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px; }
+
+  h2,h3,h4{ font-family:var(--serif); font-weight:600; margin:0; }
+  .intro{ padding:54px 0 8px; }
+  .intro .k{ font-family:var(--mono); font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--faint); }
+  .intro h1{ font-family:var(--serif); font-size:46px; margin:10px 0 12px; }
+  .intro p{ max-width:66ch; color:var(--dim); line-height:1.6; } .intro b{ color:var(--bone); }
+
+  .tabsec{ padding:30px 0 10px; }
+  .tabsec > .th{ display:flex; align-items:baseline; gap:14px; padding:60px 0 8px; margin-top:34px; border-top:1px solid var(--line-2); }
+  .tabsec > .th .tn{ font-family:var(--mono); font-size:12px; letter-spacing:3px; color:var(--faint); text-transform:uppercase; }
+  .tabsec > .th h2{ font-size:34px; }
+
+  .opt{ padding:26px 0 8px; }
+  .opthead{ display:flex; align-items:baseline; gap:12px; margin-bottom:22px; }
+  .opthead .badge{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink); background:var(--bone); padding:3px 9px; border-radius:var(--r-pill); }
+  .opthead h3{ font-size:22px; }
+  .opthead .why{ font-family:var(--mono); font-size:11px; color:var(--dim); margin-left:auto; max-width:46ch; text-align:right; line-height:1.5; }
+
+  .secdiv{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); padding-bottom:12px; margin:6px 0 18px; border-bottom:1px solid var(--line); }
+
+  /* uses tracker (shared) */
+  .uses{ display:flex; align-items:center; gap:8px; }
+  .uses .ul{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .ubox{ width:18px; height:18px; border-radius:var(--r-pill); border:1px solid var(--line-2); }
+  .ubox.on{ background:var(--bone); border-color:var(--bone); }
+  .always{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); }
+  .statchip{ font-family:var(--mono); font-size:10px; letter-spacing:.8px; text-transform:uppercase; padding:4px 11px; border-radius:var(--r-pill); border:1px solid var(--line-2); white-space:nowrap; }
+  .statchip.red{ color:var(--red); border-color:rgba(231,75,59,.5);} .statchip.green{ color:var(--green); border-color:rgba(51,180,135,.5);} .statchip.blue{ color:var(--blue); border-color:rgba(95,146,218,.5);}
+  .st{ font-family:var(--mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; }
+  .st.active{ color:var(--green);} .st.faltering{ color:var(--bone);} .st.silent{ color:var(--dim);} .st.retired{ color:var(--dim);}
+
+  /* ===================== OPTION A — THE LEDGER ===================== */
+  .ld-hero{ padding-bottom:22px; margin-bottom:8px; border-bottom:1px solid var(--line-2); }
+  .ld-eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); }
+  .ld-bigname{ font-family:var(--serif); font-weight:700; font-size:68px; line-height:1; letter-spacing:.4px; margin-top:6px; }
+  .ld-htag{ font-family:var(--serif); font-style:italic; font-size:22px; color:var(--dim); margin-top:10px; }
+  .ld-hdesc{ font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); margin-top:12px; }
+
+  .ld-row{ padding:24px 0; border-bottom:1px solid var(--line); }
+  .ld-row .top{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+  .ld-kicker{ font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--faint); margin-bottom:6px; }
+  .ld-kicker.major{ color:var(--feat-major);} .ld-kicker.minor{ color:var(--feat-minor);} .ld-kicker.passive{ color:var(--feat-passive);}
+  .ld-name{ font-family:var(--serif); font-size:30px; font-weight:600; }
+  .ld-body{ color:var(--dim); font-size:14px; line-height:1.65; margin-top:10px; max-width:74ch; }
+  .ld-body b{ color:var(--bone); font-weight:600; }
+
+  /* ledger archetype */
+  .ld-arc .pull{ font-family:var(--serif); font-style:italic; font-size:23px; color:var(--bone); margin:8px 0 16px; max-width:50ch; }
+  .ld-arc .foot{ display:flex; align-items:center; gap:24px; }
+  .drift{ display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .drift .seg{ display:flex; gap:5px; }
+  .drift .seg i{ width:34px; height:3px; background:var(--line-2); }
+  .drift .seg i.on{ background:var(--dim); }
+  .ld-arc.faltering .seg i.on{ background:var(--bone); }
+  .ld-arc.silent{ opacity:.55; } .ld-arc.retired{ opacity:.45; } .ld-arc.retired .ld-name{ text-decoration:line-through; }
+
+  /* ledger bonds */
+  .ld-vow{ padding:20px 0; border-bottom:1px solid var(--line); }
+  .ld-vow .to{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--faint); margin-bottom:8px; }
+  .ld-vow .line{ font-family:var(--serif); font-size:25px; line-height:1.25; max-width:60ch; }
+  .ld-vow .meta{ font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); margin-top:10px; display:flex; gap:18px; }
+  .ld-vow .meta b{ color:var(--bone); }
+  .ld-vow.severed .line{ color:var(--red); font-style:italic; } .ld-vow.severed .to span{ color:var(--red); }
+  .ld-vow.knot .old{ display:block; text-decoration:line-through; color:var(--faint); font-style:italic; font-size:19px; }
+  .ld-vow.knot .new{ display:block; margin-top:4px; }
+  .ld-vow.knot .seam{ font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); margin-top:8px; }
+  .ld-vow.hold .line{ font-style:normal; }
+  .ld-vow.yielded .line{ text-decoration:line-through; color:var(--faint); }
+  .owed{ color:var(--red); }
+
+  /* ledger gear */
+  .ld-item{ padding:18px 0; border-bottom:1px solid var(--line); }
+  .ld-item .iname{ font-family:var(--serif); font-size:23px; font-weight:600; }
+  .ld-item .imeta{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--faint); margin:4px 0 8px; }
+  .ld-item .iflav{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--dim); max-width:70ch; }
+
+  /* ===================== OPTION B — THE INDEX ===================== */
+  .ix-hero{ display:flex; align-items:center; gap:22px; border:1px solid var(--line-2); border-radius:var(--r-lg); padding:22px 26px; background:var(--ink-2); margin-bottom:22px; }
+  .ix-hero .mono-no{ font-family:var(--serif); font-weight:700; font-size:54px; color:var(--faint); line-height:1; }
+  .ix-hero .h-name{ font-family:var(--serif); font-weight:700; font-size:40px; line-height:1; }
+  .ix-hero .h-tag{ font-family:var(--serif); font-style:italic; font-size:18px; color:var(--dim); margin-top:4px; }
+  .ix-hero .h-desc{ font-family:var(--mono); font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--faint); margin-top:8px; }
+
+  /* index entry: two columns (marker/name | content) */
+  .ix-entry{ display:grid; grid-template-columns:240px 1fr; gap:24px; border:1px solid var(--line); border-radius:var(--r); padding:18px 20px; margin-bottom:12px; background:var(--card); }
+  .ix-entry .lcol .type{ font-family:var(--mono); font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--faint); }
+  .ix-entry .lcol .type.major{ color:var(--feat-major);} .ix-entry .lcol .type.minor{ color:var(--feat-minor);} .ix-entry .lcol .type.passive{ color:var(--feat-passive);}
+  .ix-entry .lcol .nm{ font-family:var(--serif); font-size:26px; font-weight:600; margin:3px 0 12px; line-height:1.05; }
+  .ix-entry .rcol{ color:var(--dim); font-size:13.5px; line-height:1.6; } .ix-entry .rcol b{ color:var(--bone); }
+
+  /* index archetype cards (grid, stat-colored edge) */
+  .ix-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .ix-arc{ border:1px solid var(--line); border-left:3px solid var(--line-2); border-radius:var(--r); padding:16px 18px; background:var(--card); }
+  .ix-arc.red{ border-left-color:var(--red);} .ix-arc.green{ border-left-color:var(--green);} .ix-arc.blue{ border-left-color:var(--blue);}
+  .ix-arc.silent,.ix-arc.retired{ opacity:.5; } .ix-arc.retired .nm{ text-decoration:line-through; }
+  .ix-arc .a1{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .ix-arc .nm{ font-family:var(--serif); font-size:23px; font-weight:600; }
+  .ix-arc .tl{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--dim); margin:4px 0 12px; }
+  .ix-arc .drow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ix-arc .notch{ display:flex; gap:5px; } .ix-arc .notch i{ width:11px; height:11px; border-radius:50%; border:1px solid var(--line-2); } .ix-arc .notch i.on{ background:var(--dim); border-color:var(--dim); }
+  .ix-arc.faltering .notch i.on{ background:var(--bone); border-color:var(--bone); }
+
+  /* index gear bento */
+  .ix-bento{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .ix-card{ border:1px solid var(--line); border-radius:var(--r); padding:18px; background:var(--card); display:flex; flex-direction:column; gap:8px; }
+  .ix-card .iname{ font-family:var(--serif); font-size:21px; font-weight:600; line-height:1.1; }
+  .ix-card .imeta{ font-family:var(--mono); font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .ix-card .iflav{ font-family:var(--serif); font-style:italic; font-size:14.5px; color:var(--dim); }
+
+  /* index bonds cards */
+  .ix-bond{ border:1px solid var(--line); border-radius:var(--r); padding:16px 18px; margin-bottom:12px; background:var(--card); }
+  .ix-bond.hold{ border-left:3px solid var(--bone); } .ix-bond.yielded{ border-left-color:var(--red); opacity:.75; }
+  .ix-bond.severed{ border-left:3px solid var(--red); }
+  .ix-bond .to{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin-bottom:5px; }
+  .ix-bond .line{ font-family:var(--serif); font-size:19px; line-height:1.3; }
+  .ix-bond.severed .line{ color:var(--red); font-style:italic; }
+  .ix-bond.yielded .line{ text-decoration:line-through; color:var(--faint); }
+  .ix-bond .old{ display:block; text-decoration:line-through; color:var(--faint); font-style:italic; font-size:16px; } .ix-bond .new{ display:block; margin-top:3px; }
+  .ix-bond .meta{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); margin-top:9px; display:flex; gap:16px; } .ix-bond .meta b{ color:var(--bone); }
+
+  @media (max-width:820px){ .ix-grid,.ix-bento{ grid-template-columns:1fr; } .ix-entry{ grid-template-columns:1fr; gap:10px; } .ld-bigname{ font-size:50px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <div class="k">Vertex · the other four tabs</div>
+    <h1>Two languages, your call per tab</h1>
+    <p>Same Cold Archive palette and type system as the Core tab, now extended to the rest of the sheet,
+    using <b>Mara Quill</b>'s real data. For each tab you get <b>Option A — The Ledger</b> (editorial,
+    borderless, hairline-divided, big serif) and <b>Option B — The Index</b> (structured two-column / card
+    entries, denser, scannable). You can pick a different option per tab. Veto and remix freely.</p>
+  </div>
+
+  <!-- ============================ DESIGNATION ============================ -->
+  <section class="tabsec">
+    <div class="th"><span class="tn">Tab</span><h2>Designation &amp; Features</h2></div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">A</span><h3>The Ledger</h3><span class="why">Type label, then big serif name, then the rule text. Air between features. Reads like a manual entry.</span></div>
+      <div class="ld-hero">
+        <div class="ld-eyebrow">Designation</div>
+        <div class="ld-bigname">The Blacksmith</div>
+        <div class="ld-htag">"Iron bends, but you do not."</div>
+        <div class="ld-hdesc">Burly · Stalwart · Hands-on</div>
+      </div>
+      <div class="ld-row">
+        <div class="top"><div><div class="ld-kicker major">Major Action</div><div class="ld-name">Make Do</div></div>
+          <div class="uses"><span class="ul">Uses</span><span class="ubox on"></span><span class="ubox on"></span></div></div>
+        <div class="ld-body"><b>Roll Red:</b> You restore a broken or damaged item without using resources. <b>Make Better:</b> You succeed regardless of your roll, but on a Windfall you can forgo the table to permanently enhance the item, subject to the Host's discretion.</div>
+      </div>
+      <div class="ld-row">
+        <div class="top"><div><div class="ld-kicker minor">Minor Action</div><div class="ld-name">Quickforge</div></div>
+          <div class="uses"><span class="ul">Uses</span><span class="ubox on"></span><span class="ubox on"></span></div></div>
+        <div class="ld-body">Choose two weapons wielded by you or an ally. Those weapons gain +1 to their next to-hit Casts until the end of the encounter or scene.</div>
+      </div>
+      <div class="ld-row">
+        <div class="top"><div><div class="ld-kicker passive">Passive</div><div class="ld-name">Anvil's Resolve</div></div>
+          <span class="always">Always active · costs no uses</span></div>
+        <div class="ld-body">Armor granted by wearable items is twice as effective when worn by you. You always have <b>+1 Armor</b> even when wearing nothing that grants it; it never needs repair and restores at the end of any encounter or scene.</div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">B</span><h3>The Index</h3><span class="why">Name and type on the left, rule text on the right. Compact, scannable, catalogued.</span></div>
+      <div class="ix-hero">
+        <div><div class="h-name">The Blacksmith</div><div class="h-tag">"Iron bends, but you do not."</div><div class="h-desc">Burly · Stalwart · Hands-on</div></div>
+      </div>
+      <div class="ix-entry">
+        <div class="lcol"><div class="type major">Major Action</div><div class="nm">Make Do</div><div class="uses"><span class="ul">Uses</span><span class="ubox on"></span><span class="ubox on"></span></div></div>
+        <div class="rcol"><b>Roll Red:</b> You restore a broken or damaged item without using resources. <b>Make Better:</b> You succeed regardless of your roll, but on a Windfall you can forgo the table to permanently enhance the item, subject to the Host's discretion.</div>
+      </div>
+      <div class="ix-entry">
+        <div class="lcol"><div class="type minor">Minor Action</div><div class="nm">Quickforge</div><div class="uses"><span class="ul">Uses</span><span class="ubox on"></span><span class="ubox on"></span></div></div>
+        <div class="rcol">Choose two weapons wielded by you or an ally. Those weapons gain +1 to their next to-hit Casts until the end of the encounter or scene.</div>
+      </div>
+      <div class="ix-entry">
+        <div class="lcol"><div class="type passive">Passive</div><div class="nm">Anvil's Resolve</div><span class="always">No uses</span></div>
+        <div class="rcol">Armor granted by wearable items is twice as effective when worn by you. You always have <b>+1 Armor</b> even when wearing nothing that grants it; it never needs repair and restores at the end of any encounter or scene.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ ARCHETYPES ============================ -->
+  <section class="tabsec">
+    <div class="th"><span class="tn">Tab</span><h2>Archetypes</h2></div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">A</span><h3>The Ledger</h3><span class="why">Each belief is a full-width entry. Tagline as a pull-quote. Drift becomes a horizontal erosion line.</span></div>
+      <div class="ld-arc faltering" style="opacity:1">
+        <div class="ld-row" style="border:0;padding:22px 0 0">
+          <div class="top"><div class="ld-name">Splintered Faith</div><span class="statchip blue">Blue · +1</span></div>
+          <div class="pull">"Break the glass. Bleed a little."</div>
+          <div class="foot"><span class="st faltering">Faltering</span>
+            <div class="drift">Drift <span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span> 5 / 5 · answer at the Crossing</div></div>
+        </div>
+      </div>
+      <div class="ld-arc">
+        <div class="ld-row">
+          <div class="top"><div class="ld-name">Iron Anchor</div><span class="statchip red">Red · +3</span></div>
+          <div class="pull">"The floor is exactly where you put it, and it isn't going anywhere."</div>
+          <div class="foot"><span class="st active">Active</span>
+            <div class="drift">Drift <span class="seg"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> 2 / 5</div></div>
+        </div>
+      </div>
+      <div class="ld-arc silent">
+        <div class="ld-row">
+          <div class="top"><div class="ld-name">Total Devotion</div><span class="statchip blue">susp.</span></div>
+          <div class="pull">"Cling to the unbroken light."</div>
+          <div class="foot"><span class="st silent">Silent</span>
+            <div class="drift">Numbed · woken only through a Vignette</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">B</span><h3>The Index</h3><span class="why">A grid of all your beliefs at once. Left edge carries the stat color. Drift as pips. Good for scanning tension.</span></div>
+      <div class="ix-grid">
+        <div class="ix-arc red">
+          <div class="a1"><span class="nm">Iron Anchor</span><span class="st active">Active</span></div>
+          <div class="tl">"The floor is exactly where you put it, and it isn't going anywhere."</div>
+          <div class="drow"><span class="statchip red">Red · +3</span><span class="notch"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+        </div>
+        <div class="ix-arc green">
+          <div class="a1"><span class="nm">Riposte</span><span class="st active">Active</span></div>
+          <div class="tl">"Wait for the opening. Strike the flaw."</div>
+          <div class="drow"><span class="statchip green">Green · +1</span><span class="notch"><i></i><i></i><i></i><i></i><i></i></span></div>
+        </div>
+        <div class="ix-arc blue faltering">
+          <div class="a1"><span class="nm">Splintered Faith</span><span class="st faltering">Faltering</span></div>
+          <div class="tl">"Break the glass. Bleed a little."</div>
+          <div class="drow"><span class="statchip blue">Blue · +1</span><span class="notch"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        </div>
+        <div class="ix-arc blue silent">
+          <div class="a1"><span class="nm">Total Devotion</span><span class="st silent">Silent</span></div>
+          <div class="tl">"Cling to the unbroken light."</div>
+          <div class="drow"><span class="statchip blue">susp.</span><span class="notch"><i></i><i></i><i></i><i></i><i></i></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ GEAR ============================ -->
+  <section class="tabsec">
+    <div class="th"><span class="tn">Tab</span><h2>Equipment &amp; Weapons</h2></div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">A</span><h3>The Ledger</h3><span class="why">An armory list. Serif name, mono spec line, italic flavor. Hairline between. Calm.</span></div>
+      <div class="secdiv">Carried</div>
+      <div class="ld-item"><div class="iname">Blacksmith's Hammer &amp; Tongs</div><div class="imeta">Weapon · Red-Based · Range 1</div><div class="iflav">"Forged in fire and stained with soot, these tools remember every weapon and wound they ever shaped."</div></div>
+      <div class="ld-item"><div class="iname">Leather Apron &amp; Gauntlets</div><div class="imeta">Wearable</div><div class="iflav">"Sturdy protection against heat, sparks, and flying slag."</div></div>
+      <div class="ld-item"><div class="iname">Portable Anvil &amp; Toolkit</div><div class="imeta">Accessory</div><div class="iflav">"A collapsible anvil block plus hammers, chisels, and files. Enables blacksmithing anywhere."</div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">B</span><h3>The Index</h3><span class="why">A bento of your kit. Each item is a tile. Faster to take in at a glance, more visual.</span></div>
+      <div class="ix-bento">
+        <div class="ix-card"><div class="imeta">Weapon · Red · Range 1</div><div class="iname">Blacksmith's Hammer &amp; Tongs</div><div class="iflav">"Forged in fire and stained with soot, they remember every weapon and wound they ever shaped."</div></div>
+        <div class="ix-card"><div class="imeta">Wearable</div><div class="iname">Leather Apron &amp; Gauntlets</div><div class="iflav">"Sturdy protection against heat, sparks, and flying slag."</div></div>
+        <div class="ix-card"><div class="imeta">Accessory</div><div class="iname">Portable Anvil &amp; Toolkit</div><div class="iflav">"A collapsible anvil plus hammers, chisels, and files. Blacksmithing anywhere."</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ BONDS ============================ -->
+  <section class="tabsec">
+    <div class="th"><span class="tn">Tab</span><h2>Tethers &amp; Conviction Holds</h2></div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">A</span><h3>The Ledger</h3><span class="why">These are vows, so they read as vows. First-person lines as large serif quotes. The Record shown in full.</span></div>
+      <div class="secdiv">Tethers · what they are to you, now</div>
+      <div class="ld-vow"><div class="to">to Cassian</div><div class="line">"The one who knows what I did and stayed anyway."</div><div class="meta"><span>Status <b>Active</b></span></div></div>
+      <div class="ld-vow knot"><div class="to">to Della · re-tied</div><div class="line"><span class="old">"The steadiest hand at the table."</span><span class="new">"The hand that shakes now, and reaches anyway."</span></div><div class="seam">Knot · the moment it changed</div></div>
+      <div class="ld-vow severed"><div class="to">to <span>Wren · open / severed</span></div><div class="line">"The thing I am most afraid of losing."</div></div>
+      <div class="secdiv" style="margin-top:30px">Conviction Holds · the line you will not cross</div>
+      <div class="ld-vow hold"><div class="line">"I will not draw a weapon against someone who cannot fight back."</div><div class="meta"><span>Status <b>Active</b></span><span>Honored under pressure <b>×2</b></span></div></div>
+      <div class="ld-vow hold yielded"><div class="line">"I will protect the people of this place for as long as I have the means."</div><div class="meta"><span>Status <b>Yielded</b></span><span class="owed">Vignette owed · slot locked</span></div></div>
+    </div>
+
+    <div class="opt">
+      <div class="opthead"><span class="badge">B</span><h3>The Index</h3><span class="why">Tethers and Holds as cards with status edges. Severed in red, Held in white, Yielded faded.</span></div>
+      <div class="secdiv">Tethers</div>
+      <div class="ix-bond"><div class="to">to Cassian</div><div class="line">"The one who knows what I did and stayed anyway."</div><div class="meta"><span>Active</span></div></div>
+      <div class="ix-bond"><div class="to">to Della · re-tied</div><div class="line"><span class="old">"The steadiest hand at the table."</span><span class="new">"The hand that shakes now, and reaches anyway."</span></div><div class="meta"><span>Knot</span></div></div>
+      <div class="ix-bond severed"><div class="to">to Wren · open / severed</div><div class="line">"The thing I am most afraid of losing."</div></div>
+      <div class="secdiv" style="margin-top:24px">Conviction Holds</div>
+      <div class="ix-bond hold"><div class="line">"I will not draw a weapon against someone who cannot fight back."</div><div class="meta"><span>Active</span><span>Honored <b>×2</b></span></div></div>
+      <div class="ix-bond hold yielded"><div class="line">"I will protect the people of this place for as long as I have the means."</div><div class="meta"><span>Yielded</span><span class="owed">Vignette owed</span></div></div>
+    </div>
+  </section>
+
+  <div style="height:80px"></div>
+</div>
+</body>
+</html>

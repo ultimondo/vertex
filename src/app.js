@@ -51,7 +51,7 @@ Vertex.app = (function () {
   function renderAll() {
     const c = active();
     document.getElementById("idName").textContent = c.name;
-    document.getElementById("idDesig").textContent = c.designation ? c.designation.name : "—";
+    document.getElementById("idDesig").textContent = c.designation ? "the " + c.designation.name : "—";
     renderPortrait();
     renderTab("core"); renderTab("archetypes"); renderTab("bonds");
     renderTab("designation"); renderTab("gear");

@@ -16,12 +16,11 @@ Vertex.render = (function () {
 
   function core(c) {
     const s = c.stats, r = c.res, d = M().derived(c);
-    const spent = M().archetypePointsSpent(c);
-    // The Monument: each Core Stat is a large serif numeral carrying its colour,
-    // with a ghost numeral behind for depth and quiet hover steppers to edit it.
-    const mono = (key, label, derivedHTML) => `
+    // The Monument: each Core Stat is a large centered serif numeral carrying its
+    // colour, its domains on one line, and quiet hover steppers to edit it.
+    // derived lines are passed as an array so they stack vertically (no wrapping)
+    const mono = (key, label, lines) => `
       <div class="mn ${key}">
-        <span class="ghost" aria-hidden="true">${s[key]}</span>
         <div class="mnstep">
           <button title="decrease ${label}" onclick="Vertex.app.stepStat('${key}',-1)">−</button>
           <button title="increase ${label}" onclick="Vertex.app.stepStat('${key}',1)">+</button>
@@ -29,28 +28,26 @@ Vertex.render = (function () {
         <div class="big">${s[key]}</div>
         <div class="lbl">${label}</div>
         <div class="dom">${DOMAINS[key]}</div>
-        <div class="der">${derivedHTML}</div>
+        <div class="der">${lines.map(l => `<div class="derline">${l}</div>`).join("")}</div>
       </div>`;
-    const note = spent > 5
-      ? `<div class="statnote warn">⚠ ${spent} of 5 Archetype Core-Stat points allocated — over the v004 limit of 5.</div>`
-      : `<div class="statnote">Start 1 / 1 / 1 · ${spent} of 5 Archetype Core-Stat points allocated.</div>`;
     return `
-    <div class="monnum">
-      ${mono("red", "Red", `Max HP <b class="red">${d.maxHP}</b>`)}
-      ${mono("green", "Green", `Move <b class="green">${d.move}u</b> · Difficulty <b class="green">${d.difficulty}</b>`)}
-      ${mono("blue", "Blue", `Feature Uses <b class="blue">${d.featureUses}</b>`)}
-    </div>
-    ${note}
-    <div class="monlow">
-      <div class="resblock">
-        <div class="blabel">Resources</div>
-        <div class="resgrid">
-          ${meter("fate", "Fate", r.fate.cur, d.fateMax)}
-          ${meter("hp", "Hit Points", r.hp.cur, d.maxHP)}
-          ${armorMeter(r.armor)}
-          ${meter("temp", "Temp HP", r.temp.cur, d.tempMax)}
-        </div>
+    <div class="resblock">
+      <div class="blabel">Resources</div>
+      <div class="resgrid">
+        ${meter("fate", "Fate:", r.fate.cur, d.fateMax)}
+        ${meter("hp", "Hit Points:", r.hp.cur, d.maxHP)}
+        ${armorMeter(r.armor)}
+        ${meter("temp", "Temporary Hit Points:", r.temp.cur, d.tempMax)}
       </div>
+    </div>
+    <div class="monnum">
+      ${mono("red", "Red", [`Maximum Hit Points: <b class="red">${d.maxHP}</b>`])}
+      ${mono("green", "Green", [
+        `Initiative: <b class="green">${s.green}</b>`,
+        `Movement Speed: <b class="green">${d.move}</b> Units`,
+        `Difficulty: <b class="green">${d.difficulty}</b>`
+      ])}
+      ${mono("blue", "Blue", [`Feature Uses: <b class="blue">${d.featureUses}</b>`])}
     </div>`;
   }
 
@@ -68,82 +65,86 @@ Vertex.render = (function () {
   function armorMeter(armor) {
     const pips = [1,2,3,4,5].map(n =>
       `<span class="p ${n <= armor ? "on" : ""}" onclick="Vertex.app.setArmor(${n})"></span>`).join("");
-    return `<div class="meter armor"><span class="mk">Armor</span>
+    return `<div class="meter armor"><span class="mk">Armor:</span>
       <div class="stepper"><span class="mv">${armor} / 5</span></div>
       <div class="pips">${pips}</div></div>`;
   }
 
   function archetypes(c) {
-    if (!c.archetypes.length) return panelEmpty("Archetypes", "forces in tension", "No Archetypes yet. (Add them in the upcoming character-creation flow.)");
-    const rows = c.archetypes.map((a, i) => {
-      const notches = Array.from({ length: a.driftMax || 5 }, (_, n) =>
-        `<i class="notch ${n < a.drift ? "on" : ""}" title="set drift to ${n + 1}" onclick="Vertex.app.setDrift(${i},${n + 1})"></i>`).join("");
-      const dt = a.status === "silent" ? "Numbed — grants neither Advantage nor Disadvantage. Wake it only through a Vignette."
-        : a.status === "retired" ? "Retired — struck through, kept as record. Its Core Stat points are suspended."
-        : `Drift <span class="notches">${notches}</span> ${a.drift} / ${a.driftMax || 5}${a.status === "faltering" ? " — answer it at the next Crossing" : ""}`;
-      const ptsLabel = (a.status === "silent" || a.status === "retired") ? "susp." : (a.points >= 0 ? "+" + a.points : a.points);
-      return `<div class="arc ${a.status}">
-        <div class="row1">
-          <div><span class="aname">${esc(a.name)}</span> &nbsp;<span class="status ${a.status === "active" ? "active" : ""}">${cap(a.status)}</span></div>
-          <span class="tag ${a.tag}">${cap(a.tag)} · ${ptsLabel}</span>
-        </div>
-        <div class="tagline">${esc(a.tagline)}</div>
-        <div class="drift">${dt}</div>
+    if (!c.archetypes.length) return tabLead("Archetypes · forces in tension") + `<div class="empty">No Archetypes yet.</div>`;
+    const cards = c.archetypes.map((a, i) => {
+      const max = a.driftMax || 5;
+      const frozen = a.status === "silent" || a.status === "retired";
+      const chip = frozen ? "susp." : `${cap(a.tag)} · ${a.points >= 0 ? "+" + a.points : a.points}`;
+      const drift = frozen
+        ? `<span class="dnote">${a.status === "silent" ? "numbed · woken at a Crossing" : "retired · kept as record"}</span>`
+        : `<span class="notch">${Array.from({ length: max }, (_, n) =>
+            `<i class="${n < a.drift ? "on" : ""}" title="set drift to ${n + 1}" onclick="Vertex.app.setDrift(${i},${n + 1})"></i>`).join("")}</span>`;
+      return `<div class="ix-arc ${a.tag} ${a.status}">
+        <div class="a1"><span class="nm">${esc(a.name)}</span><span class="st ${a.status}">${cap(a.status)}</span></div>
+        <div class="tl">${esc(a.tagline)}</div>
+        <div class="drow"><span class="statchip ${a.tag}">${chip}</span>${drift}</div>
       </div>`;
     }).join("");
-    return `<div class="panel"><div class="head"><h2>Archetypes</h2><span class="sub">forces in tension · drift &amp; the crossing</span></div>${rows}</div>`;
+    return tabLead("Archetypes · forces in tension · drift and the Crossing") + `<div class="ix-grid">${cards}</div>`;
   }
 
   function bonds(c) {
     const tethers = c.tethers.length ? c.tethers.map(t => {
-      const cls = t.status === "knot" ? "knot" : t.status === "open" ? "tether-open" : "";
-      const toSuffix = t.status === "knot" ? " · re-tied" : "";
-      const body = t.status === "knot"
-        ? `<div class="line"><span class="old">${esc(t.old)}</span><span class="new">${esc(t.line)}</span></div><div class="seam">⌇ knot · the moment it changed</div>`
-        : `<div class="line">${esc(t.line)}</div>`;
-      return `<div class="bond ${cls}"><div class="to">to ${esc(t.to)}${toSuffix}</div>${body}</div>`;
-    }).join("") : `<div class="empty">No Tethers yet — and a character who holds none is Isolated.</div>`;
+      if (t.status === "knot")
+        return `<div class="ix-bond"><div class="to">to ${esc(t.to)} · re-tied</div>
+          <div class="line"><span class="old">${esc(t.old)}</span><span class="new">${esc(t.line)}</span></div>
+          <div class="meta"><span>Knot · the moment it changed</span></div></div>`;
+      if (t.status === "open")
+        return `<div class="ix-bond severed"><div class="to">to ${esc(t.to)} · open / severed</div><div class="line">${esc(t.line)}</div></div>`;
+      return `<div class="ix-bond"><div class="to">to ${esc(t.to)}</div><div class="line">${esc(t.line)}</div><div class="meta"><span>Active</span></div></div>`;
+    }).join("") : `<div class="empty">No Tethers yet. A character who holds none is Isolated.</div>`;
 
     const holds = c.holds.length ? c.holds.map(h => {
-      const cls = h.status === "yielded" ? "yielded" : "";
       const meta = h.status === "yielded"
-        ? `<span>Status <b>Yielded</b></span>${h.vignetteOwed ? `<span class="owed">⚑ Vignette owed — slot locked</span>` : ""}`
-        : `<span>Status <b>Active</b></span><span>Honored under pressure <b>×${h.timesHonored || 0}</b></span>`;
-      return `<div class="bond hold ${cls}"><div class="line">${esc(h.line)}</div><div class="meta">${meta}</div></div>`;
+        ? `<span>Yielded</span>${h.vignetteOwed ? `<span class="owed">Vignette owed · slot locked</span>` : ""}`
+        : `<span>Active</span><span>Honored under pressure <b>×${h.timesHonored || 0}</b></span>`;
+      return `<div class="ix-bond hold ${h.status === "yielded" ? "yielded" : ""}"><div class="line">${esc(h.line)}</div><div class="meta">${meta}</div></div>`;
     }).join("") : `<div class="empty">No Conviction Holds yet.</div>`;
 
-    return `<div class="panel"><div class="head"><h2>Tethers</h2><span class="sub">what they are to you, now</span></div>${tethers}</div>
-            <div class="panel"><div class="head"><h2>Conviction Holds</h2><span class="sub">the line you will not cross</span></div>${holds}</div>`;
+    return tabLead("Tethers · what they are to you, now") + tethers
+      + `<div class="tablead" style="margin-top:34px">Conviction Holds · the line you will not cross</div>` + holds;
   }
 
   function designation(c) {
-    if (!c.designation && !c.features.length) {
-      return panelEmpty("Designation &amp; Features", "the practical shape you take", "No Designation selected yet. (Pick one in the upcoming character-creation flow.)");
-    }
+    if (!c.designation && !c.features.length) return `<div class="empty">No Designation selected yet.</div>`;
     const dz = c.designation || { name: "—", tagline: "", descriptors: "" };
     const uses = M().derived(c).featureUses;   // = Blue score; each Feature is usable this many times
     const feats = c.features.map((f, i) => {
       const right = f.type === "passive"
-        ? `<span class="always">always active · costs no uses</span>`
-        : `<div class="uses"><span class="ulbl">Uses <b class="blue">· Blue ${uses}</b></span>${
+        ? `<span class="always">Always active · costs no uses</span>`
+        : `<div class="uses"><span class="ulbl">Uses <b class="blue">Blue ${uses}</b></span>${
             Array.from({ length: uses }, (_, b) =>
               `<span class="ubox ${f.spent && f.spent[b] ? "" : "on"}" onclick="Vertex.app.toggleUse(${i},${b})"></span>`).join("")
           }<button class="ureset" onclick="Vertex.app.resetFeature(${i})">Reset</button></div>`;
       const tlabel = f.type === "major" ? "Major Action" : f.type === "minor" ? "Minor Action" : "Passive";
-      return `<div class="feature ${f.type}"><div class="stripe"></div><div class="body">
-        <div class="frow"><div><span class="fn">${esc(f.name)}</span><span class="ft">${tlabel}</span></div>${right}</div>
-        <div class="fd">${f.desc || ""}</div></div></div>`;
+      return `<div class="ld-row">
+        <div class="top"><div><div class="ld-kicker ${f.type}">${tlabel}</div><div class="ld-name">${esc(f.name)}</div></div>${right}</div>
+        <div class="ld-body">${f.desc || ""}</div>
+      </div>`;
     }).join("");
-    return `<div class="panel">
-      <div class="desig-hero"><div class="big">${esc((dz.name || "").toUpperCase())}</div><div class="tag2">${esc(dz.tagline)}</div><div class="desc3">${esc(dz.descriptors)}</div></div>
-      ${feats}</div>`;
+    return `<div class="ld-hero">
+        <div class="ld-eyebrow">Designation</div>
+        <div class="ld-bigname">${c.designation ? esc("The " + dz.name) : "—"}</div>
+        <div class="ld-htag">${esc(dz.tagline)}</div>
+        <div class="ld-hdesc">${esc(dz.descriptors)}</div>
+      </div>${feats}`;
   }
 
   function gear(c) {
-    if (!c.items.length) return panelEmpty("Equipment &amp; Weapons", "what you carry", "No items yet.");
-    const items = c.items.map(it => `<div class="item"><div class="iname">${esc(it.name)}</div><div class="imeta">${esc(it.meta)}</div><div class="iflavor">${esc(it.flavor)}</div></div>`).join("");
-    return `<div class="panel"><div class="head"><h2>Equipment &amp; Weapons</h2><span class="sub">${esc(c.designation ? c.designation.name + " items" : "carried")}</span></div>${items}</div>`;
+    const lead = c.designation ? `Equipment & Weapons · ${esc(c.designation.name)} kit` : "Equipment & Weapons · what you carry";
+    if (!c.items.length) return tabLead(lead) + `<div class="empty">No items yet.</div>`;
+    const cards = c.items.map(it =>
+      `<div class="ix-card"><div class="imeta">${esc(it.meta)}</div><div class="iname">${esc(it.name)}</div><div class="iflav">${esc(it.flavor)}</div></div>`).join("");
+    return tabLead(lead) + `<div class="ix-bento">${cards}</div>`;
   }
+
+  function tabLead(label) { return `<div class="tablead">${label}</div>`; }
 
   function cast(c, state) {
     const s = c.stats;
