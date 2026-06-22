@@ -32,6 +32,10 @@ Vertex.drive = (function () {
   // Drive stores .json files with this MIME type; the Picker filters to it.
   const JSON_MIME = "application/json";
 
+  // New (never-saved) characters land in this folder, created on first save.
+  const FOLDER_NAME = "Vertex Characters";
+  const FOLDER_KEY  = "vertex.driveFolderId";   // cached folder id (localStorage)
+
   let tokenClient = null;   // GIS token client (created once)
   let accessToken = null;   // current short-lived OAuth access token
   let pickerLoaded = false; // has gapi's 'picker' module finished loading?
@@ -101,6 +105,14 @@ Vertex.drive = (function () {
     });
   }
 
+  // Resolve to a usable access token, only popping a request when needed.
+  function getToken(forceNew) {
+    return ensureTokenClient().then(() => {
+      if (accessToken && !forceNew) return accessToken;
+      return requestToken();
+    });
+  }
+
   /* ---------- Google Picker ---------- */
 
   function loadPicker() {
@@ -146,6 +158,7 @@ Vertex.drive = (function () {
         let obj;
         try { obj = JSON.parse(text); }
         catch (_) { notify("“" + name + "” is not valid character JSON."); return; }
+        obj.driveFileId = fileId;   // remember the source file so "Save to Drive" updates it in place
         handlePickedCharacterData(obj);
       })
       .catch((err) => { console.error("Vertex.drive:", err); notify("Could not read that file from Drive."); });
@@ -160,6 +173,75 @@ Vertex.drive = (function () {
         if (!r.ok) throw new Error("Drive download failed (HTTP " + r.status + ").");
         return r.text();
       });
+  }
+
+  /* ---------- save the active character UP to Drive ---------- */
+
+  // Find or create the "Vertex Characters" folder; resolves to its id (cached).
+  function ensureFolder(token) {
+    const cached = localStorage.getItem(FOLDER_KEY);
+    const create = () => fetch("https://www.googleapis.com/drive/v3/files?fields=id", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ name: FOLDER_NAME, mimeType: "application/vnd.google-apps.folder" })
+    }).then((r) => { if (!r.ok) throw new Error("folder create failed"); return r.json(); })
+      .then((m) => { localStorage.setItem(FOLDER_KEY, m.id); return m.id; });
+
+    if (!cached) return create();
+    // Verify the cached folder still exists and isn't trashed; recreate if not.
+    return fetch("https://www.googleapis.com/drive/v3/files/" + cached + "?fields=id,trashed",
+      { headers: { Authorization: "Bearer " + token } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => (m && !m.trashed ? cached : create()));
+  }
+
+  // One multipart upload: PATCH when fileId is given (update), else POST (create).
+  function performUpload(char, fileId, parents, token) {
+    const content  = JSON.stringify(char, null, 2);
+    const safeName = String(char.name || "character").replace(/[^\w\-]+/g, "_");
+    const metadata = { name: "vertex-" + safeName + ".json", mimeType: JSON_MIME };
+    if (!fileId && parents) metadata.parents = parents;   // parents only allowed on create
+
+    const boundary = "vertexBoundary" + Date.now();
+    const body =
+      "--" + boundary + "\r\n" +
+      "Content-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify(metadata) + "\r\n" +
+      "--" + boundary + "\r\n" +
+      "Content-Type: " + JSON_MIME + "\r\n\r\n" + content + "\r\n" +
+      "--" + boundary + "--";
+
+    const base = "https://www.googleapis.com/upload/drive/v3/files";
+    const url  = fileId
+      ? base + "/" + encodeURIComponent(fileId) + "?uploadType=multipart&fields=id"
+      : base + "?uploadType=multipart&fields=id";
+
+    return fetch(url, {
+      method: fileId ? "PATCH" : "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "multipart/related; boundary=" + boundary },
+      body: body
+    });
+  }
+
+  // Orchestrates create-vs-update, folder placement, token refresh, stale-file recovery.
+  function saveFlow(char, token, didRefresh) {
+    const parentsP = char.driveFileId
+      ? Promise.resolve(null)                  // updates stay wherever the file already lives
+      : ensureFolder(token).catch(() => null); // new files go in the folder (root if that fails)
+
+    return parentsP.then((folderId) => {
+      const parents = folderId ? [folderId] : null;
+      return performUpload(char, char.driveFileId, parents, token).then((res) => {
+        if (res.ok) return res.json().then((m) => m.id);
+        if (res.status === 401 && !didRefresh) {        // token expired — refresh once
+          return getToken(true).then((t) => saveFlow(char, t, true));
+        }
+        if (res.status === 404 && char.driveFileId) {   // remembered file is gone — make a fresh one
+          char.driveFileId = null;
+          return saveFlow(char, token, didRefresh);
+        }
+        throw new Error("Drive save failed (HTTP " + res.status + ").");
+      });
+    });
   }
 
   /* =====================================================================
@@ -178,8 +260,9 @@ Vertex.drive = (function () {
   }
   /* ▲▲▲  SEAM  ▲▲▲ */
 
-  /* ---------- public entry point (wire this to a button) ---------- */
+  /* ---------- public entry points (wire these to buttons) ---------- */
 
+  // LOAD: pick a character JSON from Drive and import it.
   function open() {
     if (!configured()) {
       notify("Add your Google API Key, Client ID & App ID near the top of src/drive.js first.");
@@ -194,5 +277,25 @@ Vertex.drive = (function () {
       .catch((err) => { console.error("Vertex.drive:", err); notify(err.message || "Could not open Google Drive."); });
   }
 
-  return { open };
+  // SAVE: push the active character UP to Drive — updates its file in place if it
+  // came from Drive, otherwise creates a new one in the "Vertex Characters" folder.
+  function save() {
+    if (!configured()) {
+      notify("Add your Google API Key, Client ID & App ID near the top of src/drive.js first.");
+      return;
+    }
+    const char = (Vertex.app && typeof Vertex.app.getActive === "function") ? Vertex.app.getActive() : null;
+    if (!char) { notify("No character is loaded to save."); return; }
+
+    notify("Saving “" + (char.name || "character") + "” to Drive…");
+    getToken()
+      .then((token) => saveFlow(char, token, false))
+      .then((fileId) => {
+        if (Vertex.app && typeof Vertex.app.onDriveSaved === "function") Vertex.app.onDriveSaved(char.id, fileId);
+        notify("Saved “" + (char.name || "character") + "” to Google Drive.");
+      })
+      .catch((err) => { console.error("Vertex.drive:", err); notify(err.message || "Could not save to Drive."); });
+  }
+
+  return { open, save };
 })();

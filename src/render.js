@@ -184,6 +184,7 @@ Vertex.render = (function () {
     return `<div class="mlabel">Characters</div>${items}
       <div class="mfoot">
         <button onclick="Vertex.app.exportCurrent()">Export</button>
+        <button onclick="Vertex.drive.save()">Save to Drive</button>
         <button onclick="Vertex.app.importPrompt()">Import</button>
         <button onclick="Vertex.drive.open()">Load from Drive</button>
         <button onclick="Vertex.create.open()">+ New</button>

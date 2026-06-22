@@ -200,6 +200,12 @@ Vertex.app = (function () {
     if (!file) return;
     S().importCharacter(file).then(onImportData).catch(err => toast(err.message || "Import failed."));
   }
+  // ---- Google Drive seams (used by Vertex.drive) ----
+  function getActive() { return active(); }
+  function onDriveSaved(id, fileId) {
+    const c = state.list.find(x => x.id === id);
+    if (c && fileId) { c.driveFileId = fileId; save(); }   // remember the file for in-place updates
+  }
 
   /* ---------------- menu + misc ---------------- */
   function toggleMenu(e) { e.stopPropagation(); document.getElementById("menu").classList.toggle("open"); }
@@ -217,6 +223,7 @@ Vertex.app = (function () {
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, toggleUse, resetFeature,
     setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
-    switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData, toggleMenu
+    switchTo, createNew, commitNewCharacter, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
+    getActive, onDriveSaved, toggleMenu
   };
 })();
