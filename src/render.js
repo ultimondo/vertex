@@ -25,7 +25,7 @@ Vertex.render = (function () {
           <button title="decrease ${label}" onclick="Vertex.app.stepStat('${key}',-1)">−</button>
           <button title="increase ${label}" onclick="Vertex.app.stepStat('${key}',1)">+</button>
         </div>
-        <div class="big">${s[key]}</div>
+        <div class="big" title="Cast ${label}" onclick="Vertex.app.openCast('${key}')">${s[key]}</div>
         <div class="lbl">${label}</div>
         <div class="dom">${DOMAINS[key]}</div>
         <div class="der">${lines.map(l => `<div class="derline">${l}</div>`).join("")}</div>
@@ -183,7 +183,7 @@ Vertex.render = (function () {
 
   function cast(c, state) {
     const s = c.stats;
-    const btn = (key, label) => `<button class="castbtn ${key}" ${s[key] < 1 ? "disabled" : ""} onclick="Vertex.app.doCast('${key}')">Cast ${label} · ${s[key]}d6</button>`;
+    const btn = (key, label) => `<button class="castbtn ${key} ${state.stat === key ? "primary" : ""}" ${s[key] < 1 ? "disabled" : ""} onclick="Vertex.app.doCast('${key}')">Cast ${label} · ${s[key]}d6</button>`;
     const diffOpts = Array.from({ length: 12 }, (_, i) => `<option ${i + 1 === state.difficulty ? "selected" : ""}>${i + 1}</option>`).join("");
     const modeBtn = (m, label) => `<button class="${state.mode === m ? "on" : ""}" onclick="Vertex.app.setCastMode('${m}')">${label}</button>`;
     return `<div class="panel"><div class="head"><h2>Cast</h2><span class="sub">resolving truth</span></div>
@@ -192,6 +192,14 @@ Vertex.render = (function () {
       <div class="controls">${btn("red", "Red")}${btn("green", "Green")}${btn("blue", "Blue")}
         <span class="diff">Difficulty <select onchange="Vertex.app.setDifficulty(this.value)">${diffOpts}</select></span></div>
       <div id="castOut"><div class="dice"><span style="color:var(--faint);font-size:13px">Choose a stat to Cast…</span></div></div>
+    </div>`;
+  }
+
+  // The former Cast-tab UI, surfaced as a modal when a Core stat numeral is clicked.
+  function castModal(c, state) {
+    return `<div class="cast" role="dialog" aria-modal="true">
+      <button class="cast-x" onclick="Vertex.app.closeCast()" title="Close">✕</button>
+      ${cast(c, state)}
     </div>`;
   }
 
@@ -244,5 +252,5 @@ Vertex.render = (function () {
       </div>`;
   }
 
-  return { core, archetypes, bonds, designation, gear, cast, castResult, menu, crossingModal };
+  return { core, archetypes, bonds, designation, gear, cast, castModal, castResult, menu, crossingModal };
 })();

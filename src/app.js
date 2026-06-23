@@ -200,13 +200,23 @@ Vertex.app = (function () {
   }
 
   /* ---------------- Cast ---------------- */
-  function setCastMode(m) { state.cast.mode = m; renderTab("cast"); }
+  function setCastMode(m) { state.cast.mode = m; refreshCast(); }
   function setDifficulty(v) { state.cast.difficulty = parseInt(v, 10) || 1; }
   function doCast(key) {
     const c = active();
     const res = Vertex.dice.cast(c.stats[key], state.cast.difficulty, state.cast.mode);
-    document.getElementById("castOut").innerHTML = R().castResult(res, cap(key));
+    const out = document.getElementById("castOut");
+    if (out) out.innerHTML = R().castResult(res, cap(key));
   }
+  // The Cast modal — opened by clicking a Core stat numeral; reuses the preserved Cast UI.
+  function openCast(key) {
+    state.cast.stat = key;
+    const o = document.getElementById("overlay");
+    o.innerHTML = R().castModal(active(), state.cast);
+    o.onclick = e => { if (e.target === o) closeCast(); };
+  }
+  function closeCast() { const o = document.getElementById("overlay"); if (o) { o.innerHTML = ""; o.onclick = null; } }
+  function refreshCast() { const o = document.getElementById("overlay"); if (o && o.querySelector(".cast")) o.innerHTML = R().castModal(active(), state.cast); }
 
   /* ---------------- identity ---------------- */
   function editName(text) {
@@ -311,7 +321,7 @@ Vertex.app = (function () {
 
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, markDrift, toggleUse, resetFeature,
-    setCastMode, setDifficulty, doCast, editName, choosePortrait, onPortraitFile,
+    setCastMode, setDifficulty, doCast, openCast, closeCast, editName, choosePortrait, onPortraitFile,
     tetherAct, tetherDraw, tetherFray, tetherSever, tetherRetie, isolationAward,
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,
