@@ -302,6 +302,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # With --emoji/--suggest there is no source image, but argparse greedily
+    # assigns the first positional to source_image. Shift positionals left so
+    # the documented forms ("--emoji X output/ all") target the right directory
+    # instead of writing icons into a "./all/" folder in the CWD.
+    if (args.emoji or args.suggest) and args.source_image is not None:
+        if args.output_dir in ('favicon', 'app', 'all'):
+            args.icon_type = args.output_dir
+        args.output_dir = args.source_image
+        args.source_image = None
+
     # Handle emoji suggestions
     if args.suggest:
         if not suggest_emojis:

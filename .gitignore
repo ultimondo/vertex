@@ -17,3 +17,7 @@ moodboard/
 .v004.txt
 *.tmp
 *.log
+
+# --- Python bytecode cache (web-asset-generator skill scripts) ---
+__pycache__/
+*.pyc
