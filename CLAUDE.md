@@ -519,11 +519,18 @@ Canonical game corpus lives at **`D:\TTRPG\Vertex\System\`**:
 
 ## 15. Build & Architecture (the real app)
 
-**Stack:** plain HTML/CSS/vanilla JS, **no build step**. Classic `<script>` tags load in order and attach
-to a single global namespace `window.Vertex`. Runs by opening `index.html` directly (`file://`) or from any
-static host (GitHub Pages / Netlify). No Node, npm, bundler, or framework — deliberate, so the non-coder
-creator can just open it, and so there's nothing to compile/deploy to preview. Multiplayer later =
-add a backend behind `Vertex.storage` (see below) without touching the rules/UI.
+**Stack:** plain HTML/CSS/vanilla JS, **no build step**. The local scripts attach to a single global
+namespace `window.Vertex`. Runs by opening `index.html` directly (`file://`) or from any static host
+(GitHub Pages / Netlify). No Node, npm, bundler, or framework — deliberate, so the non-coder creator can
+just open it, and so there's nothing to compile/deploy to preview. Multiplayer later = add a backend behind
+`Vertex.storage` (see below) without touching the rules/UI.
+
+> **Cache-busting (important):** `index.html` loads the local JS via a tiny inline loader that appends
+> `?v=Date.now()` to each script (with `async=false` to preserve order), and the CSS the same way. This is
+> deliberate: GitHub Pages lets the browser hold stale copies of `dice.js` etc., which repeatedly showed
+> **old rules after a fix was already deployed**. With the loader, a **normal reload always runs the latest
+> code** — no hard-reload needed. (A one-time hard-reload is still required to pick up a *new* `index.html`
+> itself if the old one is cached.) Keep new local scripts inside the loader's list, not as static tags.
 
 **To run:** double-click `D:\TTRPG\Vertex\App\index.html` (or `Start-Process` it). No local server required.
 Google Fonts load over the network (graceful system fallback offline).
