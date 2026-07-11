@@ -15,8 +15,13 @@ window.Vertex = window.Vertex || {};
 Vertex.dice = (function () {
   const rollDie = () => 1 + Math.floor(Math.random() * 6);
 
-  // Rank used to pick best/worst under Advantage/Disadvantage.
-  const RANK = { downside: 0, failure: 1, success: 2, windfall: 3 };
+  // Quality score for Folding Fate selection (higher = better outcome).
+  // A Windfall is always the best possible roll (auto-success + bonus table);
+  // a Downside always the worst (auto-failure + penalty table) — these override
+  // raw success count. Between ordinary rolls, more successes is strictly
+  // better, even when both fall short of the Difficulty. Advantage takes the
+  // max score, Disadvantage the min. (Confirmed with the creator 2026-07-11.)
+  const score = r => r.windfall ? Infinity : r.downside ? -Infinity : r.successes;
 
   function castOnce(pool, difficulty) {
     pool = Math.max(0, pool | 0);
@@ -34,7 +39,7 @@ Vertex.dice = (function () {
     const downside = (ones - sixes) >= 2;
     const hit = windfall ? true : downside ? false : successes >= difficulty;
     const outcome = windfall ? "windfall" : downside ? "downside" : hit ? "success" : "failure";
-    return { dice, successes, sixes, ones, windfall, downside, hit, outcome, rank: RANK[outcome], difficulty, pool };
+    return { dice, successes, sixes, ones, windfall, downside, hit, outcome, difficulty, pool };
   }
 
   // mode: 'normal' | 'advantage' | 'disadvantage'
@@ -43,8 +48,8 @@ Vertex.dice = (function () {
       const a = castOnce(pool, difficulty);
       const b = castOnce(pool, difficulty);
       const chosen = mode === "advantage"
-        ? (a.rank >= b.rank ? a : b)
-        : (a.rank <= b.rank ? a : b);
+        ? (score(a) >= score(b) ? a : b)
+        : (score(a) <= score(b) ? a : b);
       return { mode, rolls: [a, b], chosen };
     }
     const r = castOnce(pool, difficulty);
