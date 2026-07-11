@@ -3,10 +3,14 @@
    Vertex System Guide v004 (Windfall/Downside revised 2026-07-11):
      - Cast N d6 (N = Core Stat). 5–6 = success. Difficulty = successes required.
      - A Cast SUCCEEDS iff successes >= Difficulty. Nothing else affects pass/fail.
-     - Windfall (2+ sixes) and Downside (2+ ones) are TABLE-TRIGGERS ONLY: each
-       obliges a roll on the Windfall / Downside table but does NOT force success
-       or failure. Sixes and ones cancel 1:1, so a roll carries at most one. A
-       Cast can therefore fail yet carry a Windfall, or pass yet carry a Downside.
+     - Windfall / Downside are TABLE-TRIGGERS ONLY: each obliges a roll on its
+       table but does NOT force success or failure. Pair up 6s into Windfalls and
+       1s into Downsides (every TWO of a kind = one); a Windfall and a Downside
+       cancel 1:1, and any surplus triggers its table — so a roll carries at most
+       one (a leftover single 6/1 is just an ordinary die; a 6 still scores a
+       success). A Cast can therefore fail yet carry a Windfall, or pass yet carry
+       a Downside. Examples: 6,6,1,1 -> neither; 6,6,6,1,1 -> neither (a pair each
+       cancels, lone 6 is only a success); 6,6,6,6,1,1 -> Windfall; 1,1,6 -> Downside.
      - 1-die edge case: if pool === 1 you cast a bonus die that cannot grant a
        success but can still trigger a Windfall/Downside.
      - Folding Fate: cast twice, then compare the two rolls on two qualities only,
@@ -34,8 +38,10 @@ Vertex.dice = (function () {
       if (d.v === 6) sixes++;
       if (d.v === 1) ones++;
     }
-    const windfall = (sixes - ones) >= 2;      // 1:1 cancellation -> at most one
-    const downside = (ones - sixes) >= 2;
+    const wfPairs = Math.floor(sixes / 2);      // pair up 6s into Windfalls and 1s into
+    const dsPairs = Math.floor(ones / 2);       // Downsides; they cancel 1:1, surplus wins
+    const windfall = wfPairs > dsPairs;         // (a leftover single 6/1 is just an ordinary die)
+    const downside = dsPairs > wfPairs;
     const hit = successes >= difficulty;        // pass/fail is successes ONLY
     const outcome = hit ? "success" : "failure";
     return { dice, successes, sixes, ones, windfall, downside, hit, outcome, difficulty, pool };

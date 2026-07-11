@@ -200,7 +200,7 @@ Vertex.render = (function () {
   // Step 2: a second dialog asks the mode. Step 3: the result.
   function castModal(c, state) {
     const key = state.stat, label = cap(key), pool = c.stats[key];
-    const help = `<span class="cast-help" tabindex="0" role="note" aria-label="How Casting works">?<span class="cast-tip"><b>5–6</b> on a die = a success. A Cast succeeds when successes ≥ Difficulty.<br><b>Two or more 6s</b> = Windfall — roll on the Windfall Table.<br><b>Two or more 1s</b> = Downside — roll on the Downside Table.<br>Windfall/Downside don't change success or failure — they're extra table rolls.</span></span>`;
+    const help = `<span class="cast-help" tabindex="0" role="note" aria-label="How Casting works">?<span class="cast-tip"><b>5–6</b> on a die = a success. A Cast succeeds when successes ≥ Difficulty.<br><b>Every two 6s</b> = a Windfall, <b>every two 1s</b> = a Downside — they cancel one-for-one, and any surplus rolls on its table.<br>Windfall/Downside don't change success or failure.</span></span>`;
 
     // step 1 — Difficulty (keep the full 1–12 range)
     const diffOpts = Array.from({ length: 12 }, (_, i) => `<option ${i + 1 === state.difficulty ? "selected" : ""}>${i + 1}</option>`).join("");

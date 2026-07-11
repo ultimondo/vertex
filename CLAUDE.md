@@ -177,8 +177,14 @@ Characters have **Red, Green, Blue**. They start with **1 in each**.
   **fail yet trigger a Windfall**, or **succeed yet trigger a Downside**. *(This retires the old
   double-penalty: a high stat rolls more dice, so more 1s; under the retired rule that meant more
   automatic failures — punishing investment. Now a Downside only adds a table roll.)*
-- **Cancellation:** sixes and ones **cancel 1:1**, so a single Cast carries **at most one** of
-  Windfall/Downside. (Net ≥ 2 sixes → Windfall; net ≥ 2 ones → Downside; otherwise neither.)
+- **Cancellation (pair-based):** pair sixes into Windfalls and ones into Downsides (**two** of a kind
+  each); a Windfall and a Downside **cancel 1:1**. If any surplus of either remains, the Cast triggers
+  **that one table** — **at most one Windfall or one Downside per Cast** (a single table roll), no matter
+  how many pairs survive. A leftover single 6/1 is just an ordinary die (a 6 still scores a success).
+  *Examples:* `6,6,1,1` → neither · `6,6,6,1,1` → neither (one pair each cancels; the lone 6 is only a
+  success) · `6,6,6,6,1,1` → Windfall (two Windfall-pairs outweigh one Downside-pair) · `6,6,6,6,6,1` →
+  Windfall (two pairs, but still just one Windfall) · `6,6,1` → Windfall (the lone 1 isn't a Downside) ·
+  `1,1,6` → Downside (a Downside with no Windfall to cancel it).
 
 **Windfall Tables** (1D6): *Combat* — 1 Bloodrush (extra Minor Action) · 2 Opening (next attack at Diff 1) ·
 3 Piercing (bypass Temp HP/Armor) · 4 Refresh (recover 1 Feature Use) · 5 Ascendance (next Down → hold at
