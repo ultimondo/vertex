@@ -301,7 +301,20 @@ Vertex.app = (function () {
   function onImportData(obj) {
     if (!obj || typeof obj !== "object") { toast("That file is not a Vertex character."); return; }
     M().normalize(obj);
-    if (!obj.id || state.list.some(c => c.id === obj.id)) obj.id = M().uid();
+    // Match an existing character by its linked Drive file, then by id, and UPDATE
+    // it in place. Otherwise loading the same character — especially via Load from
+    // Drive, whose file carries the original id — would append an endless duplicate.
+    let i = -1;
+    if (obj.driveFileId) i = state.list.findIndex(c => c.driveFileId === obj.driveFileId);
+    if (i < 0 && obj.id) i = state.list.findIndex(c => c.id === obj.id);
+    if (i >= 0) {
+      obj.id = state.list[i].id;               // keep the existing entry's identity
+      state.list[i] = obj; state.activeId = obj.id;
+      closeMenu(); save(); renderAll(); setTab("core");
+      toast(`Updated “${obj.name}” from the loaded copy.`);
+      return;
+    }
+    if (!obj.id) obj.id = M().uid();
     state.list.push(obj); state.activeId = obj.id;
     closeMenu(); save(); renderAll(); setTab("core");
     toast(`Imported “${obj.name}”.`);

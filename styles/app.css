@@ -96,6 +96,8 @@ input, textarea{ font-family:inherit; }
 .menu .mi .who{ flex:1; }
 .menu .mi .nm{ font-family:var(--serif); font-size:19px; line-height:1.05; }
 .menu .mi .ds{ font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); }
+.menu .mi .dvlink{ display:inline-block; margin-top:3px; font-family:var(--mono); font-size:9.5px; letter-spacing:.6px; color:var(--faint); text-decoration:none; }
+.menu .mi .dvlink:hover{ color:var(--bone); }
 .menu .mi .del{ opacity:0; color:var(--faint); border:0; background:transparent; font-size:15px; }
 .menu .mi:hover .del{ opacity:1; }
 .menu .mi .del:hover{ color:var(--red); }       /* status palette: red = danger */

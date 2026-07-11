@@ -303,7 +303,7 @@ Vertex.render = (function () {
     const items = list.map(c => `
       <div class="mi ${c.id === activeId ? "cur" : ""}" onclick="Vertex.app.switchTo('${c.id}')">
         <span class="av">${c.portrait ? `<img src="${c.portrait}" alt="">` : Vertex.model.initials(c.name)}</span>
-        <span class="who"><span class="nm">${esc(c.name)}</span><br><span class="ds">${esc(c.designation ? c.designation.name : "No designation")}</span></span>
+        <span class="who"><span class="nm">${esc(c.name)}</span><br><span class="ds">${esc(c.designation ? c.designation.name : "No designation")}</span>${c.driveFileId ? `<br><a class="dvlink" href="https://drive.google.com/file/d/${c.driveFileId}/view" target="_blank" rel="noopener" title="Open this character's synced Drive file" onclick="event.stopPropagation()">☁ Drive file ↗</a>` : ""}</span>
         <button class="del" title="Delete" onclick="event.stopPropagation();Vertex.app.deleteCharacter('${c.id}')">✕</button>
       </div>`).join("");
     const syncOn = !!(window.Vertex.drive && Vertex.drive.autoSyncPref && Vertex.drive.autoSyncPref());
