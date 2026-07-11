@@ -1,0 +1,341 @@
+<title>Vertex — Multiplayer & Accounts PRD</title>
+<style>
+  :root{
+    /* Cool Paper — the project's own light theme */
+    --bg:#eef1f5; --panel:#ffffff; --sunken:#e7ecf1;
+    --ink:#131a21; --dim:#566270; --faint:#8a94a0;
+    --line:rgba(19,26,33,.12); --line-strong:rgba(19,26,33,.22);
+    --accent:#3f6fc4; --good:#1f8f63; --bad:#cf3f30; --warn:#9c7a22;
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a0d11; --panel:#0e1318; --sunken:#141a21;
+      --ink:#e9eef3; --dim:#9aa3ad; --faint:#5f6873;
+      --line:rgba(233,238,243,.12); --line-strong:rgba(233,238,243,.22);
+      --accent:#5f92da; --good:#33b487; --bad:#e74b3b; --warn:#c9a850;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0d11; --panel:#0e1318; --sunken:#141a21;
+    --ink:#e9eef3; --dim:#9aa3ad; --faint:#5f6873;
+    --line:rgba(233,238,243,.12); --line-strong:rgba(233,238,243,.22);
+    --accent:#5f92da; --good:#33b487; --bad:#e74b3b; --warn:#c9a850;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f5; --panel:#ffffff; --sunken:#e7ecf1;
+    --ink:#131a21; --dim:#566270; --faint:#8a94a0;
+    --line:rgba(19,26,33,.12); --line-strong:rgba(19,26,33,.22);
+    --accent:#3f6fc4; --good:#1f8f63; --bad:#cf3f30; --warn:#9c7a22;
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased; }
+  .doc{ max-width:820px; margin:0 auto; padding:64px 26px 120px; }
+
+  /* ---- typographic system ---- */
+  h1{ font-family:var(--serif); font-weight:600; font-size:clamp(34px,6vw,50px); line-height:1.05;
+    letter-spacing:.2px; margin:14px 0 12px; text-wrap:balance; }
+  h2{ font-family:var(--serif); font-weight:600; font-size:27px; line-height:1.12; margin:0 0 4px; text-wrap:balance; }
+  h3{ font-family:var(--serif); font-weight:600; font-size:20px; margin:26px 0 6px; }
+  p{ margin:0 0 14px; max-width:66ch; }
+  a{ color:var(--accent); }
+  strong{ color:var(--ink); font-weight:600; }
+  .eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--faint); }
+  .lede{ font-family:var(--serif); font-size:21px; line-height:1.5; color:var(--dim); max-width:60ch; font-style:italic; margin:10px 0 0; }
+  .meta{ font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.4px;
+    display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:22px; }
+  .meta b{ color:var(--dim); font-weight:500; }
+
+  /* ---- section rhythm ---- */
+  section{ padding-top:40px; margin-top:40px; border-top:1px solid var(--line); }
+  .sechead{ display:flex; align-items:baseline; gap:12px; margin-bottom:16px; }
+  .sechead .n{ font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:1px; flex:none; }
+
+  /* ---- tables ---- */
+  .scroll{ overflow-x:auto; margin:6px 0 4px; border:1px solid var(--line); border-radius:12px; }
+  table{ border-collapse:collapse; width:100%; font-size:14.5px; }
+  th,td{ text-align:left; padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td{ border-bottom:0; }
+  thead th{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--faint); background:var(--sunken); font-weight:500; white-space:nowrap; }
+  .dec td:first-child{ font-family:var(--mono); font-size:12px; color:var(--dim); white-space:nowrap; width:34%; }
+  .matrix td:first-child{ width:44%; color:var(--dim); }
+  .matrix td:not(:first-child){ text-align:center; font-family:var(--mono); font-weight:600; width:18%; }
+  .yes{ color:var(--good); } .no{ color:var(--bad); opacity:.8; } .ltd{ color:var(--warn); font-size:12px; }
+  .matrix .lg{ font-size:11px; color:var(--faint); font-family:var(--mono); }
+
+  /* ---- flow steps ---- */
+  ol.flow{ list-style:none; counter-reset:s; margin:6px 0 0; padding:0; display:grid; gap:2px; }
+  ol.flow li{ counter-increment:s; position:relative; padding:12px 0 12px 42px; border-bottom:1px solid var(--line); }
+  ol.flow li:last-child{ border-bottom:0; }
+  ol.flow li::before{ content:counter(s); position:absolute; left:0; top:11px; width:26px; height:26px; border-radius:50%;
+    border:1px solid var(--line-strong); font-family:var(--mono); font-size:12px; color:var(--accent);
+    display:flex; align-items:center; justify-content:center; }
+  ol.flow b{ font-family:var(--serif); font-size:17px; font-weight:600; }
+
+  /* ---- phase cards ---- */
+  .phase{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:14px; }
+  .phase.mvp{ border-color:var(--accent); }
+  .phlabel{ font-family:var(--mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); }
+  .phase h3{ margin:3px 0 2px; }
+  .phase .goal{ color:var(--dim); font-size:14.5px; margin:0 0 12px; }
+  .phase ul{ margin:0; padding-left:18px; } .phase li{ margin:5px 0; }
+  .chip{ display:inline-block; font-family:var(--mono); font-size:10.5px; letter-spacing:.6px; text-transform:uppercase;
+    color:var(--faint); border:1px solid var(--line-strong); border-radius:999px; padding:2px 9px; margin-left:8px; vertical-align:middle; }
+
+  /* ---- entity cards (data model) ---- */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:8px; }
+  .ent{ background:var(--sunken); border:1px solid var(--line); border-radius:12px; padding:15px 16px; }
+  .ent h4{ margin:0 0 6px; font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); }
+  .ent code, .field{ font-family:var(--mono); font-size:12.5px; color:var(--dim); }
+  .ent p{ font-size:13px; color:var(--dim); margin:0; line-height:1.55; }
+
+  /* ---- callouts ---- */
+  .note{ border-left:3px solid var(--accent); background:var(--panel); border-radius:0 10px 10px 0;
+    padding:13px 16px; margin:14px 0; font-size:14.5px; }
+  .note.warn{ border-left-color:var(--warn); }
+  .note .k{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--faint); display:block; margin-bottom:3px; }
+
+  /* ---- open questions ---- */
+  ol.q{ counter-reset:q; list-style:none; margin:0; padding:0; }
+  ol.q li{ counter-increment:q; position:relative; padding:12px 0 12px 40px; border-bottom:1px solid var(--line); }
+  ol.q li:last-child{ border-bottom:0; }
+  ol.q li::before{ content:"Q" counter(q); position:absolute; left:0; top:12px; font-family:var(--mono);
+    font-size:11px; color:var(--warn); letter-spacing:.5px; }
+  ol.q b{ color:var(--ink); }
+  ol.q .rec{ display:block; font-size:13.5px; color:var(--dim); margin-top:3px; }
+  ol.q .rec em{ color:var(--accent); font-style:normal; font-family:var(--mono); font-size:11px; letter-spacing:.5px; text-transform:uppercase; }
+
+  ul.plain{ padding-left:18px; } ul.plain li{ margin:6px 0; max-width:64ch; }
+  .footer{ margin-top:46px; padding-top:20px; border-top:1px solid var(--line); font-family:var(--mono);
+    font-size:12px; color:var(--faint); }
+  @media (max-width:560px){ .doc{ padding:44px 18px 90px; } }
+</style>
+
+<article class="doc">
+
+  <header>
+    <div class="eyebrow">Vertex · Product Requirements · Draft&nbsp;v1</div>
+    <h1>Accounts, Stories, and the Host's Table</h1>
+    <p class="lede">Turning the solo character sheet into a shared table — sign-in, campaigns, and a Host who can see their players.</p>
+    <div class="meta">
+      <span><b>Status</b> — draft for your review</span>
+      <span><b>Date</b> — 2026-07-11</span>
+      <span><b>Scope</b> — the multiplayer phase</span>
+      <span><b>Decides nothing final</b> — everything here is up for change</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sechead"><span class="n">01</span><h2>The goal</h2></div>
+    <p>Today Vertex is a proof of concept: one person, one browser, characters saved on the device (with an optional
+    Google Drive backup). This phase makes it <strong>functional for a real group</strong>. People sign in. A Host
+    creates a <strong>Story</strong> — the campaign — and shares an invite code. Players join with their one
+    character. The Host opens the Story and sees the whole party. Everyone's data lives in the cloud so it follows
+    them across devices.</p>
+    <p>The organizing idea is the <strong>Story</strong>: a container for a group of players, their characters, and —
+    as later phases land — the Host's own material (NPCs, items, settings, notes, and the Fate/arc tracking Vertex
+    runs on). A Player sees their character and a light party roster; the Host sees everything in their Story.</p>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">02</span><h2>Decisions we locked</h2></div>
+    <p>From our planning pass. These drive the rest of the document.</p>
+    <div class="scroll">
+      <table class="dec">
+        <thead><tr><th>Decision</th><th>Choice</th></tr></thead>
+        <tbody>
+          <tr><td>Roles</td><td><strong>Per-Story.</strong> One account; in each Story you're its Host (you made it) or a Player (you joined it). The same person can host one game and play in another.</td></tr>
+          <tr><td>Player visibility</td><td><strong>Own character + a light party roster</strong> (co-members' names/portraits/designation), not others' full sheets.</td></tr>
+          <tr><td>Host's view of players</td><td><strong>On-demand snapshot</strong> for v1 — the Host opens a player's last-saved sheet. Live/real-time comes later.</td></tr>
+          <tr><td>Host's power over player sheets</td><td><strong>View-only</strong> for v1. Host-driven changes (award Fate, mark Drift) arrive as a later feature.</td></tr>
+          <tr><td>Backend</td><td><strong>Managed cloud service, free tier.</strong> Recommendation below: <strong>Supabase</strong>.</td></tr>
+          <tr><td>Joining a Story</td><td><strong>Invite code / link</strong> the Host shares. No emails required.</td></tr>
+          <tr><td>Sign-in</td><td><strong>Google + email &amp; password.</strong></td></tr>
+          <tr><td>Access model</td><td><strong>Accounts are the main path</strong>, with a zero-friction <strong>guest</strong> fallback (a local-only character, upgradeable to an account) so "solo first" survives.</td></tr>
+          <tr><td>Characters per player / Story</td><td><strong>One active character.</strong> It can be retired/replaced over the arc.</td></tr>
+          <tr><td>Existing characters</td><td><strong>Auto-import</strong> local/Drive characters into the account on first sign-in.</td></tr>
+          <tr><td>Story content (phased)</td><td>NPCs · item/loot library · settings &amp; notes · Fate/arc tracking — layered in after the MVP.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">03</span><h2>The pieces, named</h2></div>
+    <div class="grid">
+      <div class="ent"><h4>Account</h4><p>A person. Signs in with Google or email + password. Owns characters; joins or hosts Stories. Not "a Host" or "a Player" globally — that's decided per Story.</p></div>
+      <div class="ent"><h4>Story</h4><p>The campaign. Has one Host, a roster of Players, their characters, an invite code, and (later) the Host's NPCs, items, settings, and notes.</p></div>
+      <div class="ent"><h4>Membership</h4><p>The link between an Account and a Story, carrying the <span class="field">role</span> (<span class="field">host</span> / <span class="field">player</span>) and which character they brought.</p></div>
+      <div class="ent"><h4>Character</h4><p>Owned by one Account. Attached to at most one Story at a time (or unattached — a solo/guest character). The existing sheet, now in the cloud.</p></div>
+      <div class="ent"><h4>Invite code</h4><p>A short code/link (e.g. <span class="field">VTX-7QK2</span>) a Host shares. Entering it makes you a Player in that Story.</p></div>
+      <div class="ent"><h4>Guest</h4><p>Using Vertex without signing in — a local-only character, fully playable offline. Can be claimed into an account later.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">04</span><h2>Who can do what</h2></div>
+    <p>The heart of the system, and the thing the backend must enforce — not just the UI. Green = yes · red = no ·
+    amber = limited.</p>
+    <div class="scroll">
+      <table class="matrix">
+        <thead><tr><th>Capability</th><th>Guest</th><th>Player</th><th>Host</th></tr></thead>
+        <tbody>
+          <tr><td>Create / edit their own character</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Save to the cloud, sync across devices</td><td class="no">local only</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Create a Story (becomes its Host)</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Join a Story via invite code</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>See the party roster (light info)</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>View another player's full sheet</td><td class="no">—</td><td class="no">✗</td><td class="yes">✓</td></tr>
+          <tr><td>Edit another player's sheet</td><td class="no">—</td><td class="no">✗</td><td class="ltd">later</td></tr>
+          <tr><td>Manage Story content (NPCs, items, notes)</td><td class="no">—</td><td class="no">✗</td><td class="ltd">phase 2</td></tr>
+          <tr><td>Award Fate · mark Drift · call a Crossing</td><td class="no">—</td><td class="no">✗</td><td class="ltd">phase 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="k">Security note</span>This matrix is enforced at the database with row-level rules, so
+    a player <em>cannot</em> read another player's sheet even by poking at the network — the UI hiding it is not enough.</div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">05</span><h2>The core flows (v1)</h2></div>
+    <ol class="flow">
+      <li><b>Sign in — or don't.</b> Continue as a guest (local only), or sign in with Google or email + password.</li>
+      <li><b>First sign-in brings your characters.</b> Any characters already on this device (or in Drive) are auto-imported into your account as your personal characters.</li>
+      <li><b>Host: create a Story.</b> Name it; you become its Host and get an invite code to share.</li>
+      <li><b>Player: join with a code.</b> Paste the code, pick which of your characters to bring (your one active character for that Story).</li>
+      <li><b>Host: open the Story.</b> See the roster of players and, for each, open their current character sheet (read-only snapshot of their last save).</li>
+      <li><b>Player: play.</b> Manage your own sheet as today; glance at the party roster to anchor Tethers and Echoes.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">06</span><h2>Data model</h2></div>
+    <p>Relational, which is why a SQL backend fits. Five core tables for the MVP; the rest arrive with their phase.</p>
+    <div class="grid">
+      <div class="ent"><h4>users</h4><p><span class="field">id · email · display_name · created_at</span> — provided by the auth service.</p></div>
+      <div class="ent"><h4>stories</h4><p><span class="field">id · name · host_id → users · invite_code · created_at</span></p></div>
+      <div class="ent"><h4>memberships</h4><p><span class="field">id · story_id · user_id · role (host|player) · character_id · joined_at</span></p></div>
+      <div class="ent"><h4>characters</h4><p><span class="field">id · owner_id → users · story_id (nullable) · data (the full sheet JSON) · updated_at</span></p></div>
+      <div class="ent"><h4>later: story_content</h4><p><span class="field">npcs · items · notes/settings · fate_log</span> — each keyed to a <span class="field">story_id</span>, Host-only.</p></div>
+    </div>
+    <div class="note"><span class="k">Reuses today's work</span>A character's sheet stays the same JSON the app already
+    produces. <span class="field">characters.data</span> holds it — so the rules engine, rendering, and creation
+    wizard don't change. Only the <em>storage seam</em> (<span class="field">Vertex.storage</span>) swaps from
+    localStorage to the cloud, exactly as the architecture anticipated.</div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">07</span><h2>Backend recommendation — Supabase</h2></div>
+    <p>You asked for a managed service on a free tier, and for me to recommend one. I'd choose <strong>Supabase</strong>.</p>
+    <ul class="plain">
+      <li><strong>The access rules are the hard part, and Supabase makes them clean.</strong> Its Row-Level Security lets us write a rule like "a user may read a character if they own it, <em>or</em> if they host the Story it belongs to" directly on the data. That per-Story, role-based access is exactly our requirement.</li>
+      <li><strong>Auth is built in</strong> — Google and email + password out of the box, so no passwords ever pass through our code.</li>
+      <li><strong>The model is relational</strong> (users ↔ stories ↔ memberships ↔ characters), which Supabase's Postgres expresses naturally.</li>
+      <li><strong>Real-time is included</strong> for the later live-Host-view and Echo/Sacrifice phases — no re-platforming.</li>
+      <li><strong>Free tier</strong> comfortably covers a project at this stage; it scales if it ever needs to.</li>
+    </ul>
+    <p style="color:var(--dim);font-size:14.5px"><strong>Alternative — Firebase.</strong> Also free-tier and turnkey, with the tightest Google
+    sign-in. I'd pass on it here mainly because its security rules get awkward for "is this user the Host of this
+    character's Story" checks — the one thing we most need to get right.</p>
+    <div class="note"><span class="k">What this means for you</span>You would not run a server. Setup is a dashboard
+    plus a small amount of glue code behind <span class="field">Vertex.storage</span>. The guest/local path stays,
+    so the app still opens and works with no account.</div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">08</span><h2>Phased roadmap</h2></div>
+
+    <div class="phase">
+      <div class="phlabel">Phase 0 — Foundation</div>
+      <h3>Accounts &amp; the cloud seam</h3>
+      <p class="goal">Get identity and storage in place without changing how the sheet plays.</p>
+      <ul>
+        <li>Supabase project; <span class="field">users / characters</span> tables.</li>
+        <li>Sign-in: Google + email &amp; password; sign-out; guest mode preserved.</li>
+        <li>Cloud storage adapter behind <span class="field">Vertex.storage</span>; a character syncs to the account.</li>
+        <li>Auto-import local/Drive characters on first sign-in.</li>
+      </ul>
+    </div>
+
+    <div class="phase mvp">
+      <div class="phlabel">Phase 1 — MVP multiplayer <span class="chip">the review target</span></div>
+      <h3>Stories, joining, and the Host's roster</h3>
+      <p class="goal">The functional core you described: link characters to a Story; the Host sees the players.</p>
+      <ul>
+        <li>Create a Story → become Host → invite code.</li>
+        <li>Join via code → become Player → attach your one active character.</li>
+        <li><span class="field">memberships</span> + role-based access rules enforced in the database.</li>
+        <li>Host screen: party roster + open any player's character (read-only snapshot).</li>
+        <li>Player screen: own sheet (as today) + a light party roster.</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phlabel">Phase 2 — The Host runs the table</div>
+      <h3>Host content &amp; live view</h3>
+      <p class="goal">Give the Host the tools Vertex actually needs at the table.</p>
+      <ul>
+        <li>Host-only Story content: NPCs, item/loot library, settings &amp; notes, per-character Throughline.</li>
+        <li>Fate / arc tracking: award Fate, mark Drift, flag Crossings.</li>
+        <li>Real-time Host view (see player edits live) and light presence.</li>
+        <li>Host acts on player sheets — either direct edit or "Host suggests → player applies" (to be decided).</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phlabel">Phase 3 — The living table</div>
+      <h3>Player-to-player &amp; introspection</h3>
+      <p class="goal">The most Vertex-specific social mechanics.</p>
+      <ul>
+        <li>Echo (move Fate between players) and Sacrifice.</li>
+        <li>Vignette flows; the Crossing as a guided moment.</li>
+        <li>Notifications / invites by email; richer roster (shared Tethers).</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">09</span><h2>Migration &amp; the guest path</h2></div>
+    <ul class="plain">
+      <li><strong>Nobody loses a character.</strong> On first sign-in, characters already on the device (and any in Drive) are copied into the new account automatically.</li>
+      <li><strong>Guest mode stays.</strong> The app still opens with no login and works offline on a local character — then offers "claim this into an account" when they're ready.</li>
+      <li><strong>Google Drive's role.</strong> Once the cloud is primary, Drive sync becomes redundant for multiplayer. Open question below: retire it, or keep it as an optional personal export.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">10</span><h2>Open questions for you</h2></div>
+    <ol class="q">
+      <li><b>Can a Host also play a character in their own Story,</b> or is the Host purely a facilitator there?<span class="rec"><em>my lean</em> — Host-only in their own Story; if they want to play, they join someone else's.</span></li>
+      <li><b>Is a character bound to one Story, or can it move between Stories</b> (and exist unattached for solo play)?<span class="rec"><em>my lean</em> — owned by you, attachable to one Story at a time, can be solo. One character can't be in two Stories at once.</span></li>
+      <li><b>Exactly what does the party roster show a Player?</b> Name + portrait + designation only, or also live HP / Tether lines?<span class="rec"><em>my lean</em> — name, portrait, designation for v1; more later.</span></li>
+      <li><b>Do players see each other's (and the Host's) real identity</b> — account name/email — or only character-facing names?<span class="rec"><em>my lean</em> — a display name per account, never the email.</span></li>
+      <li><b>Invite-code lifecycle:</b> reusable or one-time, does it expire, can the Host revoke it, is there a player cap?<span class="rec"><em>my lean</em> — reusable, revocable, optional cap; no hard expiry.</span></li>
+      <li><b>What happens when a player leaves a Story, or a Story is deleted?</b> Does the character return to the player unattached?<span class="rec"><em>my lean</em> — the character always belongs to the player and simply detaches; deleting a Story never deletes players' characters.</span></li>
+      <li><b>Retire Google Drive sync,</b> or keep it as an optional personal backup alongside the cloud?</li>
+      <li><b>Email verification</b> required for email + password sign-ups?</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">11</span><h2>Not in v1 · risks</h2></div>
+    <h3>Deliberately out of the MVP</h3>
+    <p>Real-time Host view · Host editing player sheets · Echo / Sacrifice automation · NPC &amp; item management ·
+    Fate/arc tooling · notifications · a native mobile app · spectators.</p>
+    <h3>Risks to watch</h3>
+    <ul class="plain">
+      <li><strong>Access-rule correctness.</strong> A misconfigured rule that lets a player read another's sheet is the worst failure mode — it needs tests, not just a review.</li>
+      <li><strong>Backend cost &amp; lock-in.</strong> Free-tier limits are generous but finite; keeping the storage seam thin keeps a future move possible.</li>
+      <li><strong>Maintenance sits with a non-coder.</strong> Favor dashboard-managed config over anything that needs ongoing hand-editing.</li>
+      <li><strong>Scope creep.</strong> Vertex's social layer (Echo, Sacrifice, Vignettes) is tempting to pull forward; the phasing exists to resist that.</li>
+    </ul>
+  </section>
+
+  <div class="footer">Vertex · Multiplayer &amp; Accounts · PRD draft v1 · for review — reply with changes and I'll revise before any code is written.</div>
+
+</article>
