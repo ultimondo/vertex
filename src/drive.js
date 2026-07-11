@@ -120,10 +120,17 @@ Vertex.drive = (function () {
   }
 
   // Resolve to a usable access token, only popping a request when needed.
+  // Try a SILENT token first (it rides the existing grant, no popup) and fall
+  // back to the interactive consent flow only if silent can't produce one. This
+  // avoids the consent popup wherever a silent token works — the popup fails with
+  // Error 400 origin_mismatch on origins not registered in the OAuth client, even
+  // though silent refresh of an existing grant still succeeds. (getTokenSilent /
+  // requestTokenSilent are hoisted from the auto-save section below.)
   function getToken(forceNew) {
     return ensureTokenClient().then(() => {
       if (accessToken && !forceNew) return accessToken;
-      return requestToken();
+      const silent = forceNew ? requestTokenSilent() : getTokenSilent();
+      return silent.then((t) => t || requestToken());
     });
   }
 
