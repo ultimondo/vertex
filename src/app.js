@@ -208,12 +208,21 @@ Vertex.app = (function () {
     const out = document.getElementById("castOut");
     if (out) out.innerHTML = R().castResult(res, cap(key));
   }
-  // The Cast modal — opened by clicking a Core stat numeral; reuses the preserved Cast UI.
+  // The Cast modal — opened by clicking a Core stat numeral. Locked to that stat.
   function openCast(key) {
-    state.cast.stat = key;
+    state.cast = Object.assign({}, state.cast, { stat: key, mode: "normal", step: "difficulty", result: null });
     const o = document.getElementById("overlay");
     o.innerHTML = R().castModal(active(), state.cast);
     o.onclick = e => { if (e.target === o) closeCast(); };
+  }
+  function castChooseMode() { state.cast.step = "mode"; refreshCast(); }          // step 1 -> the mode dialog
+  function castBackToDifficulty() { state.cast.step = "difficulty"; state.cast.result = null; refreshCast(); }
+  function castWithMode(m) {                                                        // pick a mode -> roll -> show result
+    state.cast.mode = m;
+    const c = active();
+    state.cast.result = Vertex.dice.cast(c.stats[state.cast.stat], state.cast.difficulty, m);
+    state.cast.step = "result";
+    refreshCast();
   }
   function closeCast() { const o = document.getElementById("overlay"); if (o) { o.innerHTML = ""; o.onclick = null; } }
   function refreshCast() { const o = document.getElementById("overlay"); if (o && o.querySelector(".cast")) o.innerHTML = R().castModal(active(), state.cast); }
@@ -321,7 +330,7 @@ Vertex.app = (function () {
 
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, markDrift, toggleUse, resetFeature,
-    setCastMode, setDifficulty, doCast, openCast, closeCast, editName, choosePortrait, onPortraitFile,
+    setCastMode, setDifficulty, doCast, openCast, castChooseMode, castBackToDifficulty, castWithMode, closeCast, editName, choosePortrait, onPortraitFile,
     tetherAct, tetherDraw, tetherFray, tetherSever, tetherRetie, isolationAward,
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,

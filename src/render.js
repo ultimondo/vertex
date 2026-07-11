@@ -195,11 +195,50 @@ Vertex.render = (function () {
     </div>`;
   }
 
-  // The former Cast-tab UI, surfaced as a modal when a Core stat numeral is clicked.
+  // The Cast flow — opened by clicking a Core stat numeral. Locked to that one
+  // stat (no re-selecting Red/Green/Blue). Step 1: set Difficulty + confirm.
+  // Step 2: a second dialog asks the mode. Step 3: the result.
   function castModal(c, state) {
-    return `<div class="cast" role="dialog" aria-modal="true">
+    const key = state.stat, label = cap(key), pool = c.stats[key];
+    const help = `<span class="cast-help" tabindex="0" role="note" aria-label="How Casting works">?<span class="cast-tip"><b>5–6</b> on a die = a success. Difficulty = successes needed.<br><b>Two or more 6s</b> = Windfall — automatic success.<br><b>Two or more 1s</b> = Downside — automatic failure.</span></span>`;
+
+    // step 1 — Difficulty (keep the full 1–12 range)
+    const diffOpts = Array.from({ length: 12 }, (_, i) => `<option ${i + 1 === state.difficulty ? "selected" : ""}>${i + 1}</option>`).join("");
+    const step1 = `<div class="cast-body${state.step === "mode" ? " dimmed" : ""}">
+        <div class="cast-diffrow">
+          <span class="cast-difflabel">Difficulty</span>
+          <select class="cast-diff" onchange="Vertex.app.setDifficulty(this.value)">${diffOpts}</select>
+          <span class="cast-diffhint">successes needed</span>
+        </div>
+        <button class="cast-go ${key}" onclick="Vertex.app.castChooseMode()">Cast ${label}</button>
+      </div>`;
+
+    // step 2 — mode (the second dialog that pops over step 1)
+    const modeBtn = (m, lab, sub) => `<button class="cast-modebtn" onclick="Vertex.app.castWithMode('${m}')"><span class="cm-name">${lab}</span><span class="cm-sub">${sub}</span></button>`;
+    const step2 = state.step === "mode" ? `<div class="castpop" onclick="if(event.target===this)Vertex.app.castBackToDifficulty()"><div class="castpop-card">
+        <div class="castpop-q">How do you Cast?</div>
+        <div class="castpop-ctx">${label} · Difficulty ${state.difficulty}</div>
+        <div class="castpop-btns">
+          ${modeBtn("normal", "Normal", "one Cast")}
+          ${modeBtn("advantage", "Advantage", "Cast twice, take the better")}
+          ${modeBtn("disadvantage", "Disadvantage", "Cast twice, take the worse")}
+        </div>
+        <button class="castpop-cancel" onclick="Vertex.app.castBackToDifficulty()">Cancel</button>
+      </div></div>` : "";
+
+    // step 3 — result
+    const step3 = state.step === "result" && state.result
+      ? `<div class="cast-result">${castResult(state.result, label)}<button class="cast-again ${key}" onclick="Vertex.app.castBackToDifficulty()">Cast again</button></div>`
+      : "";
+
+    const body = state.step === "result" ? step3 : step1 + step2;
+
+    return `<div class="cast cast-${key}" role="dialog" aria-modal="true">
       <button class="cast-x" onclick="Vertex.app.closeCast()" title="Close">✕</button>
-      ${cast(c, state)}
+      <div class="panel">
+        <div class="head"><h2>Cast <span class="cast-statname ${key}">${label}</span> <span class="cast-pool">${pool}d6</span></h2>${help}</div>
+        ${body}
+      </div>
     </div>`;
   }
 
