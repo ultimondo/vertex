@@ -200,7 +200,7 @@ Vertex.render = (function () {
   // Step 2: a second dialog asks the mode. Step 3: the result.
   function castModal(c, state) {
     const key = state.stat, label = cap(key), pool = c.stats[key];
-    const help = `<span class="cast-help" tabindex="0" role="note" aria-label="How Casting works">?<span class="cast-tip"><b>5–6</b> on a die = a success. Difficulty = successes needed.<br><b>Two or more 6s</b> = Windfall — automatic success.<br><b>Two or more 1s</b> = Downside — automatic failure.</span></span>`;
+    const help = `<span class="cast-help" tabindex="0" role="note" aria-label="How Casting works">?<span class="cast-tip"><b>5–6</b> on a die = a success. A Cast succeeds when successes ≥ Difficulty.<br><b>Two or more 6s</b> = Windfall — roll on the Windfall Table.<br><b>Two or more 1s</b> = Downside — roll on the Downside Table.<br>Windfall/Downside don't change success or failure — they're extra table rolls.</span></span>`;
 
     // step 1 — Difficulty (keep the full 1–12 range)
     const diffOpts = Array.from({ length: 12 }, (_, i) => `<option ${i + 1 === state.difficulty ? "selected" : ""}>${i + 1}</option>`).join("");
@@ -220,18 +220,20 @@ Vertex.render = (function () {
         <div class="castpop-ctx">${label} · Difficulty ${state.difficulty}</div>
         <div class="castpop-btns">
           ${modeBtn("normal", "Normal", "one Cast")}
-          ${modeBtn("advantage", "Advantage", "Cast twice, take the better")}
-          ${modeBtn("disadvantage", "Disadvantage", "Cast twice, take the worse")}
+          ${modeBtn("advantage", "Advantage", "Cast twice, keep the better")}
+          ${modeBtn("disadvantage", "Disadvantage", "Cast twice, keep the worse")}
         </div>
         <button class="castpop-cancel" onclick="Vertex.app.castBackToDifficulty()">Cancel</button>
       </div></div>` : "";
 
-    // step 3 — result
-    const step3 = state.step === "result" && state.result
-      ? `<div class="cast-result">${castResult(state.result, label)}<button class="cast-again ${key}" onclick="Vertex.app.castBackToDifficulty()">Cast again</button></div>`
-      : "";
-
-    const body = state.step === "result" ? step3 : step1 + step2;
+    // step 3 — result, or the tradeoff choice when the two rolls don't dominate
+    let body;
+    if (state.step === "result" && state.result)
+      body = `<div class="cast-result">${castResult(state.result, label)}<button class="cast-again ${key}" onclick="Vertex.app.castBackToDifficulty()">Cast again</button></div>`;
+    else if (state.step === "choose" && state.result)
+      body = castChoice(state.result, label);
+    else
+      body = step1 + step2;
 
     return `<div class="cast cast-${key}" role="dialog" aria-modal="true">
       <button class="cast-x" onclick="Vertex.app.closeCast()" title="Close">✕</button>
@@ -242,12 +244,21 @@ Vertex.render = (function () {
     </div>`;
   }
 
-  // result of a cast -> HTML (handles Advantage/Disadvantage showing both rolls)
+  const dieHTML = d => `<div class="die ${d.bonus ? "bonus" : d.v === 6 ? "six" : d.v >= 5 ? "hit" : d.v === 1 ? "one" : ""}">${d.v}</div>`;
+  const rollHTML = r => `<div class="dice">${r.dice.map(dieHTML).join("")}</div>`;
+
+  // A roll's table obligation, decoupled from pass/fail. Windfall/Downside no
+  // longer force success or failure — they only add a table roll.
+  function tableFlag(r) {
+    if (r.windfall) return `<div class="tableflag"><span class="win">Windfall.</span> Roll on the Windfall Table.</div>`;
+    if (r.downside) return `<div class="tableflag"><span class="down">Downside.</span> Roll on the Downside Table.</div>`;
+    return "";
+  }
+
+  // result of a cast -> HTML (pass/fail + any table flag; both rolls shown for folds)
   function castResult(res, label) {
-    const dieHTML = d => `<div class="die ${d.bonus ? "bonus" : d.v === 6 ? "six" : d.v >= 5 ? "hit" : d.v === 1 ? "one" : ""}">${d.v}</div>`;
-    const rollHTML = r => `<div class="dice">${r.dice.map(dieHTML).join("")}</div>`;
     const ch = res.chosen;
-    let groups = "";
+    let groups;
     if (res.mode !== "normal") {
       groups = res.rolls.map((r, i) => {
         const isChosen = r === ch;
@@ -257,12 +268,31 @@ Vertex.render = (function () {
     } else {
       groups = rollHTML(ch);
     }
-    let v;
-    if (ch.windfall) v = `<span class="win">Windfall.</span> Automatic success — roll the Windfall Table.<small>${label} · ${ch.sixes} sixes${res.mode !== "normal" ? " · " + res.mode : ""}</small>`;
-    else if (ch.downside) v = `<span class="down">Downside.</span> Automatic failure — roll the Downside Table.<small>${label} · ${ch.ones} ones${res.mode !== "normal" ? " · " + res.mode : ""}</small>`;
-    else if (ch.hit) v = `<span class="ok">Success.</span> Your intent becomes reality.<small>${label} · ${ch.successes}/${ch.difficulty} successes${res.mode !== "normal" ? " · " + res.mode : ""}</small>`;
-    else v = `<span class="no">Not enough.</span> The truth refuses you.<small>${label} · ${ch.successes}/${ch.difficulty} successes${res.mode !== "normal" ? " · " + res.mode : ""}</small>`;
-    return `${groups}<div class="verdict">${v}</div>`;
+    const v = ch.hit
+      ? `<span class="ok">Success.</span> Your intent becomes reality.`
+      : `<span class="no">Not enough.</span> The truth refuses you.`;
+    const meta = `<small>${label} · ${ch.successes}/${ch.difficulty} successes${res.mode !== "normal" ? " · " + res.mode : ""}</small>`;
+    return `${groups}<div class="verdict">${v}${meta}</div>${tableFlag(ch)}`;
+  }
+
+  // Advantage/Disadvantage tradeoff -> the player keeps one whole roll (its
+  // pass/fail AND its table come together; no mixing).
+  function castChoice(res, label) {
+    const q = res.mode === "advantage" ? "Which result do you take?" : "Which is less bad?";
+    const cards = res.rolls.map((r, i) => {
+      const pass = r.hit ? `<span class="ok">Success</span>` : `<span class="no">Failure</span>`;
+      const tbl = r.windfall ? `<span class="win">Windfall</span>` : r.downside ? `<span class="down">Downside</span>` : `<span class="clean">no table</span>`;
+      return `<button class="rollpick" onclick="Vertex.app.castPickRoll(${i})">
+          <div class="rollpick-head">Roll ${i + 1}</div>
+          ${rollHTML(r)}
+          <div class="rollpick-v">${pass} · ${tbl}<span class="rollpick-meta">${r.successes}/${r.difficulty}</span></div>
+        </button>`;
+    }).join("");
+    return `<div class="cast-choose">
+        <div class="choose-q">${q}</div>
+        <div class="choose-sub">${label} · Difficulty ${res.rolls[0].difficulty} · ${res.mode} — the rolls trade off, so it's your call</div>
+        <div class="choose-cards">${cards}</div>
+      </div>`;
   }
 
   function panelEmpty(title, sub, msg) {

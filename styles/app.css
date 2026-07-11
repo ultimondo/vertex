@@ -353,6 +353,25 @@ input, textarea{ font-family:inherit; }
 .castpop-cancel{ margin-top:14px; background:transparent; border:0; color:var(--faint); font-size:12px; letter-spacing:.4px; }
 .castpop-cancel:hover{ color:var(--bone); }
 
+/* colour utilities inside the Cast modal (verdict, table flag, roll cards) */
+.cast .ok{ color:var(--green); } .cast .no{ color:var(--dim); }
+.cast .win{ color:var(--bone); } .cast .down{ color:var(--red); } .cast .clean{ color:var(--faint); }
+.tableflag{ margin-top:12px; font-family:var(--serif); font-size:18px; color:var(--dim); }
+
+/* the tradeoff choice step */
+.cast-choose{ margin-top:2px; }
+.choose-q{ font-family:var(--serif); font-size:22px; margin-bottom:3px; }
+.choose-sub{ font-family:var(--mono); font-size:11px; letter-spacing:.4px; color:var(--faint); margin-bottom:16px; }
+.choose-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.rollpick{ display:flex; flex-direction:column; gap:10px; text-align:left; padding:14px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--card); color:var(--bone); transition:border-color .14s ease; }
+.rollpick:hover{ border-color:var(--bone); }
+.rollpick-head{ font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+.rollpick .dice{ min-height:0; gap:8px; }
+.rollpick-v{ font-family:var(--serif); font-size:17px; }
+.rollpick-meta{ font-family:var(--mono); font-size:11px; color:var(--faint); margin-left:8px; }
+@media (max-width:480px){ .choose-cards{ grid-template-columns:1fr; } }
+
 .cast-result{ margin-top:2px; }
 .cast-again{ margin-top:20px; width:100%; padding:11px; border-radius:var(--r-sm); border:1px solid var(--line-2);
   background:transparent; color:var(--dim); font-family:var(--mono); font-size:12px; letter-spacing:.6px;

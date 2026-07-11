@@ -217,12 +217,17 @@ Vertex.app = (function () {
   }
   function castChooseMode() { state.cast.step = "mode"; refreshCast(); }          // step 1 -> the mode dialog
   function castBackToDifficulty() { state.cast.step = "difficulty"; state.cast.result = null; refreshCast(); }
-  function castWithMode(m) {                                                        // pick a mode -> roll -> show result
+  function castWithMode(m) {                                                        // pick a mode -> roll
     state.cast.mode = m;
     const c = active();
-    state.cast.result = Vertex.dice.cast(c.stats[state.cast.stat], state.cast.difficulty, m);
-    state.cast.step = "result";
+    const res = Vertex.dice.cast(c.stats[state.cast.stat], state.cast.difficulty, m);
+    state.cast.result = res;
+    state.cast.step = res.needsChoice ? "choose" : "result";                       // tradeoff -> let the player pick
     refreshCast();
+  }
+  function castPickRoll(i) {                                                        // player resolves a tradeoff
+    const res = state.cast.result;
+    if (res && res.rolls[i]) { res.chosen = res.rolls[i]; state.cast.step = "result"; refreshCast(); }
   }
   function closeCast() { const o = document.getElementById("overlay"); if (o) { o.innerHTML = ""; o.onclick = null; } }
   function refreshCast() { const o = document.getElementById("overlay"); if (o && o.querySelector(".cast")) o.innerHTML = R().castModal(active(), state.cast); }
@@ -330,7 +335,7 @@ Vertex.app = (function () {
 
   return {
     init, setTab, stepStat, stepRes, setArmor, setDrift, markDrift, toggleUse, resetFeature,
-    setCastMode, setDifficulty, doCast, openCast, castChooseMode, castBackToDifficulty, castWithMode, closeCast, editName, choosePortrait, onPortraitFile,
+    setCastMode, setDifficulty, doCast, openCast, castChooseMode, castBackToDifficulty, castWithMode, castPickRoll, closeCast, editName, choosePortrait, onPortraitFile,
     tetherAct, tetherDraw, tetherFray, tetherSever, tetherRetie, isolationAward,
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,

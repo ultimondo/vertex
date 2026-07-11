@@ -131,8 +131,8 @@ darkness. Player-facing copy: second person, evocative but precise, never morali
 | Term | Meaning (quick) |
 |------|------|
 | **Cast** | Rolling dice. Prefer over "roll." |
-| **Windfall** | Two or more 6s in a Cast. Perfect self-actualization. Auto-success + table roll. |
-| **Downside** | Two or more 1s in a Cast. The weight breaking you. Auto-failure + table roll. |
+| **Windfall** | Two or more 6s in a Cast. Perfect self-actualization. Triggers a Windfall Table roll (does **not** auto-succeed — see §4.3). |
+| **Downside** | Two or more 1s in a Cast. The weight breaking you. Triggers a Downside Table roll (does **not** auto-fail — see §4.3). |
 | **Folding Fate** | The Advantage/Disadvantage system. |
 | **Host** | The facilitator. NOT GM/DM. |
 | **Archetype** | A force/belief inside a character; organized in **Mirrors** (paired **Sides**). |
@@ -169,13 +169,16 @@ Characters have **Red, Green, Blue**. They start with **1 in each**.
 6. **Edge case:** if a choice needs only 1 success and you have only 1D6, you still Cast a 2nd D6. It
    cannot provide a success, but it **can** trigger a Windfall or Downside. *(The app's roller must encode this.)*
 
-### 4.3 Windfall & Downside
-- **Windfall** = **two or more 6s** → automatic success regardless of Difficulty; then roll **1D6** on the
-  **Combat** or **Roleplay Windfall Table**.
-- **Downside** = **two or more 1s** → automatic failure regardless of successes; then roll **1D6** on the
-  **Combat** or **Roleplay Downside Table**.
-- **Cancellation:** Windfall and Downside **sets cancel 1:1**. (1 Windfall + 1 Downside → normal Cast.
-  2 Windfalls + 1 Downside → Windfall prevails.)
+### 4.3 Windfall & Downside  *(revised 2026-07-11 — supersedes the old auto-success/failure rule)*
+- **Windfall** = **two or more 6s** → roll **1D6** on the **Combat** or **Roleplay Windfall Table**.
+- **Downside** = **two or more 1s** → roll **1D6** on the **Combat** or **Roleplay Downside Table**.
+- **They no longer force the Cast's outcome.** Success/failure is decided **solely** by successes vs
+  Difficulty (§4.2). A Windfall/Downside is a table roll layered *on top of* that result — so you can
+  **fail yet trigger a Windfall**, or **succeed yet trigger a Downside**. *(This retires the old
+  double-penalty: a high stat rolls more dice, so more 1s; under the retired rule that meant more
+  automatic failures — punishing investment. Now a Downside only adds a table roll.)*
+- **Cancellation:** sixes and ones **cancel 1:1**, so a single Cast carries **at most one** of
+  Windfall/Downside. (Net ≥ 2 sixes → Windfall; net ≥ 2 ones → Downside; otherwise neither.)
 
 **Windfall Tables** (1D6): *Combat* — 1 Bloodrush (extra Minor Action) · 2 Opening (next attack at Diff 1) ·
 3 Piercing (bypass Temp HP/Armor) · 4 Refresh (recover 1 Feature Use) · 5 Ascendance (next Down → hold at
@@ -187,12 +190,21 @@ Diff −1) · 4 Sapped (next Feature costs 2 Uses) · 5 Friendly Fire (ally −1
 *Roleplay* — 1 Void (−3 Fate) · 2 Muted (next Cast Diff +1) · 3 Opaque · 4 Misread · 5 Eyes Upon You ·
 6 Cursed (lose next Archetype Advantage).
 
-### 4.4 Folding Fate (Advantage / Disadvantage)
-- **Advantage:** Cast twice, take the **better** result. Granted when prepared in the Story or strongly
-  aligned with an Archetype (also via Tethers; see §6).
-- **Disadvantage:** Cast twice, take the **worse** result. Inflicted when compromised or in strong
-  conflict with an Archetype.
-- **Advantage does NOT stack** — two sources of Advantage still = Cast twice, take best.
+### 4.4 Folding Fate (Advantage / Disadvantage)  *(comparison revised 2026-07-11)*
+- Both modes = **Cast twice**, then compare the two rolls on **two qualities only**: **pass/fail**
+  (successes vs Difficulty) and **table** (Windfall is good · none is neutral · Downside is bad).
+- **If one roll is objectively better** (≥ on both qualities, strictly better on one) it is taken
+  automatically — **Advantage keeps the better** roll, **Disadvantage keeps the worse**. No prompt.
+- **If the rolls trade off** (one wins on pass, the other on table — e.g. *pass-but-Downside* vs
+  *fail-clean*, or *fail-but-Windfall* vs *pass-clean*) → **the player chooses** which **whole** roll to
+  keep (its pass/fail *and* its table come together — no mixing). Advantage asks "which do you want?";
+  Disadvantage "which is less bad?" — same mechanic.
+- **Number of successes never decides this** — it is **narrative flavour only** (the Host may reward a
+  higher-success roll in the fiction); it merely breaks the tie for which of two otherwise-identical rolls
+  to surface.
+- **Advantage** granted when prepared in the Story or strongly aligned with an Archetype (also via Tethers;
+  see §6). **Disadvantage** inflicted when compromised or in strong conflict with an Archetype.
+- **Advantage does NOT stack** — two sources still = Cast twice.
 - The Host adjudicates, but **players may advocate** ("Vertex rewards those who can justify their will").
 
 **The four identity-Cast outcomes (the heart of the Fate economy):**
@@ -529,7 +541,7 @@ the `/vertex/` sub-path. The site is fully public and search-indexable.
 | `index.html` | App shell: centered title-bar tabs, persistent identity header (portrait thumbnail + name + designation), full-width tab panels filled by JS. |
 | `styles/app.css` | All styling — Cold Archive palette + the Monument / Ledger / Index framework (§11), token-driven `:root`. |
 | `data/seed.js` | `Vertex.SEED` — two starter characters (Mara·Blacksmith, Rosa·Luchador), loaded only on first run. |
-| `src/dice.js` | `Vertex.dice` — **pure** Cast engine (v004 resolution, Windfall/Downside + 1:1 cancel, 1-die edge case, Advantage/Disadvantage). No DOM. |
+| `src/dice.js` | `Vertex.dice` — **pure** Cast engine: pass/fail = successes ≥ Difficulty; Windfall/Downside are table-triggers only (1:1 cancel), **decoupled** from success; Folding Fate auto-keeps the better/worse roll but returns `needsChoice` when the two rolls trade off. 1-die edge case. No DOM. |
 | `src/model.js` | `Vertex.model` — character schema, **derived values** (never stored), normalize/clamp helpers, `archetypePointsSpent`. |
 | `src/storage.js` | `Vertex.storage` — localStorage load/save + JSON export/import. **The seam to swap for a cloud/multiplayer backend.** |
 | `src/render.js` | `Vertex.render` — character → tab HTML (pure string builders); controls call `Vertex.app.*`. |
@@ -546,8 +558,11 @@ characters (auto-saved in-browser); editable stats with live-derived values; edi
 (Fate/HP/Armor/Temp HP); portrait image upload; per-feature use tracking; clickable Drift. All five tabs are
 redesigned in the **Cold Archive** language (§11): **Core = the Monument**, **Designation = the Ledger**,
 **Archetypes / Gear / Bonds = the Index** — rendering from data (display + the existing inline interactions).
-The **Cast** engine (Normal/Advantage/Disadvantage, real dice, Windfall/Downside, `Vertex.render.cast`) is
-**preserved but no longer surfaced as a tab** (to be re-surfaced elsewhere later). **Guided character
+The **Cast** is surfaced as a **modal opened by clicking a Core stat numeral** (locked to that stat): a
+short flow of **set Difficulty → choose Normal/Advantage/Disadvantage → (if the two rolls trade off) pick
+which roll to keep → result**, with the success/Windfall/Downside legend on a hover `?`. Resolution follows
+§4.2–4.4: pass/fail is successes-only and Windfall/Downside are decoupled table-triggers. (The old
+Cast-**tab** UI builder, `Vertex.render.cast`, is kept but unmounted.) **Guided character
 creation** (`src/create.js`) is built: a step-by-step
 wizard (Identity → Designation → Archetypes → Backstory → Convictions & Tethers → Image → Review) that
 authors everything free-form, allocates Archetype Core-Stat points (≤3 each, ≤5 total) that auto-apply to
