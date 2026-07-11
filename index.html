@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Apply the saved theme before CSS loads so there's no flash (default: dark). -->
+<script>(function(){try{if(localStorage.getItem('vertex.theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 <title>Vertex</title>
 <meta name="description" content="Vertex — a tabletop RPG about who you are, who you are becoming, and what it costs to complete that transformation." />
 <meta name="theme-color" content="#0a0d11" />
@@ -49,6 +51,7 @@
       <button data-tab="bonds" onclick="Vertex.app.setTab('bonds',this)">Bonds</button>
     </nav>
     <div class="topctrl">
+      <button class="btn theme-toggle" id="themeToggle" onclick="Vertex.app.toggleTheme()" title="Switch to light" aria-label="Toggle light or dark theme">☀</button>
       <div class="switchwrap">
         <button class="btn" onclick="Vertex.app.toggleMenu(event)">Switch character ▾</button>
         <div class="menu" id="menu"></div>

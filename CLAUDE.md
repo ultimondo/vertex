@@ -435,11 +435,18 @@ painterly portraiture of the dissolving self, jewel-toned in the three stat colo
 film grain. It informed the **soul** (the three stats as palette) and the portrait treatment; the live
 chrome is cool graphite, not the mood board's warm purple.
 
-**Setting-skins (later).** Because the look is token-driven, alternate skins drop in by swapping the `:root`
-block: a Weird West **parchment** skin, and a light **Editorial Bone** skin (warm off-white, explored in
-`mockups/palette-directions.html`) are candidates. The **legacy** FoundryVTT skin (`vertex-custom.css`:
-worn parchment/leather, Garamond + Special Elite, `darkred`/`#3A7C22`/`#0070C0`) is prior art for the
-Weird West direction, not the core identity.
+**Light mode — shipped (2026-07-11).** A **"Cool Paper"** light theme (cool paper-white canvas, cool
+near-black ink, vibrant Fate/HP/Temp meters) is live, toggled from a **☀/☾ button in the title bar**. It's
+a pure token swap under `:root[data-theme="light"]` in `styles/app.css`; the toggle sets `data-theme` on
+`<html>`, persists to `localStorage` (`vertex.theme`), and an inline `<head>` script applies the saved
+choice before CSS loads (no flash). Default is **dark**. The **top bar stays a dark header in both themes**
+(VERTEX + tabs pinned light). The controller side is `Vertex.app.toggleTheme` / `applyTheme`. *(The warmer
+**Editorial Bone** palette from `mockups/palette-directions.html` was the other finalist; Cool Paper won.)*
+
+**Setting-skins (later).** Because the look is token-driven, alternate skins drop in the same way (another
+`:root[data-theme=…]` block or a swap of the base `:root`): a Weird West **parchment** skin is a candidate.
+The **legacy** FoundryVTT skin (`vertex-custom.css`: worn parchment/leather, Garamond + Special Elite,
+`darkred`/`#3A7C22`/`#0070C0`) is prior art for the Weird West direction, not the core identity.
 
 ---
 

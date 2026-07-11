@@ -32,6 +32,7 @@ Vertex.app = (function () {
     save();
     renderAll();
     setTab(state.activeTab);
+    applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");  // sync toggle icon
   }
 
   let suppressAutoSync = false;
@@ -45,6 +46,19 @@ Vertex.app = (function () {
   function refreshMenu() {
     const m = document.getElementById("menu");
     if (m) m.innerHTML = R().menu(state.list, state.activeId);
+  }
+
+  /* ---------------- theme (light / dark) ---------------- */
+  function applyTheme(theme) {
+    const t = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("vertex.theme", t); } catch (e) {}
+    const b = document.getElementById("themeToggle");
+    if (b) { b.textContent = t === "light" ? "☾" : "☀"; b.title = t === "light" ? "Switch to dark" : "Switch to light"; }
+  }
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    applyTheme(cur === "light" ? "dark" : "light");
   }
 
   /* ---------------- rendering ---------------- */
@@ -353,6 +367,6 @@ Vertex.app = (function () {
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,
     switchTo, createNew, commitNewCharacter, saveCharacter, editSection, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
-    getActive, onDriveSaved, refreshMenu, toggleMenu
+    getActive, onDriveSaved, refreshMenu, toggleMenu, toggleTheme
   };
 })();
