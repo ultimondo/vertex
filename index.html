@@ -51,6 +51,7 @@
       <button data-tab="bonds" onclick="Vertex.app.setTab('bonds',this)">Bonds</button>
     </nav>
     <div class="topctrl">
+      <span id="identityCtl" class="idctl"></span>
       <button class="btn theme-toggle" id="themeToggle" onclick="Vertex.app.toggleTheme()" title="Switch to light" aria-label="Toggle light or dark theme">☀</button>
       <div class="switchwrap">
         <button class="btn" onclick="Vertex.app.toggleMenu(event)">Switch character ▾</button>
@@ -91,6 +92,10 @@
   <div class="toast" id="toast"></div>
   <div id="overlay"></div>
 
+  <!-- Sign-in gate (accounts main path + guest fallback). Shown by default so it
+       covers the app on first paint; auth.js hides it once signed in / guest. -->
+  <div id="authgate"><div class="gate-card"><div class="gate-brand">VERTEX</div><div class="gate-sub">Loading…</div></div></div>
+
   <!-- ============ Google APIs (for "Load from Drive"; async, order-independent) ============ -->
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -108,7 +113,7 @@
     (function () {
       var v = Date.now();
       ["data/seed.js", "src/supa.js", "src/dice.js", "src/model.js", "src/storage.js",
-       "src/render.js", "src/create.js", "src/app.js", "src/drive.js"]
+       "src/render.js", "src/create.js", "src/app.js", "src/drive.js", "src/auth.js"]
         .forEach(function (s) {
           var el = document.createElement("script");
           el.src = s + "?v=" + v;
