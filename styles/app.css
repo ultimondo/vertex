@@ -128,6 +128,75 @@
 .gate-guest:hover{ color:var(--dim); }
 .gate-msg{ min-height:18px; font-size:13px; text-align:center; color:var(--dim); line-height:1.45; }
 .gate-msg.bad{ color:var(--red); } .gate-msg.ok{ color:var(--green); }
+
+/* ---------------- Stories (multiplayer overlay) ---------------- */
+.stories{ position:relative; width:min(560px,94vw); max-height:90vh; overflow:auto;
+  background:var(--ink-2); border:1px solid var(--line-2); border-radius:var(--r-lg); padding:26px 28px 24px;
+  box-shadow:0 40px 120px -30px #000; }
+.stories.wide{ width:min(1000px,96vw); }
+.st-head{ display:flex; align-items:baseline; gap:12px; margin:0 0 18px; }
+.st-head h2{ font-family:var(--serif); font-size:27px; }
+.st-head .sub{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--faint); }
+.st-back{ background:transparent; border:0; color:var(--dim); font-family:var(--mono); font-size:11px; letter-spacing:.6px; padding:0 0 14px; }
+.st-back:hover{ color:var(--bone); }
+.st-actions{ display:flex; gap:9px; margin-bottom:16px; }
+.st-cta{ padding:11px 16px; border-radius:var(--r-sm); border:1px solid var(--line-2); background:var(--bone); color:var(--ink); font-size:13.5px; font-weight:600; transition:opacity .14s ease, border-color .14s ease; }
+.st-cta:hover{ opacity:.9; }
+.st-cta.ghost{ background:transparent; color:var(--bone); }
+.st-cta.ghost:hover{ border-color:var(--bone); opacity:1; }
+.st-list{ display:flex; flex-direction:column; }
+.st-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; background:transparent;
+  border:0; border-top:1px solid var(--line); padding:15px 6px; text-align:left; cursor:pointer; border-radius:var(--r-sm); }
+.st-row:first-child{ border-top:0; }
+.st-row:hover{ background:var(--card); }
+.st-nm{ font-family:var(--serif); font-size:20px; color:var(--bone); }
+.st-role{ font-family:var(--mono); font-size:9.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 9px;
+  border-radius:var(--r-pill); border:1px solid var(--line-2); color:var(--dim); flex:none; }
+.st-role.host{ color:var(--green); border-color:var(--green); }        /* status palette: affirm */
+.st-empty{ color:var(--faint); font-size:14px; padding:18px 6px; line-height:1.6; }
+.st-empty.small{ padding:10px 2px; font-size:12.5px; }
+.st-form{ display:flex; flex-direction:column; gap:10px; }
+.st-form input, .st-form select{ background:var(--card); border:1px solid var(--line-2); border-radius:var(--r-sm);
+  padding:11px 13px; color:var(--bone); font-size:14px; font-family:var(--sans); }
+.st-form input:focus, .st-form select:focus{ outline:none; border-color:var(--blue); }
+.st-lab{ font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); margin-top:4px; }
+.st-msg{ min-height:18px; font-size:13px; color:var(--red); margin-top:10px; }
+.st-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--faint); margin:6px 0 8px; }
+.st-roster{ display:flex; flex-direction:column; }
+.st-member{ display:flex; align-items:center; gap:13px; border-top:1px solid var(--line); padding:12px 2px; }
+.st-member:first-child{ border-top:0; }
+.st-av{ width:38px; height:46px; flex:none; border-radius:var(--r-sm); overflow:hidden; display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-size:15px; color:rgba(233,238,243,.9); background:linear-gradient(155deg,#1d242c,#0e1318 55%,#070a0d); }
+.st-av img{ width:100%; height:100%; object-fit:cover; }
+.st-who{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.st-mn{ font-family:var(--serif); font-size:18px; color:var(--bone); line-height:1.05; }
+.st-ds{ font-family:var(--mono); font-size:10.5px; letter-spacing:.4px; color:var(--dim); text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.st-acts{ display:flex; gap:6px; flex:none; }
+.st-mini{ font-family:var(--mono); font-size:10.5px; letter-spacing:.4px; text-transform:uppercase; color:var(--dim);
+  background:transparent; border:1px solid var(--line-2); border-radius:var(--r-sm); padding:6px 10px; }
+.st-mini:hover{ color:var(--bone); border-color:var(--bone); }
+.st-mini.danger:hover{ color:var(--red); border-color:var(--red); }
+.st-section{ margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+.st-invites{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.st-invite{ display:flex; align-items:center; gap:10px; }
+.st-code{ font-family:var(--mono); font-size:15px; letter-spacing:1.5px; color:var(--bone); background:var(--card);
+  border:1px solid var(--line-2); border-radius:var(--r-sm); padding:6px 12px; }
+.st-exp{ font-family:var(--mono); font-size:11px; color:var(--faint); flex:1; }
+.st-fresh{ font-size:13px; color:var(--dim); margin-top:10px; }
+.st-fresh b{ font-family:var(--mono); letter-spacing:1.5px; color:var(--green); }
+.st-foot{ margin-top:20px; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; }
+.st-danger{ font-family:var(--mono); font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--faint); background:transparent; border:0; }
+.st-danger:hover{ color:var(--red); }
+/* read-only character view (Host looking at a player) */
+.roview-head{ display:flex; align-items:center; gap:18px; padding:6px 2px 18px; border-bottom:1px solid var(--line); margin-bottom:6px; }
+.roview-head .portrait{ width:64px; height:80px; }
+.roview-head h2{ font-family:var(--serif); font-size:34px; }
+.roview-head .desig{ font-family:var(--mono); font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin-top:8px; }
+.st-ro-badge{ margin-left:auto; align-self:flex-start; font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  color:var(--faint); border:1px solid var(--line-2); border-radius:var(--r-pill); padding:3px 10px; }
+.roview{ pointer-events:none; }        /* display only — never edit another player's sheet */
+.roview button, .roview .editbtn, .roview .mnstep{ display:none !important; }
+.roview .panel{ margin-bottom:16px; }
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{

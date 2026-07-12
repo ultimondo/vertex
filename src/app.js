@@ -47,6 +47,7 @@ Vertex.app = (function () {
     // Nudge the silent Drive auto-save (no-op unless the player enabled it).
     if (!suppressAutoSync && window.Vertex.drive && Vertex.drive.noteChange) Vertex.drive.noteChange();
   }
+  function getList() { return state.list; }
   // Replace the whole character list (used when signing in swaps to cloud data).
   function loadList(list) {
     (list || []).forEach(M().normalize);
@@ -380,6 +381,6 @@ Vertex.app = (function () {
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,
     switchTo, createNew, commitNewCharacter, saveCharacter, editSection, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
-    getActive, onDriveSaved, refreshMenu, toggleMenu, toggleTheme, loadList
+    getActive, getList, onDriveSaved, refreshMenu, toggleMenu, toggleTheme, loadList
   };
 })();

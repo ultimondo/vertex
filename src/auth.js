@@ -114,7 +114,8 @@ Vertex.auth = (function () {
     const el = document.getElementById("identityCtl");
     if (!el) return;
     if (user) {
-      el.innerHTML = `<span class="idname" title="Signed in">${esc(profile && profile.display_name || "")}</span>` +
+      el.innerHTML = `<button class="btn" onclick="Vertex.stories.open()">Stories</button>` +
+                     `<span class="idname" title="Signed in">${esc(profile && profile.display_name || "")}</span>` +
                      `<button class="btn" onclick="Vertex.auth.signOut()">Sign out</button>`;
     } else if (isGuest()) {
       el.innerHTML = `<button class="btn" onclick="Vertex.auth.signInFromGuest()">Sign in</button>`;
