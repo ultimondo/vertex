@@ -171,7 +171,7 @@
       <div class="ent"><h4>Account</h4><p>A person. Signs in with Google or email + password. Owns characters; joins or hosts Stories. Not "a Host" or "a Player" globally — that's decided per Story.</p></div>
       <div class="ent"><h4>Story</h4><p>The campaign. Has one Host, a roster of Players, their characters, an invite code, and (later) the Host's NPCs, items, settings, and notes.</p></div>
       <div class="ent"><h4>Membership</h4><p>The link between an Account and a Story, carrying the <span class="field">role</span> (<span class="field">host</span> / <span class="field">player</span>) and which character they brought.</p></div>
-      <div class="ent"><h4>Character</h4><p>Owned by one Account. Attached to at most one Story at a time (or unattached — a solo/guest character). The existing sheet, now in the cloud.</p></div>
+      <div class="ent"><h4>Character</h4><p>Owned by one Account. Can be attached to any number of Stories at once (usually one). The existing sheet, now in the cloud.</p></div>
       <div class="ent"><h4>Invite code</h4><p>A short code/link (e.g. <span class="field">VTX-7QK2</span>) a Host shares. Entering it makes you a Player in that Story.</p></div>
       <div class="ent"><h4>Guest</h4><p>Using Vertex without signing in — a local-only character, fully playable offline. Can be claimed into an account later.</p></div>
     </div>
@@ -220,7 +220,8 @@
       <div class="ent"><h4>users</h4><p><span class="field">id · email · display_name · created_at</span> — provided by the auth service.</p></div>
       <div class="ent"><h4>stories</h4><p><span class="field">id · name · host_id → users · invite_code · created_at</span></p></div>
       <div class="ent"><h4>memberships</h4><p><span class="field">id · story_id · user_id · role (host|player) · character_id · joined_at</span></p></div>
-      <div class="ent"><h4>characters</h4><p><span class="field">id · owner_id → users · story_id (nullable) · data (the full sheet JSON) · updated_at</span></p></div>
+      <div class="ent"><h4>characters</h4><p><span class="field">id · owner_id → users · data (sheet JSON) · updated_at</span> — no story link here; characters reach Stories through memberships (many-to-many).</p></div>
+      <div class="ent"><h4>invites</h4><p><span class="field">id · story_id · code · created_by · expires_at · used_by · revoked</span> — one-time, 24h, host-revocable.</p></div>
       <div class="ent"><h4>later: story_content</h4><p><span class="field">npcs · items · notes/settings · fate_log</span> — each keyed to a <span class="field">story_id</span>, Host-only.</p></div>
     </div>
     <div class="note"><span class="k">Reuses today's work</span>A character's sheet stays the same JSON the app already
@@ -309,7 +310,8 @@
   </section>
 
   <section>
-    <div class="sechead"><span class="n">10</span><h2>Open questions for you</h2></div>
+    <div class="sechead"><span class="n">10</span><h2>Open questions — now resolved</h2></div>
+    <div class="note"><span class="k">Answered 2026-07-12</span>Host is host-only in their own Story (they can play in others) · a character can be in many Stories at once · the roster shows display-name + character name + portrait + designation · display names are aliases, never emails · invites are one-time, expire in 24h, host-revocable, no player cap · a character always stays with its owner and simply detaches when a Story ends · Google Drive sync stays as an optional backup · email verification is required. Platform-wide user removal is handled from the Supabase dashboard for v1; a Host can remove a player from their own Story in the MVP.</div>
     <ol class="q">
       <li><b>Can a Host also play a character in their own Story,</b> or is the Host purely a facilitator there?<span class="rec"><em>my lean</em> — Host-only in their own Story; if they want to play, they join someone else's.</span></li>
       <li><b>Is a character bound to one Story, or can it move between Stories</b> (and exist unattached for solo play)?<span class="rec"><em>my lean</em> — owned by you, attachable to one Story at a time, can be solo. One character can't be in two Stories at once.</span></li>
