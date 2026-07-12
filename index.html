@@ -95,6 +95,10 @@
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+  <!-- Supabase client library (accounts + cloud backend). Blocking classic script
+       so window.supabase is ready before src/supa.js runs in the loader below. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- ============ scripts (classic, ordered; no build step) ============
        Loaded via a tiny cache-busting loader so a NORMAL reload always runs the
        latest code. GitHub Pages otherwise lets the browser serve a stale cached
@@ -103,7 +107,7 @@
   <script>
     (function () {
       var v = Date.now();
-      ["data/seed.js", "src/dice.js", "src/model.js", "src/storage.js",
+      ["data/seed.js", "src/supa.js", "src/dice.js", "src/model.js", "src/storage.js",
        "src/render.js", "src/create.js", "src/app.js", "src/drive.js"]
         .forEach(function (s) {
           var el = document.createElement("script");
