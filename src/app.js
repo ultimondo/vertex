@@ -37,11 +37,23 @@ Vertex.app = (function () {
 
   let suppressAutoSync = false;
   function save() {
-    const ok = S().saveAll(state.list);
-    S().setActiveId(state.activeId);
-    if (!ok) toast("Couldn’t save — storage may be full (large portrait image?).");
+    if (window.Vertex.cloud && Vertex.cloud.signedIn()) {
+      Vertex.cloud.noteChange(active());          // signed in → cloud is the source of truth
+    } else {
+      const ok = S().saveAll(state.list);          // guest → localStorage
+      S().setActiveId(state.activeId);
+      if (!ok) toast("Couldn’t save — storage may be full (large portrait image?).");
+    }
     // Nudge the silent Drive auto-save (no-op unless the player enabled it).
     if (!suppressAutoSync && window.Vertex.drive && Vertex.drive.noteChange) Vertex.drive.noteChange();
+  }
+  // Replace the whole character list (used when signing in swaps to cloud data).
+  function loadList(list) {
+    (list || []).forEach(M().normalize);
+    state.list = (list && list.length) ? list : [M().newCharacter()];
+    state.activeId = state.list[0].id;
+    renderAll();
+    setTab(state.activeTab);
   }
   function refreshMenu() {
     const m = document.getElementById("menu");
@@ -304,6 +316,7 @@ Vertex.app = (function () {
     if (!c) return;
     if (!confirm(`Delete “${c.name}”? This cannot be undone.`)) return;
     state.list = state.list.filter(x => x.id !== id);
+    if (window.Vertex.cloud && Vertex.cloud.signedIn()) Vertex.cloud.remove(id);
     if (!state.list.length) state.list.push(M().newCharacter());
     if (state.activeId === id) state.activeId = state.list[0].id;
     save(); renderAll(); setTab(state.activeTab);
@@ -367,6 +380,6 @@ Vertex.app = (function () {
     holdHonor, holdYield, holdHoldLine, holdVignettePlayed,
     openCrossing, closeCrossing, crossRevise, crossRetire, crossSilence, crossWake,
     switchTo, createNew, commitNewCharacter, saveCharacter, editSection, deleteCharacter, exportCurrent, importPrompt, onImportFile, onImportData,
-    getActive, onDriveSaved, refreshMenu, toggleMenu, toggleTheme
+    getActive, onDriveSaved, refreshMenu, toggleMenu, toggleTheme, loadList
   };
 })();

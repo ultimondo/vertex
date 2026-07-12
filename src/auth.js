@@ -92,7 +92,10 @@ Vertex.auth = (function () {
   async function signOut() {
     localStorage.removeItem(GUEST_KEY);
     try { if (supa()) await supa().auth.signOut(); } catch (_) {}
-    user = null; profile = null; gateMode = "in"; showGate(); updateIdentityBar();
+    user = null; profile = null; gateMode = "in";
+    if (window.Vertex.cloud) Vertex.cloud.onSignOut();
+    if (window.Vertex.app && Vertex.app.loadList) Vertex.app.loadList(Vertex.storage.loadAll() || []);
+    showGate(); updateIdentityBar();
   }
 
   function showGate() { const g = gateEl(); if (g) { g.classList.remove("hidden"); renderGate(); } }
@@ -121,7 +124,7 @@ Vertex.auth = (function () {
   async function resolve() {
     const { data } = await supa().auth.getSession();
     user = data.session ? data.session.user : null;
-    if (user)          { await loadProfile(); hideGate(); }
+    if (user)          { await loadProfile(); if (window.Vertex.cloud) await Vertex.cloud.onSignIn(user); hideGate(); }
     else if (isGuest()) { hideGate(); }
     else               { showGate(); }
     updateIdentityBar();
@@ -131,7 +134,7 @@ Vertex.auth = (function () {
     if (!supa()) { hideGate(); return; }   // no backend reachable → stay local, don't block the app
     supa().auth.onAuthStateChange(async (_event, session) => {
       user = session ? session.user : null;
-      if (user) { await loadProfile(); hideGate(); }
+      if (user) { await loadProfile(); if (window.Vertex.cloud) await Vertex.cloud.onSignIn(user); hideGate(); }
       updateIdentityBar();
     });
     resolve();

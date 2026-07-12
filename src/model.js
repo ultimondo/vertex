@@ -7,7 +7,10 @@ window.Vertex = window.Vertex || {};
 Vertex.model = (function () {
 
   function uid() {
-    return "c_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    // UUID so ids are valid cloud primary keys and globally unique.
+    return (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : "c_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
   }
 
   function initials(name) {
