@@ -59,6 +59,9 @@ after 90 days**. Vertex now has a heartbeat so that can't happen quietly again.
 2. Open **`supabase/003_keepalive.sql`** from this repo, paste the whole file, press **Run.**
    That adds one row and one function, `ping()` — a real (tiny) database write anyone may call.
 
+*(The keepalive works even before you run that file — the Action falls back to a plain query the
+security rules answer with nothing. Running it just gives the project a proper heartbeat row.)*
+
 Nothing else to do. Three things now keep it alive:
 
 - **A nightly GitHub Action** (`.github/workflows/supabase-keepalive.yml`) calls `ping()` at 06:17 UTC

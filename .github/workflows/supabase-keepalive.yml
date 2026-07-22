@@ -34,16 +34,34 @@ jobs:
       - name: Ping the database
         run: |
           set -uo pipefail
-          for attempt in 1 2 3; do
-            code=$(curl -sS -m 30 -o body.txt -w '%{http_code}' \
+
+          # Preferred heartbeat: the ping() function from 003_keepalive.sql.
+          ping_rpc() {
+            curl -sS -m 30 -o body.txt -w '%{http_code}' \
               -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
               -H "apikey: $SUPABASE_ANON_KEY" \
               -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
               -H "Content-Type: application/json" \
-              -d '{}') || code=000
-            echo "attempt $attempt: HTTP $code — $(cat body.txt 2>/dev/null)"
+              -d '{}'
+          }
+          # Fallback if that migration hasn't been run yet: a plain SELECT that
+          # Row-Level Security answers with [] — still a real query on the database.
+          ping_select() {
+            curl -sS -m 30 -o body.txt -w '%{http_code}' \
+              "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1" \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+          }
+
+          for attempt in 1 2 3; do
+            code=$(ping_rpc); code=${code:-000}; how="ping()"
+            if [ "$code" != "200" ]; then
+              echo "attempt $attempt: ping() → HTTP $code — $(cat body.txt 2>/dev/null)"
+              code=$(ping_select); code=${code:-000}; how="select"
+            fi
+            echo "attempt $attempt: $how → HTTP $code — $(cat body.txt 2>/dev/null)"
             if [ "$code" = "200" ]; then
-              echo "Project is awake. Last ping: $(cat body.txt)" >> "$GITHUB_STEP_SUMMARY"
+              echo "Project is awake (via $how)." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
             sleep 15
