@@ -50,6 +50,32 @@ Left sidebar → **Project Settings → API**:
 
 Paste those two to me. **Do not** send the `service_role` key or your database password.
 
+## 7. Keep the project awake (do this once — it already bit us once)
+
+Supabase **pauses a free project after 7 days with no activity**, and a paused project is **deleted
+after 90 days**. Vertex now has a heartbeat so that can't happen quietly again.
+
+1. Left sidebar → **SQL Editor → New query**.
+2. Open **`supabase/003_keepalive.sql`** from this repo, paste the whole file, press **Run.**
+   That adds one row and one function, `ping()` — a real (tiny) database write anyone may call.
+
+Nothing else to do. Three things now keep it alive:
+
+- **A nightly GitHub Action** (`.github/workflows/supabase-keepalive.yml`) calls `ping()` at 06:17 UTC
+  every day. It uses only the public URL + anon key, so there are no secrets to configure.
+- **The app itself** pings once a day per browser — so anyone simply *using* Vertex keeps it awake.
+- **A failure alarm:** if a ping ever fails, the Action fails and **GitHub emails you** — days before
+  a pause could happen. If you get one, open the
+  [project dashboard](https://supabase.com/dashboard/project/fcuiaerlovooloamckot) and press **Restore**.
+
+> **If the project is already paused,** unpausing is a dashboard-only action: sign in at
+> https://supabase.com/dashboard/project/fcuiaerlovooloamckot and press **Restore project**. Your data
+> comes back with it. Run step 7.2 above once it's up.
+
+> **One long-term catch:** GitHub disables scheduled workflows in a repo with **no commits for 60 days.**
+> The workflow handles this itself — if the repo has been quiet 45 days it leaves one tiny commit so the
+> schedule stays enabled. (GitHub also emails you before disabling anything.)
+
 ---
 
 Once I have those two values, I'll:

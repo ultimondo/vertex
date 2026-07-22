@@ -1,0 +1,69 @@
+# =============================================================================
+# VERTEX — Supabase keepalive
+# Supabase pauses a free-tier project after 7 days with no activity, and a paused
+# project is deleted after 90 days. This wakes it every day by calling the tiny
+# public `ping()` function from supabase/003_keepalive.sql (a real database write,
+# so it always counts as activity). If a ping ever fails, the run fails and GitHub
+# emails you — that is the early warning, days before a pause could happen.
+#
+# The URL + key below are the PUBLIC project URL and anon key already published in
+# src/supa.js and protected by Row-Level Security. No secrets live in this file.
+# You can also run it by hand: Actions tab → Supabase keepalive → Run workflow.
+# =============================================================================
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: "17 6 * * *"      # 06:17 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write             # only for the "keep the schedule alive" step below
+
+concurrency: supabase-keepalive
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://fcuiaerlovooloamckot.supabase.co
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdWlhZXJsb3Zvb2xvYW1ja290Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NjA3MDUsImV4cCI6MjA5OTQzNjcwNX0.Flirboib9zmWxh9QhJmGlx-mCwFB9HVfKfTCjBbEvuk
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping the database
+        run: |
+          set -uo pipefail
+          for attempt in 1 2 3; do
+            code=$(curl -sS -m 30 -o body.txt -w '%{http_code}' \
+              -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{}') || code=000
+            echo "attempt $attempt: HTTP $code — $(cat body.txt 2>/dev/null)"
+            if [ "$code" = "200" ]; then
+              echo "Project is awake. Last ping: $(cat body.txt)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::Supabase did not answer the keepalive ping (last HTTP $code). The project may be paused — unpause it at https://supabase.com/dashboard/project/fcuiaerlovooloamckot"
+          exit 1
+
+      # GitHub disables scheduled workflows in a repo that has had no commits for
+      # 60 days — which would silently stop the keepalive. If the repo has been
+      # quiet for 45 days, leave one small commit so the schedule keeps running.
+      # Does nothing at all while the project is being worked on normally.
+      - name: Keep the schedule alive
+        run: |
+          set -euo pipefail
+          days=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "days since last commit: $days"
+          [ "$days" -ge 45 ] || exit 0
+          date -u +%Y-%m-%dT%H:%M:%SZ > .github/keepalive-stamp
+          git config user.name  "ultimondo"
+          git config user.email "ultimondo@users.noreply.github.com"
+          git add .github/keepalive-stamp
+          git commit -m "Keepalive: keep the scheduled workflow enabled"
+          git push

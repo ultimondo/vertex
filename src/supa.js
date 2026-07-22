@@ -18,3 +18,18 @@ Vertex.supa = (window.supabase && window.supabase.createClient)
   : null;
 
 if (!Vertex.supa) console.error("Vertex.supa: supabase-js did not load — check the CDN <script> in index.html.");
+
+/* Keepalive (see supabase/003_keepalive.sql). A free-tier project is paused after
+   7 days with no activity, so every visit to the app counts as a heartbeat — at
+   most one per browser per day, fire-and-forget, never blocking the page. The
+   nightly GitHub Action is the guarantee; this is the layer that means ordinary
+   use alone keeps the project awake. */
+(function () {
+  if (!Vertex.supa) return;
+  try {
+    var key = "vertex.lastPing";
+    if (Date.now() - (+localStorage.getItem(key) || 0) < 864e5) return;   // 24h
+    localStorage.setItem(key, String(Date.now()));
+  } catch (e) { /* private mode: ping anyway */ }
+  Vertex.supa.rpc("ping").then(null, function () {});
+})();
