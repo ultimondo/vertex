@@ -33,6 +33,7 @@ jobs:
 
       - name: Ping the database
         run: |
+          set +e            # GitHub's default shell is `bash -e`; a failed curl must not abort the retry loop
           set -uo pipefail
 
           # Preferred heartbeat: the ping() function from 003_keepalive.sql.
@@ -74,6 +75,7 @@ jobs:
       # quiet for 45 days, leave one small commit so the schedule keeps running.
       # Does nothing at all while the project is being worked on normally.
       - name: Keep the schedule alive
+        if: always()          # runs even if the ping failed, so the schedule can't lapse
         run: |
           set -euo pipefail
           days=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
