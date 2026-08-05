@@ -1,20 +1,37 @@
 # =============================================================================
 # VERTEX — Supabase keepalive
-# Supabase pauses a free-tier project after 7 days with no activity, and a paused
-# project is deleted after 90 days. This wakes it every day by calling the tiny
-# public `ping()` function from supabase/003_keepalive.sql (a real database write,
-# so it always counts as activity). If a ping ever fails, the run fails and GitHub
-# emails you — that is the early warning, days before a pause could happen.
+# Supabase pauses a free-tier project after ~7 days without "sufficient activity"
+# (their word — the threshold is deliberately undocumented, but the guidance is
+# "a few user requests to the database each day"). A paused project can still be
+# restored from the dashboard; left alone it is eventually deleted.
 #
-# The URL + key below are the PUBLIC project URL and anon key already published in
-# src/supa.js and protected by Row-Level Security. No secrets live in this file.
-# You can also run it by hand: Actions tab → Supabase keepalive → Run workflow.
+# This keeps the project awake by calling the tiny public `ping()` function from
+# supabase/003_keepalive.sql — a real database write, so it always counts as
+# activity, not just a request that bounces off the edge.
+#
+# Design notes (each one is a failure this has already had, or nearly had):
+#   · EVERY 6 HOURS, not daily. GitHub queues scheduled jobs and drops them under
+#     load — our runs have drifted by up to 1.5h. One ping a day means one dropped
+#     run = a day with zero activity. Four a day also matches "a few requests
+#     each day" far better than the bare minimum of one.
+#   · TWO requests per run (the rpc + a REST read), so activity registers even if
+#     one path is ever changed or blocked.
+#   · A STALENESS ALARM. The dangerous failure is not a ping that fails — that
+#     already fails loudly. It is the schedule silently never firing (GitHub
+#     disables cron in repos idle 60 days; runs can be dropped; the workflow can
+#     be disabled by hand). Nothing errors, so nothing emails you. So before
+#     pinging we ask the database how old the last heartbeat is, and if it is
+#     older than it has any right to be, we ping first and then fail loudly.
+#
+# The URL + key below are the PUBLIC project URL and anon key already published
+# in src/supa.js and protected by Row-Level Security. No secrets in this file.
+# Run it by hand any time: Actions tab → Supabase keepalive → Run workflow.
 # =============================================================================
 name: Supabase keepalive
 
 on:
   schedule:
-    - cron: "17 6 * * *"      # 06:17 UTC daily
+    - cron: "17 */6 * * *"     # 00:17, 06:17, 12:17, 18:17 UTC
   workflow_dispatch:
 
 permissions:
@@ -28,8 +45,41 @@ jobs:
     env:
       SUPABASE_URL: https://fcuiaerlovooloamckot.supabase.co
       SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdWlhZXJsb3Zvb2xvYW1ja290Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NjA3MDUsImV4cCI6MjA5OTQzNjcwNX0.Flirboib9zmWxh9QhJmGlx-mCwFB9HVfKfTCjBbEvuk
+      # Alarm if the previous heartbeat is older than this. At one ping per 6h,
+      # 30h means at least four scheduled runs in a row went missing *and* nobody
+      # opened the app — a real signal, days before a pause becomes possible.
+      STALE_AFTER_HOURS: 30
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read the heartbeat age (before we touch it)
+        id: age
+        run: |
+          set +e
+          set -uo pipefail
+          # keepalive_status() is read-only and comes from 004_keepalive_status.sql.
+          # If that migration hasn't been run yet this 404s and we simply skip the
+          # check — the ping below still works, exactly as before.
+          code=$(curl -sS -m 30 -o status.json -w '%{http_code}' \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/keepalive_status" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" -d '{}')
+          code=${code:-000}
+          echo "keepalive_status() → HTTP $code — $(cat status.json 2>/dev/null)"
+          if [ "$code" != "200" ]; then
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            echo "Heartbeat age unknown (HTTP $code) — run supabase/004_keepalive_status.sql to enable this check."
+            exit 0
+          fi
+          hours=$(jq -r '.[0].age_hours // empty' status.json)
+          count=$(jq -r '.[0].pings     // empty' status.json)
+          last=$( jq -r '.[0].last_ping // empty' status.json)
+          echo "skipped=false"        >> "$GITHUB_OUTPUT"
+          echo "hours=${hours:-0}"    >> "$GITHUB_OUTPUT"
+          echo "count=${count:-0}"    >> "$GITHUB_OUTPUT"
+          echo "last=${last:-unknown}" >> "$GITHUB_OUTPUT"
+          echo "last heartbeat: $last (${hours}h ago, $count pings total)"
 
       - name: Ping the database
         run: |
@@ -54,6 +104,7 @@ jobs:
               -H "Authorization: Bearer $SUPABASE_ANON_KEY"
           }
 
+          ok=0
           for attempt in 1 2 3; do
             code=$(ping_rpc); code=${code:-000}; how="ping()"
             if [ "$code" != "200" ]; then
@@ -61,14 +112,34 @@ jobs:
               code=$(ping_select); code=${code:-000}; how="select"
             fi
             echo "attempt $attempt: $how → HTTP $code — $(cat body.txt 2>/dev/null)"
-            if [ "$code" = "200" ]; then
-              echo "Project is awake (via $how)." >> "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
+            if [ "$code" = "200" ]; then ok=1; break; fi
             sleep 15
           done
-          echo "::error::Supabase did not answer the keepalive ping (last HTTP $code). The project may be paused — unpause it at https://supabase.com/dashboard/project/fcuiaerlovooloamckot"
-          exit 1
+
+          if [ "$ok" != "1" ]; then
+            echo "::error::Supabase did not answer the keepalive ping (last HTTP $code). The project may be paused — unpause it at https://supabase.com/dashboard/project/fcuiaerlovooloamckot"
+            exit 1
+          fi
+
+          # A second, different request in the same run: more than one "user
+          # request to the database" per visit, and it exercises a path the rpc
+          # doesn't. Best-effort — the heartbeat above is what actually matters.
+          extra=$(ping_select); echo "second request: HTTP ${extra:-000}"
+
+          echo "Project is awake (via $how)." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Alarm if the heartbeat had gone stale
+        if: steps.age.outputs.skipped == 'false'
+        run: |
+          set -uo pipefail
+          hours="${{ steps.age.outputs.hours }}"
+          echo "Heartbeat was ${hours}h old, last at ${{ steps.age.outputs.last }} (${{ steps.age.outputs.count }} pings total)." >> "$GITHUB_STEP_SUMMARY"
+          # Integer compare — bash can't do decimals, and we only care about the hour.
+          if [ "${hours%%.*}" -ge "$STALE_AFTER_HOURS" ]; then
+            echo "::error::The Supabase heartbeat had gone ${hours}h stale — the scheduled keepalive is NOT running reliably. This run pinged the project (so it is awake now), but check the Actions tab: the schedule may be disabled or its runs dropped. Left unfixed, the project will be paused."
+            exit 1
+          fi
+          echo "Heartbeat healthy (${hours}h < ${STALE_AFTER_HOURS}h)."
 
       # GitHub disables scheduled workflows in a repo that has had no commits for
       # 60 days — which would silently stop the keepalive. If the repo has been

@@ -6,8 +6,10 @@
 -- project a heartbeat: one tiny row and one function, `ping()`, that anyone may
 -- call. Real database activity — not just a request that bounces off the edge —
 -- so it always counts. Two things call it (see docs/SUPABASE-SETUP.md §7):
---   · the GitHub Action .github/workflows/supabase-keepalive.yml, every 2 days
+--   · the GitHub Action .github/workflows/supabase-keepalive.yml, every 6 hours
 --   · the app itself, once a day per browser (src/supa.js)
+-- See also 004_keepalive_status.sql, which adds the read-only companion the
+-- Action uses to notice if those pings ever quietly stop.
 --
 -- The table is single-row BY CONSTRUCTION (primary key `id` is boolean and must
 -- be true), so a public write endpoint can never grow the database, and the

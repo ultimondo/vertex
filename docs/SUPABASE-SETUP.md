@@ -58,18 +58,36 @@ after 90 days**. Vertex now has a heartbeat so that can't happen quietly again.
 1. Left sidebar → **SQL Editor → New query**.
 2. Open **`supabase/003_keepalive.sql`** from this repo, paste the whole file, press **Run.**
    That adds one row and one function, `ping()` — a real (tiny) database write anyone may call.
+3. **New query** again → paste **`supabase/004_keepalive_status.sql`** → **Run.**
+   That adds a read-only companion, `keepalive_status()`, which reports how long ago the last
+   heartbeat was. It's what lets the Action catch the *silent* failure — see the alarm below.
 
-*(The keepalive works even before you run that file — the Action falls back to a plain query the
-security rules answer with nothing. Running it just gives the project a proper heartbeat row.)*
+*(The keepalive works even before you run those files — the Action falls back to a plain query the
+security rules answer with nothing, and skips the staleness check. Running them gives the project a
+proper heartbeat row and turns the alarm on.)*
 
 Nothing else to do. Three things now keep it alive:
 
-- **A nightly GitHub Action** (`.github/workflows/supabase-keepalive.yml`) calls `ping()` at 06:17 UTC
-  every day. It uses only the public URL + anon key, so there are no secrets to configure.
+- **A GitHub Action** (`.github/workflows/supabase-keepalive.yml`) calls `ping()` **every 6 hours**
+  (00:17 / 06:17 / 12:17 / 18:17 UTC). It uses only the public URL + anon key, so there are no
+  secrets to configure. It's four times a day rather than once because GitHub queues and sometimes
+  drops scheduled jobs — with one ping a day, a single dropped run meant a day with no activity at all.
 - **The app itself** pings once a day per browser — so anyone simply *using* Vertex keeps it awake.
-- **A failure alarm:** if a ping ever fails, the Action fails and **GitHub emails you** — days before
-  a pause could happen. If you get one, open the
-  [project dashboard](https://supabase.com/dashboard/project/fcuiaerlovooloamckot) and press **Restore**.
+- **Two alarms**, both of which email you via GitHub, days before a pause could happen:
+  - *the ping failed* — the project is unreachable or already paused;
+  - *the heartbeat went stale* — the database says no ping has landed in over 30 hours, which means
+    the schedule itself has stopped running. **This is the one that matters**, because when a
+    scheduled run simply never fires, nothing fails and nothing would otherwise warn you.
+
+  If you get either, open the
+  [project dashboard](https://supabase.com/dashboard/project/fcuiaerlovooloamckot) (press **Restore**
+  if it's paused) and check the repo's **Actions** tab to see whether the schedule is still enabled.
+
+> **A warning email is not proof the keepalive is broken.** Supabase scans a *trailing* 7-day window,
+> so a warning can arrive days after the heartbeat started working, describing a stretch that is
+> already over. (That is exactly what happened on 2026-07-28: the pings had been running green since
+> 23 July, the warning still went out, and the project was never paused.) Check the last run in the
+> **Actions** tab before you worry — a green run means the database answered.
 
 > **If the project is already paused,** unpausing is a dashboard-only action: sign in at
 > https://supabase.com/dashboard/project/fcuiaerlovooloamckot and press **Restore project**. Your data
