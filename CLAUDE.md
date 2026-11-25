@@ -78,13 +78,13 @@ before making product or design assumptions** — name the decision ("X vs Y") r
   `mockups/cold-archive-bold.html` (the Monument vs a portrait-led Dossier), and `mockups/tabs-directions.html`
   (Ledger vs Index for each non-Core tab). These are reference artifacts, **not** the app. (`sheet-v1..v4.html`
   are superseded earlier passes from the deep-purple era.) The creator's **mood board** lives at
-  `D:\TTRPG\Vertex\App\moodboard\` (~90 images) — the Read tool can open them directly; Pinterest itself is
+  `D:\TTRPG\Iris\App\moodboard\` (~90 images) — the Read tool can open them directly; Pinterest itself is
   not fetchable.
 - **THE REAL APP NOW EXISTS** at the project root (build started 2026-06-20) — see **§15 Build & Architecture**.
 
 ### Relationship to prior work
 There is an earlier **FoundryVTT implementation** of the Vertex character sheet built with the *Custom
-System Builder (CSB)* module + custom CSS (`D:\TTRPG\Vertex\System\FoundryVTT\`). **That is prior art,
+System Builder (CSB)* module + custom CSS (`D:\TTRPG\Iris\Foundry System\Reference\`). **That is prior art,
 not the destination.** This app is a standalone, purpose-built experience. The FoundryVTT sheet is
 valuable as (a) a proven field/data model for the character sheet (see **§10**) and (b) the source of
 the current visual language (see **§9**).
@@ -430,7 +430,7 @@ Wordmark **Cinzel**, flat (no chromatic aberration).
   pips** and status markers. Gear: a bento of item tiles. Bonds: Tether/Hold **status-edge cards** (severed
   red, held white, yielded faded) showing the knot **Record**.
 
-**Mood board (inspiration / history).** `D:\TTRPG\Vertex\App\moodboard\` (~90 images, read 2026-06-20):
+**Mood board (inspiration / history).** `D:\TTRPG\Iris\App\moodboard\` (~90 images, read 2026-06-20):
 painterly portraiture of the dissolving self, jewel-toned in the three stat colors over warm near-black,
 film grain. It informed the **soul** (the three stats as palette) and the portrait treatment; the live
 chrome is cool graphite, not the mood board's warm purple.
@@ -489,7 +489,7 @@ From the creator's design instructions (philosophy/voice still fully current):
 ## 13. Open Questions / Decisions Still To Resolve
 *(The big direction calls are settled — see **Decisions Locked** in §1. These remain open.)*
 
-1. ~~**Mood-board palette**~~ — **RESOLVED.** Ingested from `D:\TTRPG\Vertex\App\moodboard\` (Pinterest
+1. ~~**Mood-board palette**~~ — **RESOLVED.** Ingested from `D:\TTRPG\Iris\App\moodboard\` (Pinterest
    itself is not fetchable; the Read tool opens the saved images directly). The live palette is now the
    **Cold Archive** direction (§11); the mood board informed the soul + portrait treatment, not the chrome.
 2. ~~**Tech stack / framework**~~ — **RESOLVED.** Plain **no-build vanilla JS** (classic `<script>` tags,
@@ -509,15 +509,20 @@ From the creator's design instructions (philosophy/voice still fully current):
 
 ## 14. Source Material (read these; do not rely on summaries)
 
-Canonical game corpus lives at **`D:\TTRPG\Vertex\System\`**:
-- `Vertex Guides\Vertex System Guide v.004.docx` — **canonical**, governs on conflict.
-- `Vertex Guides\Vertex Archetypes Guide.docx` — full Mirror/Side catalog + taglines + Stat tags.
-- `Vertex Guides\Vertex Designation Guide (Weird West Setting).docx` (+ `.pdf`) — example setting.
-- `Vertex Guides\Vertex - Arcs (drop-in section).md` — Arc rules (folded into v004).
-- `Vertex Guides\Vertex Comparative Analysis.docx`, `…Roleplay Mechanics Research & Design Proposals.docx` — design rationale.
-- `Vertex Guides\Old System Guides\` — prior drafts (may contain **retired** terminology — beware).
-- `Claude Instructions\Vertex_Claude_Instructions.md` — design-collaborator guide (**mechanics stale**; philosophy/voice current).
-- `FoundryVTT\CSB-Template-Instructions.md`, `FoundryVTT\vertex-custom.css` — prior-art sheet model + visual language.
+> **Moved 2026-11-25:** the system is now **Iris** and its files live in **`D:\TTRPG\Iris\`** (this app is
+> `D:\TTRPG\Iris\App`). Iris rulings since v004 (e.g. Bloom/Wilt replace Windfall/Downside, Facet replaces
+> Designation, feature uses refill at a Full Rest, Armor per piece) are tracked in the claude.ai project
+> "Iris - TTRPG" (`claude/iris-project-hub.md`, `claude/iris-discrepancy-log.md`). Check there before building rules.
+
+Canonical game corpus lives at **`D:\TTRPG\Iris\Rules\`**:
+- `Current\Vertex System Guide v.004.docx` — **canonical** until the Iris guide is written, governs on conflict.
+- `Current\Vertex Archetypes Guide.docx` — full Mirror/Side catalog + taglines + Stat tags.
+- `Archive\Vertex Designation Guide (Weird West Setting).docx` (+ `.pdf`) — example setting (older wording; the newer `Weird West Class Guide.docx` is in `D:\TTRPG\Weird West\System\`).
+- `Archive\Vertex - Arcs (drop-in section).md` — Arc rules (folded into v004).
+- `Research\Vertex Comparative Analysis.docx`, `Research\…Roleplay Mechanics Research & Design Proposals.docx` — design rationale.
+- `Archive\Old System Guides\` — prior drafts (may contain **retired** terminology — beware).
+- `Archive\Vertex_Claude_Instructions.md` — design-collaborator guide (**mechanics stale**; philosophy/voice current).
+- `D:\TTRPG\Iris\Foundry System\Reference\CSB-Template-Instructions.md`, `vertex-custom.css` — prior-art sheet model + visual language.
 
 > `.docx` files are not directly readable by the Read tool. Extract text first (e.g., unzip
 > `word/document.xml` and strip tags) — they convert cleanly to plain text.
@@ -539,13 +544,13 @@ just open it, and so there's nothing to compile/deploy to preview. Multiplayer l
 > code** — no hard-reload needed. (A one-time hard-reload is still required to pick up a *new* `index.html`
 > itself if the old one is cached.) Keep new local scripts inside the loader's list, not as static tags.
 
-**To run:** double-click `D:\TTRPG\Vertex\App\index.html` (or `Start-Process` it). No local server required.
+**To run:** double-click `D:\TTRPG\Iris\App\index.html` (or `Start-Process` it). No local server required.
 Google Fonts load over the network (graceful system fallback offline).
 
 **Version control (commit + push as you work — see §12):** **public** GitHub repo **`ultimondo/vertex`**,
 default branch **`main`** tracking `origin/main`. Commit identity is **repo-local** (name `ultimondo`,
 no-reply email — global git config untouched). `moodboard/` is **gitignored** (third-party art, local-only);
-the canonical guides under `D:\TTRPG\Vertex\System\` live outside the repo and are not versioned here.
+the canonical guides under `D:\TTRPG\Iris\Rules\` live outside this repo (in the private `ultimondo/iris` repo) and are not versioned here.
 Workflow: `git add` → commit with a clean message (+ the `Co-Authored-By` trailer) → `git push` after each
 meaningful change, so no status or work is ever lost.
 
